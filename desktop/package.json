@@ -1,0 +1,52 @@
+{
+  "name": "desktop",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Pika Canvas desktop app (Electron)",
+  "author": "Pika Canvas",
+  "main": "main.cjs",
+  "scripts": {
+    "build:server": "node build-server.mjs",
+    "build:web": "npm -w web run build",
+    "build:all": "npm run build:web && npm run build:server",
+    "start": "npm run build:all && electron .",
+    "dist": "npm run build:all && electron-builder",
+    "dist:dir": "npm run build:all && electron-builder --dir"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "esbuild": "^0.24.2"
+  },
+  "build": {
+    "appId": "com.pikacanvas.app",
+    "productName": "Pika Canvas",
+    "electronVersion": "33.4.11",
+    "npmRebuild": false,
+    "directories": {
+      "output": "release",
+      "buildResources": "buildResources"
+    },
+    "files": [
+      "main.cjs"
+    ],
+    "extraResources": [
+      {
+        "from": "build/server.cjs",
+        "to": "server.cjs"
+      },
+      {
+        "from": "build/web",
+        "to": "web"
+      }
+    ],
+    "mac": {
+      "target": [
+        "dmg",
+        "dir"
+      ],
+      "category": "public.app-category.graphics-design",
+      "icon": "buildResources/icon.icns"
+    }
+  }
+}

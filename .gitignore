@@ -1,0 +1,22 @@
+node_modules/
+dist/
+.env
+data/
+assets/
+**/data/
+**/assets/
+*.log
+.DS_Store
+
+# --- work data: never share canvas projects (graphs/uploads) ---
+projects/
+**/projects/
+
+# --- build / packaging artifacts ---
+desktop/build/
+desktop/release/
+*.dmg
+*.app
+
+# generated icon source (make-source-art.mjs で再生成可能)
+desktop/source-art.png

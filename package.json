@@ -1,0 +1,27 @@
+{
+  "name": "pika-canvas",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "server",
+    "mcp",
+    "web",
+    "desktop"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,web -c blue,green \"npm:dev:server\" \"npm:dev:web\"",
+    "dev:server": "npm -w server run dev",
+    "dev:web": "npm -w web run dev",
+    "dev:mcp": "npm -w mcp run dev",
+    "build": "npm -w web run build",
+    "sync:catalog": "node server/scripts/sync-catalog.mjs",
+    "typecheck": "npm -w server run typecheck && npm -w mcp run typecheck && npm -w web run typecheck",
+    "app": "npm -w desktop run start",
+    "app:dist": "npm -w desktop run dist"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "sharp": "^0.34.5"
+  }
+}
