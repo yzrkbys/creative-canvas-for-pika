@@ -16,6 +16,7 @@ export const NODE_LABELS: Record<NodeType, string> = {
   llm_text: "テキスト生成 (LLM)",
   av_mux: "音声を合成",
   video_concat: "動画連結",
+  video_trim: "動画トリム",
   frame_extract: "フレーム抽出",
   note: "メモ",
   doc: "ドキュメント",

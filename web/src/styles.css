@@ -674,6 +674,7 @@ textarea.cnode-doc {
 .cn-video_upscale { border-color: #f59e0b; }
 .cn-video_concat { border-color: #6366f1; }
 .cn-frame_extract { border-color: #a855f7; }
+.cn-video_trim { border-color: #8b5cf6; }
 .cn-fx { display: flex; flex-direction: column; }
 .cn-fx video.cn-media { background: #000; }
 .cn-fx-ctrls { display: flex; flex-direction: column; gap: 4px; padding: 6px; }

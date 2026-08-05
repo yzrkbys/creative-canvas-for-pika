@@ -88,6 +88,10 @@ export const PORTS: Record<NodeType, PortDef> = {
     inputs: [{ port: "clip_in", kind: "video", required: true }],
     output: { port: "video_out", kind: "video" },
   },
+  video_trim: {
+    inputs: [{ port: "video_in", kind: "video", required: true }],
+    output: { port: "video_out", kind: "video" },
+  },
   frame_extract: {
     inputs: [{ port: "video_in", kind: "video", required: true }],
     output: { port: "image_out", kind: "image" },

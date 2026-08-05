@@ -129,6 +129,31 @@ export async function muxAudio(
   await run(FFMPEG, args);
 }
 
+/**
+ * Cut [startSec, endSec) out of a video. The picture is re-encoded rather than
+ * stream-copied: a copy can only cut on keyframes, which for a 4s generated
+ * clip can miss the intended point by most of a second.
+ */
+export async function trimVideo(
+  input: string,
+  startSec: number,
+  endSec: number,
+  outPath: string,
+): Promise<void> {
+  const start = Math.max(0, startSec);
+  const dur = endSec - start;
+  if (!(dur > 0)) throw new Error(`trim: end (${endSec}s) must be after start (${start}s)`);
+  await run(FFMPEG, [
+    "-ss", String(start),
+    "-i", input,
+    "-t", String(dur),
+    "-c:v", "libx264", "-crf", "16", "-pix_fmt", "yuv420p",
+    "-c:a", "aac", "-b:a", "192k",
+    "-movflags", "+faststart",
+    "-y", outPath,
+  ]);
+}
+
 // Extract a single frame at `timeSec` seconds as a PNG (accurate seek).
 export async function extractFrame(
   input: string,

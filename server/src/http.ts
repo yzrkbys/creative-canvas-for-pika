@@ -7,6 +7,7 @@ import { projectAssetsDir } from "./paths.js";
 import { streamToAssets } from "./assets.js";
 import { isMockMode } from "./providers/index.js";
 import { MODELS } from "./registry.js";
+import { catalogDrift } from "./catalog-check.js";
 
 // Wrap an async handler so thrown errors become 400 JSON.
 function h(fn: (req: Request, res: Response) => unknown) {
@@ -33,7 +34,8 @@ export function createHttpApp(projects: ProjectManager) {
     (req: Request, res: Response) =>
       h(async (rq, rs) => fn(await projects.getCanvas(rq.params.pid), rq, rs))(req, res);
 
-  app.get("/api/health", (_req, res) => res.json({ ok: true, mock: isMockMode() }));
+  app.get("/api/health", (_req, res) =>
+    res.json({ ok: true, mock: isMockMode(), catalog: catalogDrift() }));
   app.get("/api/models", (_req, res) => res.json(MODELS));
 
   // ---- project CRUD ----
@@ -50,6 +52,7 @@ export function createHttpApp(projects: ProjectManager) {
 
   // ---- project-scoped reads ----
   app.get("/api/projects/:pid/graph", hc((c) => c.getGraph()));
+  app.get("/api/projects/:pid/cost", hc((c) => c.costSummary()));
   app.get("/api/projects/:pid/graph/compact", hc((c) => c.getGraphCompact()));
   app.get("/api/projects/:pid/jobs/:jid", hc((c, req) => {
     const job = c.getJob(req.params.jid);
@@ -90,10 +93,10 @@ export function createHttpApp(projects: ProjectManager) {
   app.post("/api/projects/:pid/upload", hc((c, req) => c.uploadImage(req.body.path)));
   app.post("/api/projects/:pid/upload-audio", hc((c, req) => c.uploadAudio(req.body.path)));
   app.post("/api/projects/:pid/nodes/:id/upload-file", hc((c, req) =>
-    c.uploadToNode(req.params.id, req.body.dataUrl),
+    c.uploadToNode(req.params.id, req.body.dataUrl ?? req.body.path),
   ));
   app.post("/api/projects/:pid/nodes/:id/upload-video", hc((c, req) =>
-    c.uploadVideoToNode(req.params.id, req.body.dataUrl),
+    c.uploadVideoToNode(req.params.id, req.body.dataUrl ?? req.body.path),
   ));
   // Large videos: stream the raw request body straight to disk. Avoids base64
   // inflation (+33%) and the JSON body-size limit. Content-type is non-JSON, so
@@ -106,7 +109,7 @@ export function createHttpApp(projects: ProjectManager) {
     return c.attachVideoToNode(req.params.id, localUrl);
   }));
   app.post("/api/projects/:pid/nodes/:id/upload-audio", hc((c, req) =>
-    c.uploadAudioToNode(req.params.id, req.body.dataUrl),
+    c.uploadAudioToNode(req.params.id, req.body.dataUrl ?? req.body.path),
   ));
   // Large audio (long WAV/uncompressed): stream raw bytes straight to disk to
   // avoid base64 inflation and the JSON body-size limit, like video.

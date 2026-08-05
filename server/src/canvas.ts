@@ -3,7 +3,7 @@ import path from "node:path";
 import { promises as fs } from "node:fs";
 import { nanoid } from "nanoid";
 import pdfParse from "pdf-parse/lib/pdf-parse.js";
-import { concatVideos, extractFrame, muxAudio, probeDuration } from "./ffmpeg.js";
+import { concatVideos, extractFrame, muxAudio, probeDuration, trimVideo } from "./ffmpeg.js";
 import { projectAssetsDir, resolveAssetPath } from "./paths.js";
 import {
   connectionValid,
@@ -59,7 +59,10 @@ export interface ConnectArgs {
 
 export type RunResult =
   | { jobId: string }
-  | { needConfirm: true; estimate: { amount: number; currency: string; note?: string } };
+  | {
+      needConfirm: true;
+      estimate: { amount: number; currency: string; note?: string; metered?: boolean };
+    };
 
 // Params the canvas itself owns rather than the model: node geometry, archive
 // state, and the builtin nodes' own settings. These survive a model switch.
@@ -71,6 +74,8 @@ const UI_OWNED_PARAMS = new Set([
   "archived",
   "archivedReason",
   "time", // frame_extract
+  "start", // video_trim
+  "end", // video_trim
   "length", // av_mux
 ]);
 
@@ -332,6 +337,45 @@ export class Canvas extends EventEmitter {
     this.emitEvent({ type: "edge:removed", id: edgeId });
   }
 
+  /**
+   * What this project actually cost, with metered work counted separately.
+   * Summing `meta.cost` alone hides every token-billed generation, which for a
+   * video project is usually the bulk of the spend.
+   */
+  costSummary(): {
+    measuredUsd: number;
+    measuredOutputs: number;
+    meteredOutputs: number;
+    byModel: { model: string; outputs: number; measuredUsd: number; metered: number }[];
+  } {
+    const by = new Map<string, { outputs: number; measuredUsd: number; metered: number }>();
+    let measuredUsd = 0, measuredOutputs = 0, meteredOutputs = 0;
+    for (const node of this.graph.nodes) {
+      for (const o of node.data.outputs ?? []) {
+        const model = o.meta.model ?? "unknown";
+        const row = by.get(model) ?? { outputs: 0, measuredUsd: 0, metered: 0 };
+        row.outputs += 1;
+        if (o.meta.cost === null || o.meta.cost === undefined) {
+          row.metered += 1;
+          meteredOutputs += 1;
+        } else {
+          row.measuredUsd += o.meta.cost;
+          measuredUsd += o.meta.cost;
+          measuredOutputs += 1;
+        }
+        by.set(model, row);
+      }
+    }
+    return {
+      measuredUsd: Number(measuredUsd.toFixed(4)),
+      measuredOutputs,
+      meteredOutputs,
+      byModel: [...by.entries()]
+        .map(([model, r]) => ({ model, ...r, measuredUsd: Number(r.measuredUsd.toFixed(4)) }))
+        .sort((a, b) => b.measuredUsd - a.measuredUsd || b.outputs - a.outputs),
+    };
+  }
+
   // ---- sugar ----
 
   setPrompt(id: string, text: string): GraphNode {
@@ -404,6 +448,7 @@ export class Canvas extends EventEmitter {
       throw new Error(`${node.type} nodes don't run`);
     if (node.type === "web_clip") return this.runWebClip(node);
     if (node.type === "video_concat") return this.runVideoConcat(node);
+    if (node.type === "video_trim") return this.runVideoTrim(node);
     if (node.type === "frame_extract") return this.runFrameExtract(node);
     if (node.type === "av_mux") return this.runAvMux(node);
 
@@ -437,6 +482,7 @@ export class Canvas extends EventEmitter {
           amount: estimate.amount,
           currency: estimate.currency,
           note: estimate.note,
+          metered: estimate.metered,
         },
       };
     }
@@ -602,6 +648,82 @@ export class Canvas extends EventEmitter {
   }
 
   // ---- frame_extract (builtin: grab one frame from a video at a chosen time) ----
+  private runVideoTrim(node: GraphNode): RunResult {
+    const job: Job = {
+      id: nanoid(),
+      nodeId: node.id,
+      status: "queued",
+      progress: 0,
+      createdAt: new Date().toISOString(),
+    };
+    this.jobs.set(job.id, job);
+    this.setStatus(node, "queued");
+    void this.executeVideoTrim(job, node);
+    return { jobId: job.id };
+  }
+
+  /** The single video connected to `video_in`, with its latest video output. */
+  private connectedVideo(node: GraphNode): { url: string } {
+    const edge = this.graph.edges.find(
+      (e) => e.target === node.id && e.targetHandle === "video_in",
+    );
+    const src = edge && this.graph.nodes.find((n) => n.id === edge.source);
+    const vid =
+      src && [...(src.data.outputs ?? [])].reverse().find((o) => o.kind === "video");
+    if (!vid) throw new Error("video_in に動画出力を持つノードを接続してください");
+    return vid;
+  }
+
+  private async executeVideoTrim(job: Job, node: GraphNode): Promise<void> {
+    try {
+      job.status = "running";
+      this.setStatus(node, "running");
+
+      const vid = this.connectedVideo(node);
+      const inputPath = resolveAssetPath(vid.url);
+      const duration = await probeDuration(inputPath);
+      // Same time spec as frame_extract: seconds, "first"/"last", or "NN%".
+      const start = this.frameTimeSec(node.data.params.start ?? 0, duration);
+      const endRaw = node.data.params.end;
+      const end =
+        endRaw === undefined || endRaw === "" || endRaw === "last" || endRaw === "end"
+          ? duration
+          : this.frameTimeSec(endRaw, duration);
+      if (!(end > start))
+        throw new Error(`トリム範囲が不正です: start=${start}s end=${end}s（尺 ${duration.toFixed(2)}s）`);
+
+      const name = `${nanoid()}.mp4`;
+      await fs.mkdir(projectAssetsDir(this.projectId), { recursive: true });
+      const outPath = path.join(projectAssetsDir(this.projectId), name);
+      await trimVideo(inputPath, start, end, outPath);
+
+      const output: Output = {
+        id: nanoid(),
+        kind: "video",
+        url: `/assets/${this.projectId}/${name}`,
+        meta: {
+          provider: "ffmpeg",
+          model: "video_trim",
+          durationSec: Number((end - start).toFixed(3)),
+          cost: 0, // local ffmpeg: genuinely free, unlike a metered model
+        },
+        createdAt: new Date().toISOString(),
+      };
+      this.archiveSupersededOutput(node);
+      node.data.outputs.push(output);
+      this.touch();
+      this.emitEvent({ type: "node:output", id: node.id, output });
+
+      job.status = "succeeded";
+      job.progress = 1;
+      this.setStatus(node, "succeeded");
+    } catch (err) {
+      job.status = "failed";
+      job.error = (err as Error).message;
+      this.setStatus(node, "failed", job.error);
+    }
+  }
+
   private runFrameExtract(node: GraphNode): RunResult {
     const job: Job = {
       id: nanoid(),
@@ -821,6 +943,7 @@ export class Canvas extends EventEmitter {
             provider: adapter.id,
             model: node.data.model,
             cost: result.cost,
+            usage: result.usage,
             seed: raw.seed,
           },
           createdAt: new Date().toISOString(),
@@ -844,6 +967,36 @@ export class Canvas extends EventEmitter {
 
   // ---- assets (spec §2 uploadImage) ----
 
+  /**
+   * Accept either a data: URL (browser drop) or a local filesystem path (agents
+   * and the MCP). The two upload surfaces used to disagree — project-level took
+   * a path, node-level took a dataUrl — and passing the wrong one surfaced as a
+   * raw `undefined.startsWith` TypeError rather than a usable message.
+   */
+  private async ingest(
+    source: unknown,
+    kind: "image" | "video" | "audio",
+    field: string,
+  ): Promise<string> {
+    if (typeof source !== "string" || !source.trim())
+      throw new Error(
+        `${field}: expected a data: URL or a local file path, received ${source === undefined ? "nothing" : typeof source}`,
+      );
+    const src = source.trim();
+    if (src.startsWith("data:") || /^https?:\/\//.test(src))
+      return (await downloadToAssets(src, kind, this.projectId)).localUrl;
+    const abs = path.resolve(src);
+    let bytes: Buffer;
+    try {
+      bytes = await fs.readFile(abs);
+    } catch {
+      throw new Error(`${field}: cannot read file ${abs}`);
+    }
+    const fallback = kind === "image" ? "png" : kind === "video" ? "mp4" : "mp3";
+    const ext = (path.extname(abs).slice(1) || fallback).toLowerCase();
+    return saveBytesToAssets(bytes, ext, this.projectId);
+  }
+
   async uploadImage(filePath: string): Promise<{ node: GraphNode; output: Output }> {
     const abs = path.resolve(filePath);
     const bytes = await fs.readFile(abs);
@@ -866,10 +1019,10 @@ export class Canvas extends EventEmitter {
     return { node, output };
   }
 
-  // Attach a browser-uploaded image (data: URL) to an existing node.
-  async uploadToNode(id: string, dataUrl: string): Promise<Output> {
+  // Attach an uploaded image to an existing node. Accepts a data: URL or a path.
+  async uploadToNode(id: string, source: string): Promise<Output> {
     const node = this.node(id);
-    const { localUrl } = await downloadToAssets(dataUrl, "image", this.projectId);
+    const localUrl = await this.ingest(source, "image", "dataUrl");
     const output: Output = {
       id: nanoid(),
       kind: "image",
@@ -884,10 +1037,9 @@ export class Canvas extends EventEmitter {
     return output;
   }
 
-  // Attach a browser-uploaded video (data: URL) to an existing node.
-  async uploadVideoToNode(id: string, dataUrl: string): Promise<Output> {
-    const { localUrl } = await downloadToAssets(dataUrl, "video", this.projectId);
-    return this.attachVideoToNode(id, localUrl);
+  // Attach an uploaded video to an existing node. Accepts a data: URL or a path.
+  async uploadVideoToNode(id: string, source: string): Promise<Output> {
+    return this.attachVideoToNode(id, await this.ingest(source, "video", "dataUrl"));
   }
 
   // Attach a video already saved into the project's assets dir (e.g. a streamed
@@ -909,9 +1061,8 @@ export class Canvas extends EventEmitter {
   }
 
   // Attach a browser-uploaded audio clip (data: URL) to an existing node.
-  async uploadAudioToNode(id: string, dataUrl: string): Promise<Output> {
-    const { localUrl } = await downloadToAssets(dataUrl, "audio", this.projectId);
-    return this.attachAudioToNode(id, localUrl);
+  async uploadAudioToNode(id: string, source: string): Promise<Output> {
+    return this.attachAudioToNode(id, await this.ingest(source, "audio", "dataUrl"));
   }
 
   // Attach an audio clip already saved into the project's assets dir (e.g. a

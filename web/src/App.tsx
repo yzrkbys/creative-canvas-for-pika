@@ -55,6 +55,7 @@ const nodeTypes: NodeTypes = {
   av_mux: CanvasNode,
   video_concat: CanvasNode,
   frame_extract: CanvasNode,
+  video_trim: CanvasNode,
   note: CanvasNode,
   doc: CanvasNode,
   web_clip: CanvasNode,
@@ -80,13 +81,14 @@ function defaultSize(t: NodeType): { w: number; h: number } {
   )
     return { w: 300, h: 280 };
   if (t === "frame_extract") return { w: 300, h: 340 };
+  if (t === "video_trim") return { w: 300, h: 300 };
   return { w: 280, h: 300 }; // image_gen / image_edit / image_upload
 }
 
 // Grouped node palette for the "+ Add node" menu (scales as types grow).
 const NODE_GROUPS: { label: string; types: NodeType[] }[] = [
   { label: "画像", types: ["image_gen", "image_edit", "image_upload"] },
-  { label: "動画", types: ["video_gen", "video_upload", "video_upscale", "video_concat", "frame_extract"] },
+  { label: "動画", types: ["video_gen", "video_upload", "video_upscale", "video_trim", "video_concat", "frame_extract"] },
   { label: "音声", types: ["audio_gen", "video_to_audio", "av_mux", "transcribe", "audio_upload"] },
   { label: "テキスト / 情報", types: ["llm_text", "note", "doc", "web_clip", "file_import"] },
   { label: "レイアウト", types: ["frame"] },

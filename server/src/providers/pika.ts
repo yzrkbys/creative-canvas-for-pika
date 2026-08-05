@@ -403,6 +403,7 @@ export function estimate(
     return {
       amount: 0,
       currency: "USD",
+      metered: true,
       note: `事前見積り不可: $${unitPrice} / 1M ${pricing.unit}（生成量が事前に判りません）${tierNote ? ` · ${tierNote}` : ""}`,
     };
   }
@@ -513,6 +514,27 @@ interface PikaJob {
   status: "queued" | "running" | "completed" | "failed";
   output?: { media_type?: string; [k: string]: any };
   error?: unknown;
+  // Metered models are billed on counters only the provider knows. Whatever it
+  // reports is kept verbatim so a real charge can be reconciled later; the
+  // shape is not guaranteed and is deliberately not parsed here.
+  usage?: Record<string, unknown>;
+  [k: string]: unknown;
+}
+
+/** Pull whatever usage counters a completed job carries, wherever they sit. */
+function usageOf(job: PikaJob): Record<string, unknown> | undefined {
+  for (const key of ["usage", "metrics", "billing", "consumption"]) {
+    const v = (job as Record<string, unknown>)[key];
+    if (v && typeof v === "object") return v as Record<string, unknown>;
+  }
+  const out = job.output as Record<string, unknown> | undefined;
+  if (out) {
+    for (const key of ["usage", "metrics", "billing"]) {
+      const v = out[key];
+      if (v && typeof v === "object") return v as Record<string, unknown>;
+    }
+  }
+  return undefined;
 }
 
 /**
@@ -668,7 +690,13 @@ export const pikaAdapter: ProviderAdapter = {
     const entry = getEntry(model);
     if (!spec || !entry) throw new Error(`unknown model ${model}`);
 
-    if (entry.category === "llm") return { outputs: await runChat(entry, args.prompt, args.params, args.inputs), cost: 0 };
+    if (entry.category === "llm") {
+      const est = estimate(model, args.params, args.prompt);
+      return {
+        outputs: await runChat(entry, args.prompt, args.params, args.inputs),
+        cost: est.metered ? null : est.amount,
+      };
+    }
 
     const params = await withMeasuredDuration(entry, spec, args.params, args.inputs);
 
@@ -697,7 +725,15 @@ export const pikaAdapter: ProviderAdapter = {
         ? [{ kind: "text", url: "", text: await fetchText(url) }]
         : [{ kind: spec.kind, url, fetchHeaders: fetchHeadersFor(url) }];
 
-    return { outputs, cost: estimate(model, args.params, args.prompt).amount };
+    // A metered model reports null, not 0 — the charge is real, we just cannot
+    // derive it locally. Recording 0 made totals silently under-report by the
+    // whole token-billed share of a project.
+    const est = estimate(model, args.params, args.prompt);
+    return {
+      outputs,
+      cost: est.metered ? null : est.amount,
+      usage: usageOf(job),
+    };
   },
 };
 
