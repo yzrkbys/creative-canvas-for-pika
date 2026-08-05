@@ -89,7 +89,13 @@ export function CanvasNode({ data, selected }: NodeProps) {
       const res = await api.run(node.id, false);
       if ("needConfirm" in res) {
         const e = res.estimate;
-        if (window.confirm(`高コスト処理の見積り: 約 $${e.amount} ${e.note ? `(${e.note})` : ""}\n実行しますか？`))
+        // A metered model has amount 0 only because the unit cannot be quoted.
+        // Printing "約 $0" there asked the user to approve paid work as if it
+        // were free, which is the opposite of what this dialog is for.
+        const head = e.metered
+          ? "課金されますが、事前に金額を出せません"
+          : `見積り: 約 $${e.amount}`;
+        if (window.confirm(`${head}\n${e.note ?? ""}\n\n実行しますか？`))
           await api.run(node.id, true);
       }
     } catch (err) {

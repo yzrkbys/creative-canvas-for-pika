@@ -132,6 +132,7 @@ server.tool(
     "note/doc = editable text (set content with canvas_set_prompt; doc is long-form). " +
     "web_clip = fetch a URL to text (set params.url, then canvas_run). " +
     "video_concat = join clips on clip_in (ordered left->right by node x). " +
+    "video_trim = cut a sub-range out of video_in (params.start / params.end, each seconds | first | last | NN%), then canvas_run -> video_out. Generated clips arrive at the model's minimum length, so this is how a shot is cut to its intended duration without leaving the canvas. " +
     "frame_extract = grab one frame from video_in at params.time (seconds | first | last | NN%), then canvas_run -> image_out. " +
     "frame = visual group/label box (set title with canvas_set_prompt).",
   {
@@ -149,6 +150,7 @@ server.tool(
       "llm_text",
       "av_mux",
       "video_concat",
+      "video_trim",
       "frame_extract",
       "note",
       "doc",

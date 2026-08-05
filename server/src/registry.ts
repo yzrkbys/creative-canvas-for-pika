@@ -250,6 +250,20 @@ const BUILTIN_MODELS: ModelSpec[] = [
     ],
     defaults: { url: "", maxChars: 12000 },
   },
+  {
+    id: "builtin/video-trim",
+    provider: "builtin",
+    path: "video-trim",
+    label: "動画トリム",
+    kind: "video",
+    nodeTypes: ["video_trim"],
+    priceHint: "free (ffmpeg)",
+    paramSchema: [
+      { key: "start", label: "Start (s | 0 | NN%)", type: "string" },
+      { key: "end", label: "End (s | last | NN%)", type: "string" },
+    ],
+    defaults: { start: "0", end: "last" },
+  },
 ];
 
 export const MODELS: ModelSpec[] = [...PIKA_MODELS, ...BUILTIN_MODELS];

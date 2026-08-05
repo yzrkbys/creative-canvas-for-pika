@@ -15,6 +15,7 @@ import { ProjectManager, type ScopedEvent } from "./projects.js";
 import * as store from "./persistence.js";
 import { isMockMode } from "./providers/index.js";
 import { CATALOG, MODELS } from "./registry.js";
+import { checkCatalogDrift } from "./catalog-check.js";
 
 async function main() {
   await store.init(); // create projects dir + migrate any legacy single graph
@@ -89,6 +90,10 @@ async function main() {
     });
     ws.on("close", () => subscription.delete(ws));
   });
+
+  // Fire and forget: a stale snapshot must be visible before a paid run,
+  // but it must never delay or block the server coming up.
+  void checkCatalogDrift();
 
   const port = Number(process.env.PORT ?? 8797);
   server.listen(port, () => {

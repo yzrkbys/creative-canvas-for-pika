@@ -112,6 +112,13 @@ export const PORTS: Record<NodeType, PortDef> = {
     inputs: [{ port: "clip_in", kind: "video", required: true }],
     output: { port: "video_out", kind: "video" },
   },
+  // cut a sub-range out of a video (builtin/ffmpeg). Generated clips come at a
+  // model's minimum length, so trimming to the intended cut is needed on nearly
+  // every shot; without this the graph has to leave the canvas and come back.
+  video_trim: {
+    inputs: [{ port: "video_in", kind: "video", required: true }],
+    output: { port: "video_out", kind: "video" },
+  },
   // extract one frame from a video at a chosen time -> image (builtin/ffmpeg)
   frame_extract: {
     inputs: [{ port: "video_in", kind: "video", required: true }],

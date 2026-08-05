@@ -83,7 +83,10 @@ export const mockAdapter: ProviderAdapter = {
     }
     return {
       outputs,
-      cost: this.estimateCost(model, args.params, args.inputs, args.prompt).amount,
+      cost: (() => {
+        const est = this.estimateCost(model, args.params, args.inputs, args.prompt);
+        return est.metered ? null : est.amount;
+      })(),
     };
   },
 };

@@ -22,6 +22,7 @@ export type NodeType =
   | "av_mux"
   | "video_concat"
   | "frame_extract"
+  | "video_trim"
   | "note"
   | "doc"
   | "web_clip"
@@ -56,7 +57,14 @@ export interface OutputMeta {
   durationSec?: number;
   provider: string;
   model: string;
-  cost?: number;
+  // number = the amount actually charged for this output.
+  // null   = the model is metered on a unit we cannot convert (per-million
+  //          output tokens), so the charge is real but unknown here. It is NOT
+  //          zero, and anything summing costs must report it separately.
+  cost?: number | null;
+  // Whatever usage counters the provider reported for this output, kept raw so
+  // a real figure can be reconciled later without re-running anything.
+  usage?: Record<string, unknown>;
   seed?: number;
 }
 
@@ -130,6 +138,9 @@ export interface CostEstimate {
   amount: number;
   currency: "USD";
   note?: string;
+  // true when the unit cannot be quoted up front. `amount` is 0 in that case
+  // purely as a placeholder — treat it as "unknown", never as "free".
+  metered?: boolean;
 }
 
 export interface ProviderRunArgs {
@@ -140,7 +151,8 @@ export interface ProviderRunArgs {
 
 export interface ProviderRunResult {
   outputs: RawOutput[];
-  cost: number;
+  cost: number | null; // null = metered on an unquotable unit (see OutputMeta.cost)
+  usage?: Record<string, unknown>;
 }
 
 export interface ProviderAdapter {

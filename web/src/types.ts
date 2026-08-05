@@ -14,6 +14,7 @@ export type NodeType =
   | "av_mux"
   | "video_concat"
   | "frame_extract"
+  | "video_trim"
   | "note"
   | "doc"
   | "web_clip"
@@ -46,7 +47,8 @@ export interface Output {
     durationSec?: number;
     provider: string;
     model: string;
-    cost?: number;
+    cost?: number | null; // null = metered on an unquotable unit, NOT free
+    usage?: Record<string, unknown>;
     seed?: number;
   };
   createdAt: string;
@@ -132,4 +134,7 @@ export type ServerEvent =
 
 export type RunResult =
   | { jobId: string }
-  | { needConfirm: true; estimate: { amount: number; currency: string; note?: string } };
+  | {
+      needConfirm: true;
+      estimate: { amount: number; currency: string; note?: string; metered?: boolean };
+    };
