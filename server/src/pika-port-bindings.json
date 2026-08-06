@@ -13,25 +13,81 @@
     "nothing, and the user would pay for a generation that ignored their inputs.",
     "",
     "For a single-valued field the first connected port with a matching kind",
-    "wins. For an array field every listed port contributes, in order."
+    "wins. For an array field every listed port contributes, in order.",
+    "",
+    "A field is normally a list of ports. A TAGGED-UNION array (Kling 3.0's `contents`) instead maps each port to the role string the item must carry, because there the port IS the semantics: the same URL means first frame or reference or base clip depending on where it is wired."
   ],
   "fields": {
-    "image_url": ["image_in"],
-    "image": ["image_in"],
-    "first_frame_image": ["image_in"],
-    "last_frame_url": ["last_frame_in"],
-    "last_frame_image": ["last_frame_in"],
-    "end_image_url": ["last_frame_in"],
-    "image_urls": ["image_in", "ref_in"],
-    "reference_image_urls": ["ref_in"],
-    "mask_image_url": ["mask_in"],
-    "modify_region_mask": ["mask_in"],
-    "video_url": ["video_in"],
-    "video": ["video_in"],
-    "source_url": ["video_in", "audio_in"],
-    "video_urls": ["ref_video_in"],
-    "audio_url": ["audio_in"],
-    "sound_file": ["audio_in"],
-    "audio_urls": ["ref_audio_in"]
+    "image_url": [
+      "image_in"
+    ],
+    "image": [
+      "image_in"
+    ],
+    "first_frame_image": [
+      "image_in"
+    ],
+    "last_frame_url": [
+      "last_frame_in"
+    ],
+    "last_frame_image": [
+      "last_frame_in"
+    ],
+    "end_image_url": [
+      "last_frame_in"
+    ],
+    "image_urls": [
+      "image_in",
+      "ref_in"
+    ],
+    "reference_image_urls": [
+      "ref_in"
+    ],
+    "mask_image_url": [
+      "mask_in"
+    ],
+    "modify_region_mask": [
+      "mask_in"
+    ],
+    "video_url": [
+      "video_in"
+    ],
+    "video": [
+      "video_in"
+    ],
+    "source_url": [
+      "video_in",
+      "audio_in"
+    ],
+    "video_urls": [
+      "ref_video_in"
+    ],
+    "audio_url": [
+      "audio_in"
+    ],
+    "sound_file": [
+      "audio_in"
+    ],
+    "audio_urls": [
+      "ref_audio_in"
+    ],
+    "keyframes": [
+      "image_in",
+      "ref_in"
+    ],
+    "start_video_url": [
+      "video_in"
+    ],
+    "contents": {
+      "roleField": "type",
+      "urlField": "url",
+      "ports": {
+        "image_in": "first_frame",
+        "last_frame_in": "last_frame",
+        "ref_in": "refer_image",
+        "video_in": "base_video",
+        "ref_video_in": "feature_video"
+      }
+    }
   }
 }

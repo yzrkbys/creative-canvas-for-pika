@@ -71,12 +71,38 @@ function unwrap(prop) {
   return merged;
 }
 
-/** Media fields are self-describing: the schema tags them with `media_kinds`. */
-function mediaKindsOf(prop) {
+/**
+ * Media fields are self-describing: the schema tags them with `media_kinds`.
+ * Three shapes occur:
+ *   1. a plain string field           -> image_url
+ *   2. an array of tagged strings     -> image_urls: [url, url]
+ *   3. an array of tagged OBJECTS     -> keyframes: [{image_url, at_s}, ...]
+ * Shape 3 (FLUX 3's keyframes) hides `media_kinds` one level down, inside the
+ * item object. Without this branch the field is not seen as media at all, so
+ * the connected images are never sent — and a required field like `keyframes`
+ * would bill for a run that carried no pictures.
+ */
+function mediaKindsOf(prop, defs = {}) {
   if (Array.isArray(prop.media_kinds)) return { kinds: prop.media_kinds, array: false };
-  if (prop.type === "array") {
-    const item = unwrap(prop.items ?? {});
-    if (Array.isArray(item.media_kinds)) return { kinds: item.media_kinds, array: true };
+  if (prop.type !== "array") return null;
+  const item = unwrap(resolveRefs(prop.items ?? {}, defs));
+  if (Array.isArray(item.media_kinds)) return { kinds: item.media_kinds, array: true };
+  if (item.type === "object" && item.properties) {
+    for (const [name, sub] of Object.entries(item.properties)) {
+      const s = unwrap(sub);
+      if (!Array.isArray(s.media_kinds)) continue;
+      // Scalar siblings (FLUX 3's `at_s`) let each item be positioned. They are
+      // surfaced as one comma-separated param rather than a bespoke widget.
+      const extras = Object.entries(item.properties)
+        .filter(([n, v]) => n !== name && !Array.isArray(unwrap(v).media_kinds))
+        .map(([n, v]) => ({
+          key: n,
+          label: unwrap(v).title || n,
+          description: unwrap(v).description,
+          required: (item.required ?? []).includes(n),
+        }));
+      return { kinds: s.media_kinds, array: true, itemField: name, itemExtras: extras };
+    }
   }
   return null;
 }
@@ -220,12 +246,31 @@ function normalize(entry) {
 
   for (const [key, raw] of Object.entries(props)) {
     const prop = unwrap(raw);
-    const mk = mediaKindsOf(prop);
+    const mk = mediaKindsOf(prop, defs);
 
     if (mk) {
       const f = { field: key, kinds: mk.kinds, array: mk.array, required: required.has(key) };
       if (mk.array && typeof prop.maxItems === "number") f.maxItems = prop.maxItems;
       if (mk.array && typeof prop.minItems === "number") f.minItems = prop.minItems;
+      if (mk.itemField) {
+        f.itemField = mk.itemField;
+        if (mk.itemExtras?.length) f.itemExtras = mk.itemExtras;
+        // One param per positioning sibling, taking a comma-separated list the
+        // same length as the connected media (or blank to leave it to the model).
+        for (const ex of mk.itemExtras ?? []) {
+          const pkey = `${key}_${ex.key}`;
+          params.push({
+            key: pkey,
+            label: `${labelOf(key, prop)} · ${ex.label}`,
+            type: "string",
+            valueType: "string",
+            description:
+              (ex.description ? ex.description + " " : "") +
+              "接続したメディアと同数をカンマ区切りで指定します（空欄ならモデルに任せます）。",
+          });
+          defaults[pkey] = "";
+        }
+      }
       media.push(f);
       continue;
     }
