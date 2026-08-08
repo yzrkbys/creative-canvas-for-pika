@@ -1,5 +1,5 @@
 {
-  "syncedAt": "2026-08-06T12:35:59.224Z",
+  "syncedAt": "2026-08-08T10:56:53.003Z",
   "base": "https://api.dev.pika.art",
   "entries": [
     {
@@ -1230,14 +1230,14 @@
               "resolution": "720p",
               "mode": "standard"
             },
-            "usd": 0.369
+            "usd": 0.387
           },
           {
             "spec": {
               "resolution": "1080p",
               "mode": "standard"
             },
-            "usd": 0.477
+            "usd": 0.486
           }
         ]
       }
@@ -2894,6 +2894,511 @@
               "mode": "standard"
             },
             "usd": 8.085
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "bytedance/seedance-2.5/image-to-video",
+      "vendor": "bytedance",
+      "fn": "image-to-video",
+      "category": "video",
+      "name": "Seedance 2.5 Image To Video",
+      "description": "Seedance 2.5 Image To Video is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/bytedance/seedance-2.5/image-to-video",
+      "textField": "prompt",
+      "media": [
+        {
+          "field": "image_url",
+          "kinds": [
+            "image"
+          ],
+          "array": false,
+          "required": true
+        },
+        {
+          "field": "end_image_url",
+          "kinds": [
+            "image"
+          ],
+          "array": false,
+          "required": false
+        }
+      ],
+      "params": [
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "select",
+          "options": [
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26",
+            "27",
+            "28",
+            "29",
+            "30",
+            "auto"
+          ],
+          "valueType": "loose",
+          "description": "Video length in seconds (4-30), or 'auto' to let the model choose.",
+          "required": true
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "480p",
+            "720p"
+          ],
+          "valueType": "string",
+          "description": "Output resolution (480p/720p for 2.5)."
+        },
+        {
+          "key": "generate_audio",
+          "label": "Generate Audio",
+          "type": "select",
+          "options": [
+            "",
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Whether to generate audio for the video."
+        },
+        {
+          "key": "watermark",
+          "label": "Watermark",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Whether to add a watermark to the output video."
+        },
+        {
+          "key": "output_format",
+          "label": "Output Format",
+          "type": "select",
+          "options": [
+            "",
+            "mp4",
+            "mov"
+          ],
+          "valueType": "string",
+          "description": "Output container format."
+        },
+        {
+          "key": "ratio",
+          "label": "Ratio",
+          "type": "select",
+          "options": [
+            "",
+            "adaptive"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio."
+        }
+      ],
+      "defaults": {
+        "duration": "4",
+        "resolution": "720p",
+        "generate_audio": "",
+        "watermark": "off",
+        "output_format": "",
+        "ratio": ""
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt",
+        "duration",
+        "image_url"
+      ],
+      "pricing": {
+        "unit": "video_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {
+              "resolution": "480p",
+              "mode": "standard"
+            },
+            "usd": 11.235
+          },
+          {
+            "spec": {
+              "resolution": "720p",
+              "mode": "standard"
+            },
+            "usd": 11.235
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "bytedance/seedance-2.5/reference-to-video",
+      "vendor": "bytedance",
+      "fn": "reference-to-video",
+      "category": "video",
+      "name": "Seedance 2.5 Reference To Video",
+      "description": "Seedance 2.5 Reference To Video: generate, edit, or extend video guided by reference images, videos, and audio; editing and extension are requested through the prompt. Billed per million video output tokens; the rate depends on whether the input includes video.",
+      "method": "POST",
+      "path": "/v1/media/bytedance/seedance-2.5/reference-to-video",
+      "textField": "prompt",
+      "media": [
+        {
+          "field": "image_urls",
+          "kinds": [
+            "image"
+          ],
+          "array": true,
+          "required": false,
+          "maxItems": 30
+        },
+        {
+          "field": "video_urls",
+          "kinds": [
+            "video"
+          ],
+          "array": true,
+          "required": false,
+          "maxItems": 10
+        },
+        {
+          "field": "audio_urls",
+          "kinds": [
+            "audio"
+          ],
+          "array": true,
+          "required": false,
+          "maxItems": 10
+        }
+      ],
+      "params": [
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "select",
+          "options": [
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26",
+            "27",
+            "28",
+            "29",
+            "30",
+            "auto"
+          ],
+          "valueType": "loose",
+          "description": "Video length in seconds (4-30), or 'auto' to let the model choose.",
+          "required": true
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "480p",
+            "720p"
+          ],
+          "valueType": "string",
+          "description": "Output resolution (480p/720p for 2.5)."
+        },
+        {
+          "key": "generate_audio",
+          "label": "Generate Audio",
+          "type": "select",
+          "options": [
+            "",
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Whether to generate audio for the video."
+        },
+        {
+          "key": "watermark",
+          "label": "Watermark",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Whether to add a watermark to the output video."
+        },
+        {
+          "key": "output_format",
+          "label": "Output Format",
+          "type": "select",
+          "options": [
+            "",
+            "mp4",
+            "mov"
+          ],
+          "valueType": "string",
+          "description": "Output container format."
+        },
+        {
+          "key": "ratio",
+          "label": "Ratio",
+          "type": "select",
+          "options": [
+            "",
+            "1:1",
+            "4:3",
+            "3:4",
+            "16:9",
+            "9:16",
+            "21:9",
+            "adaptive"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio."
+        }
+      ],
+      "defaults": {
+        "duration": "4",
+        "resolution": "720p",
+        "generate_audio": "",
+        "watermark": "off",
+        "output_format": "",
+        "ratio": ""
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt",
+        "duration"
+      ],
+      "pricing": {
+        "unit": "video_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {
+              "resolution": "480p",
+              "mode": "standard",
+              "variant": "with-video-input"
+            },
+            "usd": 6.72
+          },
+          {
+            "spec": {
+              "resolution": "720p",
+              "mode": "standard",
+              "variant": "with-video-input"
+            },
+            "usd": 6.72
+          },
+          {
+            "spec": {
+              "resolution": "480p",
+              "mode": "standard",
+              "variant": "no-video-input"
+            },
+            "usd": 11.235
+          },
+          {
+            "spec": {
+              "resolution": "720p",
+              "mode": "standard",
+              "variant": "no-video-input"
+            },
+            "usd": 11.235
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "bytedance/seedance-2.5/text-to-video",
+      "vendor": "bytedance",
+      "fn": "text-to-video",
+      "category": "video",
+      "name": "Seedance 2.5 Text To Video",
+      "description": "Seedance 2.5 Text To Video is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/bytedance/seedance-2.5/text-to-video",
+      "textField": "prompt",
+      "media": [],
+      "params": [
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "select",
+          "options": [
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26",
+            "27",
+            "28",
+            "29",
+            "30",
+            "auto"
+          ],
+          "valueType": "loose",
+          "description": "Video length in seconds (4-30), or 'auto' to let the model choose.",
+          "required": true
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "480p",
+            "720p"
+          ],
+          "valueType": "string",
+          "description": "Output resolution (480p/720p for 2.5)."
+        },
+        {
+          "key": "generate_audio",
+          "label": "Generate Audio",
+          "type": "select",
+          "options": [
+            "",
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Whether to generate audio for the video."
+        },
+        {
+          "key": "watermark",
+          "label": "Watermark",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Whether to add a watermark to the output video."
+        },
+        {
+          "key": "output_format",
+          "label": "Output Format",
+          "type": "select",
+          "options": [
+            "",
+            "mp4",
+            "mov"
+          ],
+          "valueType": "string",
+          "description": "Output container format."
+        },
+        {
+          "key": "ratio",
+          "label": "Ratio",
+          "type": "select",
+          "options": [
+            "",
+            "1:1",
+            "4:3",
+            "3:4",
+            "16:9",
+            "9:16",
+            "21:9",
+            "adaptive"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio."
+        }
+      ],
+      "defaults": {
+        "duration": "4",
+        "resolution": "720p",
+        "generate_audio": "",
+        "watermark": "off",
+        "output_format": "",
+        "ratio": ""
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt",
+        "duration"
+      ],
+      "pricing": {
+        "unit": "video_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {
+              "resolution": "480p",
+              "mode": "standard"
+            },
+            "usd": 11.235
+          },
+          {
+            "spec": {
+              "resolution": "720p",
+              "mode": "standard"
+            },
+            "usd": 11.235
           }
         ]
       }

@@ -142,12 +142,23 @@ async function startServer() {
   await waitForHealth(port);
 }
 
+// electron-builder stamps the icon into packaged builds (build.mac.icon), but
+// an unpackaged run — `npm run app` — has no bundle to read it from and falls
+// back to the stock Electron icon. Point at the same source file so a dev run
+// is recognisable in the Dock and the switcher.
+function appIconPath() {
+  const p = path.join(__dirname, "buildResources", "icon.png");
+  return fs.existsSync(p) ? p : null;
+}
+
 function createWindow() {
+  const icon = app.isPackaged ? null : appIconPath();
   win = new BrowserWindow({
     width: 1400,
     height: 900,
     backgroundColor: "#0f1419",
     title: "Pika Canvas",
+    ...(icon ? { icon } : {}),
     webPreferences: { contextIsolation: true, nodeIntegration: false },
   });
   win.loadURL(`http://127.0.0.1:${port}/`);
@@ -190,6 +201,12 @@ function buildMenu() {
 }
 
 app.whenReady().then(async () => {
+  // macOS takes the Dock icon from the bundle, which an unpackaged run lacks —
+  // it has to be set explicitly, and only after the app is ready.
+  if (!app.isPackaged && process.platform === "darwin") {
+    const icon = appIconPath();
+    if (icon) app.dock?.setIcon(icon);
+  }
   try {
     await startServer();
   } catch (err) {
