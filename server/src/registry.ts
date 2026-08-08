@@ -23,6 +23,13 @@ export interface CatalogMediaField {
   required: boolean;
   maxItems?: number;
   minItems?: number;
+  /**
+   * Set when the array holds OBJECTS rather than bare URLs: the property inside
+   * each object that carries the media URL (FLUX 3 keyframes -> "image_url").
+   */
+  itemField?: string;
+  /** Scalar siblings of `itemField`, exposed as `<field>_<key>` params. */
+  itemExtras?: { key: string; label: string; description?: string; required: boolean }[];
 }
 
 export interface CatalogPricing {
@@ -110,6 +117,13 @@ const NODE_TYPE_BY_FUNCTION: Record<string, NodeType> = {
   "voice-isolation": "audio_gen",
   dubbing: "audio_gen",
   "video-to-audio": "video_to_audio",
+  // Sonilo renamed its scoring endpoints (video-to-audio -> video-to-music);
+  // without these the whole family silently drops out of the registry.
+  "video-to-music": "video_to_audio",
+  "video-to-sound-effects": "video_to_audio",
+  "text-to-music": "audio_gen",
+  // Returns a scored VIDEO, not a bare track — it belongs on a video node.
+  "video-to-scored-video": "video_gen",
   // Output is text, not audio — routing on category alone would misplace this.
   transcription: "transcribe",
 };

@@ -1,5 +1,5 @@
 {
-  "syncedAt": "2026-08-04T09:05:48.178Z",
+  "syncedAt": "2026-08-06T12:35:59.224Z",
   "base": "https://api.dev.pika.art",
   "entries": [
     {
@@ -814,6 +814,432 @@
           }
         ],
         "inputUsd": 3.15
+      }
+    },
+    {
+      "apiId": "black-forest-labs/flux-3-video/image-to-video",
+      "vendor": "black-forest-labs",
+      "fn": "image-to-video",
+      "category": "video",
+      "name": "FLUX 3 Image To Video",
+      "description": "FLUX 3 image-to-video from one or more keyframe images, 5-20s with native audio, billed per second of generated video at 720p or 1080p. Draft mode is a cheaper 720p-only preview that can be re-rendered at full quality.",
+      "method": "POST",
+      "path": "/v1/media/black-forest-labs/flux-3-video/image-to-video",
+      "textField": "prompt",
+      "media": [
+        {
+          "field": "keyframes",
+          "kinds": [
+            "image"
+          ],
+          "array": true,
+          "required": true,
+          "maxItems": 10,
+          "minItems": 1,
+          "itemField": "image_url",
+          "itemExtras": [
+            {
+              "key": "at_s",
+              "label": "At (seconds)",
+              "description": "Seconds into the clip this frame anchors at. Set it on every keyframe or on none.",
+              "required": false
+            }
+          ]
+        }
+      ],
+      "params": [
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "720p",
+            "1080p"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        },
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "select",
+          "options": [
+            "auto",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ],
+          "valueType": "loose",
+          "description": "Video length in whole seconds (5-20), or \"auto\" to let the model choose."
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "auto",
+            "21:9",
+            "2:1",
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio."
+        },
+        {
+          "key": "draft",
+          "label": "Draft",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Generate a cheaper 720p draft preview instead of a full-quality render."
+        },
+        {
+          "key": "generate_audio",
+          "label": "Generate Audio",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Whether to generate synchronized audio."
+        },
+        {
+          "key": "keyframes_at_s",
+          "label": "Keyframes · At (seconds)",
+          "type": "string",
+          "valueType": "string",
+          "description": "Seconds into the clip this frame anchors at. Set it on every keyframe or on none. 接続したメディアと同数をカンマ区切りで指定します（空欄ならモデルに任せます）。"
+        }
+      ],
+      "defaults": {
+        "resolution": "720p",
+        "duration": "auto",
+        "aspect_ratio": "auto",
+        "draft": "off",
+        "generate_audio": "on",
+        "keyframes_at_s": ""
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt",
+        "keyframes"
+      ],
+      "pricing": {
+        "unit": "second",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "resolution": "720p",
+              "mode": "draft"
+            },
+            "usd": 0.054
+          },
+          {
+            "spec": {
+              "resolution": "720p",
+              "mode": "standard"
+            },
+            "usd": 0.153
+          },
+          {
+            "spec": {
+              "resolution": "1080p",
+              "mode": "standard"
+            },
+            "usd": 0.261
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "black-forest-labs/flux-3-video/text-to-video",
+      "vendor": "black-forest-labs",
+      "fn": "text-to-video",
+      "category": "video",
+      "name": "FLUX 3 Text To Video",
+      "description": "FLUX 3 text-to-video, 5-20s with native audio, billed per second of generated video at 720p or 1080p. Draft mode is a cheaper 720p-only preview that can be re-rendered at full quality.",
+      "method": "POST",
+      "path": "/v1/media/black-forest-labs/flux-3-video/text-to-video",
+      "textField": "prompt",
+      "media": [],
+      "params": [
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "720p",
+            "1080p"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        },
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "select",
+          "options": [
+            "auto",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ],
+          "valueType": "loose",
+          "description": "Video length in whole seconds (5-20), or \"auto\" to let the model choose."
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "auto",
+            "21:9",
+            "2:1",
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio."
+        },
+        {
+          "key": "draft",
+          "label": "Draft",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Generate a cheaper 720p draft preview instead of a full-quality render."
+        },
+        {
+          "key": "generate_audio",
+          "label": "Generate Audio",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Whether to generate synchronized audio."
+        }
+      ],
+      "defaults": {
+        "resolution": "720p",
+        "duration": "auto",
+        "aspect_ratio": "auto",
+        "draft": "off",
+        "generate_audio": "on"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt"
+      ],
+      "pricing": {
+        "unit": "second",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "resolution": "720p",
+              "mode": "draft"
+            },
+            "usd": 0.054
+          },
+          {
+            "spec": {
+              "resolution": "720p",
+              "mode": "standard"
+            },
+            "usd": 0.153
+          },
+          {
+            "spec": {
+              "resolution": "1080p",
+              "mode": "standard"
+            },
+            "usd": 0.261
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "black-forest-labs/flux-3-video/video-to-video",
+      "vendor": "black-forest-labs",
+      "fn": "video-to-video",
+      "category": "video",
+      "name": "FLUX 3 Video To Video",
+      "description": "FLUX 3 video-to-video: continue an existing clip with new content, 5-20s with native audio, billed per second of generated video at 720p or 1080p. Draft mode is a cheaper 720p-only preview that can be re-rendered at full quality.",
+      "method": "POST",
+      "path": "/v1/media/black-forest-labs/flux-3-video/video-to-video",
+      "textField": "prompt",
+      "media": [
+        {
+          "field": "start_video_url",
+          "kinds": [
+            "video"
+          ],
+          "array": false,
+          "required": true
+        }
+      ],
+      "params": [
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "720p",
+            "1080p"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        },
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "select",
+          "options": [
+            "auto",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20"
+          ],
+          "valueType": "loose",
+          "description": "Video length in whole seconds (5-20), or \"auto\" to let the model choose."
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "auto",
+            "21:9",
+            "2:1",
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio."
+        },
+        {
+          "key": "draft",
+          "label": "Draft",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Generate a cheaper 720p draft preview instead of a full-quality render."
+        },
+        {
+          "key": "generate_audio",
+          "label": "Generate Audio",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Whether to generate synchronized audio."
+        }
+      ],
+      "defaults": {
+        "resolution": "720p",
+        "duration": "auto",
+        "aspect_ratio": "auto",
+        "draft": "off",
+        "generate_audio": "on"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt",
+        "start_video_url"
+      ],
+      "pricing": {
+        "unit": "second",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "resolution": "720p",
+              "mode": "draft"
+            },
+            "usd": 0.108
+          },
+          {
+            "spec": {
+              "resolution": "720p",
+              "mode": "standard"
+            },
+            "usd": 0.369
+          },
+          {
+            "spec": {
+              "resolution": "1080p",
+              "mode": "standard"
+            },
+            "usd": 0.477
+          }
+        ]
       }
     },
     {
@@ -4381,10 +4807,29 @@
           ],
           "valueType": "string",
           "description": "Output aspect ratio."
+        },
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "select",
+          "options": [
+            "0",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10"
+          ],
+          "valueType": "loose",
+          "description": "Output length in seconds (3-10, default 10). The model cannot exceed 10 seconds; prompts that describe longer content are clamped to this length. Pass 0 to let the model choose a length from the prompt instead; prompts that ask for more than 10 seconds may fail."
         }
       ],
       "defaults": {
-        "aspect_ratio": "16:9"
+        "aspect_ratio": "16:9",
+        "duration": 10
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -4438,10 +4883,29 @@
           ],
           "valueType": "string",
           "description": "Output aspect ratio."
+        },
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "select",
+          "options": [
+            "0",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10"
+          ],
+          "valueType": "loose",
+          "description": "Output length in seconds (3-10, default 10). The model cannot exceed 10 seconds; prompts that describe longer content are clamped to this length. Pass 0 to let the model choose a length from the prompt instead; prompts that ask for more than 10 seconds may fail."
         }
       ],
       "defaults": {
-        "aspect_ratio": "16:9"
+        "aspect_ratio": "16:9",
+        "duration": 10
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -4484,10 +4948,29 @@
           ],
           "valueType": "string",
           "description": "Output aspect ratio."
+        },
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "select",
+          "options": [
+            "0",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10"
+          ],
+          "valueType": "loose",
+          "description": "Output length in seconds (3-10, default 10). The model cannot exceed 10 seconds; prompts that describe longer content are clamped to this length. Pass 0 to let the model choose a length from the prompt instead; prompts that ask for more than 10 seconds may fail."
         }
       ],
       "defaults": {
-        "aspect_ratio": "16:9"
+        "aspect_ratio": "16:9",
+        "duration": 10
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -5694,8 +6177,74 @@
       "method": "POST",
       "path": "/v1/media/kling/kling-3.0/omni-video",
       "textField": null,
-      "media": [],
+      "media": [
+        {
+          "field": "contents",
+          "kinds": [
+            "image",
+            "video"
+          ],
+          "array": true,
+          "required": true,
+          "minItems": 1,
+          "itemField": "url",
+          "itemExtras": [
+            {
+              "key": "type",
+              "label": "Type",
+              "description": "Input kind: prompt text, reference image/video, or an Element.",
+              "required": true
+            },
+            {
+              "key": "text",
+              "label": "Text",
+              "description": "Prompt text (type='prompt').",
+              "required": false
+            },
+            {
+              "key": "element_id",
+              "label": "Element Id",
+              "description": "Element ID (type='element').",
+              "required": false
+            },
+            {
+              "key": "id",
+              "label": "Id",
+              "description": "Index id referenced from the prompt as @id.",
+              "required": false
+            }
+          ]
+        }
+      ],
       "params": [
+        {
+          "key": "contents_type",
+          "label": "Contents · Type",
+          "type": "string",
+          "valueType": "string",
+          "description": "Input kind: prompt text, reference image/video, or an Element. 接続したメディアと同数をカンマ区切りで指定します（空欄ならモデルに任せます）。"
+        },
+        {
+          "key": "contents_text",
+          "label": "Contents · Text",
+          "type": "string",
+          "valueType": "string",
+          "description": "Prompt text (type='prompt'). 接続したメディアと同数をカンマ区切りで指定します（空欄ならモデルに任せます）。"
+        },
+        {
+          "key": "contents_element_id",
+          "label": "Contents · Element Id",
+          "type": "string",
+          "valueType": "string",
+          "description": "Element ID (type='element'). 接続したメディアと同数をカンマ区切りで指定します（空欄ならモデルに任せます）。"
+        },
+        {
+          "key": "contents_id",
+          "label": "Contents · Id",
+          "type": "string",
+          "valueType": "string",
+          "description": "Index id referenced from the prompt as @id. 接続したメディアと同数をカンマ区切りで指定します（空欄ならモデルに任せます）。"
+        },
         {
           "key": "duration",
           "label": "Duration",
@@ -5768,6 +6317,10 @@
         }
       ],
       "defaults": {
+        "contents_type": "",
+        "contents_text": "",
+        "contents_element_id": "",
+        "contents_id": "",
         "duration": 5,
         "resolution": "720p",
         "aspect_ratio": "16:9",
@@ -5775,105 +6328,8 @@
         "multi_shot": "",
         "watermark": ""
       },
-      "advanced": [
-        {
-          "key": "contents",
-          "label": "Contents",
-          "required": true,
-          "description": "Reference inputs: prompt, images, videos, Elements.",
-          "schema": {
-            "description": "Reference inputs: prompt, images, videos, Elements.",
-            "items": {
-              "additionalProperties": false,
-              "properties": {
-                "type": {
-                  "description": "Input kind: prompt text, reference image/video, or an Element.",
-                  "enum": [
-                    "prompt",
-                    "first_frame",
-                    "last_frame",
-                    "refer_image",
-                    "feature_video",
-                    "base_video",
-                    "element"
-                  ],
-                  "title": "Type",
-                  "type": "string"
-                },
-                "text": {
-                  "anyOf": [
-                    {
-                      "maxLength": 3072,
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "description": "Prompt text (type='prompt').",
-                  "title": "Text"
-                },
-                "url": {
-                  "anyOf": [
-                    {
-                      "media_kinds": [
-                        "image",
-                        "video"
-                      ],
-                      "pattern": "^https?://",
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "description": "Material URL (image/video input types).",
-                  "title": "Url"
-                },
-                "element_id": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "description": "Element ID (type='element').",
-                  "title": "Element Id"
-                },
-                "id": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "default": null,
-                  "description": "Index id referenced from the prompt as @id.",
-                  "title": "Id"
-                }
-              },
-              "required": [
-                "type"
-              ],
-              "title": "Kling3Content",
-              "type": "object"
-            },
-            "minItems": 1,
-            "title": "Contents",
-            "type": "array"
-          }
-        }
-      ],
-      "requiredAdvanced": [
-        "contents"
-      ],
+      "advanced": [],
+      "requiredAdvanced": [],
       "requiredFields": [
         "contents"
       ],
@@ -8629,14 +9085,14 @@
       }
     },
     {
-      "apiId": "sonilo/sonilo-v1.1-music/text-to-audio",
+      "apiId": "sonilo/sonilo-v1.1-music/text-to-music",
       "vendor": "sonilo",
-      "fn": "text-to-audio",
+      "fn": "text-to-music",
       "category": "audio",
       "name": "Sonilo V1.1 Text to Music",
       "description": "Generate a licensed music track from a text prompt, with optional timed sections.",
       "method": "POST",
-      "path": "/v1/media/sonilo/sonilo-v1.1-music/text-to-audio",
+      "path": "/v1/media/sonilo/sonilo-v1.1-music/text-to-music",
       "textField": "prompt",
       "textMaxLength": 2000,
       "media": [],
@@ -8750,14 +9206,14 @@
       }
     },
     {
-      "apiId": "sonilo/sonilo-v1.1-music/video-to-audio",
+      "apiId": "sonilo/sonilo-v1.1-music/video-to-music",
       "vendor": "sonilo",
-      "fn": "video-to-audio",
+      "fn": "video-to-music",
       "category": "audio",
       "name": "Sonilo V1.1 Video to Music",
       "description": "Score a video and return the soundtrack, optionally ducked under dialogue.",
       "method": "POST",
-      "path": "/v1/media/sonilo/sonilo-v1.1-music/video-to-audio",
+      "path": "/v1/media/sonilo/sonilo-v1.1-music/video-to-music",
       "textField": "prompt",
       "textMaxLength": 2000,
       "media": [
@@ -8805,7 +9261,7 @@
             "on"
           ],
           "valueType": "boolean",
-          "description": "Duck the music under dialogue."
+          "description": "Duck the music under dialogue; the returned audio is the ducked mix."
         }
       ],
       "defaults": {
@@ -8893,14 +9349,14 @@
       }
     },
     {
-      "apiId": "sonilo/sonilo-v1.1-music/video-to-video",
+      "apiId": "sonilo/sonilo-v1.1-music/video-to-scored-video",
       "vendor": "sonilo",
-      "fn": "video-to-video",
-      "category": "video",
+      "fn": "video-to-scored-video",
+      "category": "audio",
       "name": "Sonilo v1.1 Music (Video to Scored Video)",
       "description": "Score a video and return the picture remuxed with its new soundtrack.",
       "method": "POST",
-      "path": "/v1/media/sonilo/sonilo-v1.1-music/video-to-video",
+      "path": "/v1/media/sonilo/sonilo-v1.1-music/video-to-scored-video",
       "textField": "prompt",
       "textMaxLength": 2000,
       "media": [
@@ -9007,14 +9463,14 @@
       }
     },
     {
-      "apiId": "sonilo/sonilo-v1.1-sfx/video-to-audio",
+      "apiId": "sonilo/sonilo-v1.1-sfx/video-to-sound-effects",
       "vendor": "sonilo",
-      "fn": "video-to-audio",
+      "fn": "video-to-sound-effects",
       "category": "audio",
       "name": "Sonilo V1.1 Video to Sound Effects",
       "description": "Sonilo V1.1 Video to Sound Effects is available in the Business API catalog.",
       "method": "POST",
-      "path": "/v1/media/sonilo/sonilo-v1.1-sfx/video-to-audio",
+      "path": "/v1/media/sonilo/sonilo-v1.1-sfx/video-to-sound-effects",
       "textField": "prompt",
       "textMaxLength": 2000,
       "media": [

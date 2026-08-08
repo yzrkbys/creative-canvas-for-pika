@@ -32,7 +32,15 @@ import type {
 const BASE = process.env.PIKA_API_BASE ?? "https://api.dev.pika.art";
 const POLL_INTERVAL_MS = 3000;
 const POLL_TIMEOUT_MS = 20 * 60 * 1000; // long video jobs legitimately take minutes
-const FIELD_PORTS = bindingsFile.fields as Record<string, PortIn[]>;
+const FIELD_PORTS_RAW = bindingsFile.fields as Record<string, unknown>;
+// The plain view: tagged-union fields expose their ports here too, so every
+// existing lookup (port order, consumed-port accounting) keeps working.
+const FIELD_PORTS = Object.fromEntries(
+  Object.entries(FIELD_PORTS_RAW).map(([k, v]) => [
+    k,
+    (Array.isArray(v) ? v : Object.keys((v as { ports: Record<string, string> }).ports)) as PortIn[],
+  ]),
+) as Record<string, PortIn[]>;
 
 // Raw JSON escape hatch. A couple of endpoints take structured arrays
 // (dialogue turns, omni-video contents) that the param widgets cannot express.
@@ -162,6 +170,18 @@ const PORT_LABEL: Record<PortIn, string> = {
   text_in: "テキスト",
 };
 
+/** A tagged-union media field: the port a URL comes from decides its role. */
+interface UnionBinding {
+  roleField: string;
+  urlField: string;
+  ports: Record<string, string>;
+}
+
+function unionBindingFor(field: string): UnionBinding | null {
+  const b = FIELD_PORTS_RAW[field];
+  return b && !Array.isArray(b) ? (b as UnionBinding) : null;
+}
+
 function portsFor(field: string): PortIn[] {
   const ports = FIELD_PORTS[field];
   if (!ports) {
@@ -247,6 +267,32 @@ export function buildBody(
       }
       continue;
     }
+    const union = unionBindingFor(m.field);
+    if (union) {
+      // Each connected input becomes one item tagged with the role of the port
+      // it arrived on. Order follows port order, then edge order.
+      const items: Record<string, unknown>[] = [];
+      for (const port of ports) {
+        const role = union.ports[port];
+        if (!role) continue;
+        for (const i of inputs) {
+          if (i.port !== port || i.kind === "text" || !i.url) continue;
+          if (!m.kinds.includes(i.kind)) continue;
+          items.push({ [union.roleField]: role, [union.urlField]: i.url });
+        }
+      }
+      // The prompt travels inside the same array for these models rather than
+      // in a top-level text field.
+      const text = (prompt ?? "").trim();
+      if (text) items.unshift({ [union.roleField]: "prompt", text });
+      if (!items.length && m.required)
+        throw new Error(
+          `${entry.name} は最低1つの入力が必要です（${m.field}）。プロンプトかメディアを与えてください。`,
+        );
+      if (items.length) body[m.field] = items;
+      continue;
+    }
+
     if (m.array) {
       const max = m.maxItems ?? urls.length;
       if (urls.length > max) {
@@ -254,7 +300,38 @@ export function buildBody(
           `${entry.name} の ${m.field} は最大 ${max} 件です（現在 ${urls.length} 件）。超過分を外してください。`,
         );
       }
-      body[m.field] = urls;
+      if (m.minItems && urls.length < m.minItems) {
+        throw new Error(
+          `${entry.name} の ${m.field} は最低 ${m.minItems} 件必要です（現在 ${urls.length} 件）。`,
+        );
+      }
+      if (m.itemField) {
+        // Object-shaped items (FLUX 3 keyframes). Each positioning sibling is
+        // supplied as one comma-separated param; the schema requires it on
+        // every entry or on none, so a partial list is rejected rather than
+        // silently padded.
+        const items: Record<string, unknown>[] = urls.map((u) => ({ [m.itemField!]: u }));
+        for (const ex of m.itemExtras ?? []) {
+          const raw = params[`${m.field}_${ex.key}`];
+          const list = String(raw ?? "")
+            .split(",")
+            .map((v) => v.trim())
+            .filter(Boolean);
+          if (!list.length) continue;
+          if (list.length !== items.length) {
+            throw new Error(
+              `${entry.name}: ${m.field}_${ex.key} は ${items.length} 件（接続したメディアと同数）で指定してください（現在 ${list.length} 件）。全件に付けるか、空欄にするかのどちらかです。`,
+            );
+          }
+          list.forEach((v, i) => {
+            const n = Number(v);
+            items[i][ex.key] = Number.isFinite(n) ? n : v;
+          });
+        }
+        body[m.field] = items;
+      } else {
+        body[m.field] = urls;
+      }
     } else {
       if (urls.length > 1) {
         const where = ports.map((p) => PORT_LABEL[p]).join(" / ");
@@ -280,7 +357,14 @@ export function buildBody(
   }
 
   // --- params --------------------------------------------------------------
+  // Params synthesised for object-array media (`keyframes_at_s`) exist only to
+  // build the item objects above. They are not fields of the endpoint, so
+  // sending them on would trip additionalProperties.
+  const synthetic = new Set(
+    entry.media.flatMap((m) => (m.itemExtras ?? []).map((ex) => `${m.field}_${ex.key}`)),
+  );
   for (const f of entry.params) {
+    if (synthetic.has(f.key)) continue;
     const raw = params[f.key];
     // "" is the canvas's "leave unset" — omit so Pika applies its own default.
     if (raw === undefined || raw === null || raw === "") {
@@ -348,12 +432,33 @@ function norm(v: unknown): string {
 function pickTier(pricing: CatalogPricing, params: Record<string, unknown>) {
   let best = pricing.tiers[0];
   let bestScore = -1;
+  // A tier can name a dimension the params express as a boolean instead: FLUX 3
+  // prices on `mode: draft|standard` while the endpoint exposes `draft: on|off`.
+  // Collect the values that exist as boolean params so such a tier can still be
+  // matched exactly, rather than falling back to "ティア推定" and quoting the
+  // wrong price (720p draft is $0.054, the standard tier $0.153).
+  const flagValues = new Set<string>();
+  for (const t of pricing.tiers)
+    for (const v of Object.values(t.spec))
+      if (params[String(v)] !== undefined) flagValues.add(norm(v));
+  const activeFlag = [...flagValues].find((v) => {
+    const got = norm(params[v]);
+    return got !== "" && got !== "off" && got !== "false";
+  });
+
   for (const t of pricing.tiers) {
     const keys = Object.keys(t.spec);
     let score = 0;
     for (const k of keys) {
       const want = norm(t.spec[k]);
       const got = norm(params[k]);
+      if (got === "" && flagValues.size) {
+        // The params have no key `k`; decide from the boolean flags. A tier
+        // naming a flag matches when that flag is on; every other tier value
+        // for this dimension is the baseline, matching when no flag is on.
+        if (flagValues.has(want) ? activeFlag === want : activeFlag === undefined) score++;
+        continue;
+      }
       // Tiers say audio on/off while some models expose audio as "native"/"off";
       // treat any set, non-"off" value as "on" so those still line up.
       if (got === want || (want === "on" && got !== "" && got !== "off")) score++;
