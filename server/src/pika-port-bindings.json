@@ -27,6 +27,9 @@
     "first_frame_image": [
       "image_in"
     ],
+    "first_frame_url": [
+      "image_in"
+    ],
     "last_frame_url": [
       "last_frame_in"
     ],
@@ -62,6 +65,9 @@
     "video_urls": [
       "ref_video_in"
     ],
+    "reference_video_urls": [
+      "ref_video_in"
+    ],
     "audio_url": [
       "audio_in"
     ],
@@ -71,7 +77,20 @@
     "audio_urls": [
       "ref_audio_in"
     ],
+    "reference_audio_urls": [
+      "ref_audio_in"
+    ],
+    "reference_audio": [
+      "ref_audio_in"
+    ],
+    "source_audio": [
+      "audio_in"
+    ],
     "keyframes": [
+      "image_in",
+      "ref_in"
+    ],
+    "images": [
       "image_in",
       "ref_in"
     ],

@@ -31,7 +31,12 @@ import type {
 
 const BASE = process.env.PIKA_API_BASE ?? "https://api.dev.pika.art";
 const POLL_INTERVAL_MS = 3000;
-const POLL_TIMEOUT_MS = 20 * 60 * 1000; // long video jobs legitimately take minutes
+// 180 min, not 20: Wan 3.0 early access runs 30-60+ min per job, and the
+// provider's own lifetime cap was observed to kill a job only at ~90 min
+// (2026-08-21, 30s/1080p omni-video). Our poll must outlive the provider's
+// verdict either way — giving up early orphans a job that keeps running AND
+// billing on Pika's side; a genuinely dead job exits the loop via its status.
+const POLL_TIMEOUT_MS = 180 * 60 * 1000;
 const FIELD_PORTS_RAW = bindingsFile.fields as Record<string, unknown>;
 // The plain view: tagged-union fields expose their ports here too, so every
 // existing lookup (port order, consumed-port accounting) keeps working.

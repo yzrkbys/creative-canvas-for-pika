@@ -26,7 +26,9 @@ import { fileURLToPath } from "node:url";
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.join(HERE, "..", "src");
 const BASE = process.env.PIKA_API_BASE ?? "https://api.dev.pika.art";
-const CONCURRENCY = 8;
+// 2, not 8: the catalog API rate-limits bursts of detail fetches (HTTP 429
+// observed at 8-wide on a 125+ endpoint catalog even with backoff).
+const CONCURRENCY = 2;
 
 const outFlag = process.argv.indexOf("--out");
 const OUT = outFlag > -1 ? path.resolve(process.argv[outFlag + 1]) : path.join(SRC, "pika-catalog.json");
@@ -36,10 +38,34 @@ const BINDINGS = JSON.parse(readFileSync(path.join(SRC, "pika-port-bindings.json
 // Pika names the free-text field `prompt` on 79 endpoints and `text` on 5.
 const TEXT_FIELDS = ["prompt", "text"];
 
+// A few endpoints carry their free text under their own name and have no
+// `prompt` at all (pika-speech: `script`, pika-soundtrack: `instruction`).
+// Left as params, those models get a node whose prompt box does nothing while
+// the actual text hides in a side panel. Promoted only when the endpoint has
+// no field from TEXT_FIELDS, so a model with both keeps `prompt` as the box.
+const FALLBACK_TEXT_FIELDS = ["script", "instruction"];
+
+// The catalog is public, but early-access models (e.g. Wan 3.0 during its
+// closed beta) only appear when the request carries an allowlisted API key.
+// Reads PIKA_API_KEY from the environment; without it the sync still works,
+// it just cannot see gated models.
+const API_KEY = process.env.PIKA_API_KEY;
+
 async function getJson(p) {
-  const res = await fetch(BASE + p, { headers: { "user-agent": "PikaCanvas/sync-catalog" } });
-  if (!res.ok) throw new Error(`GET ${p} -> HTTP ${res.status}`);
-  return res.json();
+  const headers = { "user-agent": "PikaCanvas/sync-catalog" };
+  if (API_KEY) headers["X-API-Key"] = API_KEY;
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(BASE + p, { headers }).catch((e) => {
+      if (attempt >= 7) throw e;
+      return null; // transient network error — retry
+    });
+    if (res && res.ok) return res.json();
+    // 125+ endpoint detail fetches trip the API's rate limit; back off and retry.
+    if (attempt >= 7 || (res && res.status !== 429 && res.status < 500)) {
+      throw new Error(`GET ${p} -> HTTP ${res ? res.status : "network error"}`);
+    }
+    await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
+  }
 }
 
 async function mapLimit(items, limit, fn) {
@@ -318,6 +344,20 @@ function normalize(entry) {
       if (field.type === "select") field.options = ["", ...field.options];
     }
     params.push(field);
+  }
+
+  if (!textField) {
+    const key = FALLBACK_TEXT_FIELDS.find((k) => params.some((f) => f.key === k && f.type === "string"));
+    if (key) {
+      textField = key;
+      const prop = unwrap(props[key]);
+      if (typeof prop.maxLength === "number") textMaxLength = prop.maxLength;
+      params.splice(
+        params.findIndex((f) => f.key === key),
+        1,
+      );
+      delete defaults[key];
+    }
   }
 
   // Required params the simple UI cannot render must be visible, not silent:

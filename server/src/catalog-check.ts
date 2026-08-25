@@ -35,8 +35,13 @@ export function catalogDrift(): CatalogDrift {
 export async function checkCatalogDrift(): Promise<CatalogDrift> {
   const local = CATALOG;
   try {
+    // Same auth rule as sync-catalog.mjs: the catalog is public, but gated
+    // early-access models (Wan 3.0 beta) only appear with an allowlisted key.
+    // Without it they would be flagged stale on every boot — a false alarm.
+    const headers: Record<string, string> = { "user-agent": "PikaCanvas/catalog-check" };
+    if (process.env.PIKA_API_KEY) headers["X-API-Key"] = process.env.PIKA_API_KEY;
     const res = await fetch(`${BASE}/catalog/apis`, {
-      headers: { "user-agent": "PikaCanvas/catalog-check" },
+      headers,
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
