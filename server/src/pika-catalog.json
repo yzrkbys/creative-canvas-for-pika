@@ -1,5 +1,5 @@
 {
-  "syncedAt": "2026-08-08T10:56:53.003Z",
+  "syncedAt": "2026-08-21T03:06:12.650Z",
   "base": "https://api.dev.pika.art",
   "entries": [
     {
@@ -733,6 +733,515 @@
       }
     },
     {
+      "apiId": "alibaba/wan3.0-video/image-to-video",
+      "vendor": "alibaba",
+      "fn": "image-to-video",
+      "category": "video",
+      "name": "Wan 3.0 Image To Video",
+      "description": "Wan 3.0 Image To Video is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/alibaba/wan3.0-video/image-to-video",
+      "textField": "prompt",
+      "textMaxLength": 20000,
+      "media": [
+        {
+          "field": "first_frame_url",
+          "kinds": [
+            "image"
+          ],
+          "array": false,
+          "required": true
+        },
+        {
+          "field": "last_frame_url",
+          "kinds": [
+            "image"
+          ],
+          "array": false,
+          "required": false
+        }
+      ],
+      "params": [
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "480p",
+            "720p",
+            "1080p"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        },
+        {
+          "key": "ratio",
+          "label": "Ratio",
+          "type": "select",
+          "options": [
+            "adaptive",
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio; 'adaptive' lets the model choose."
+        },
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "select",
+          "options": [
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26",
+            "27",
+            "28",
+            "29",
+            "30",
+            "auto"
+          ],
+          "valueType": "loose",
+          "description": "Output length in seconds (2-30), or 'auto' for smart duration."
+        },
+        {
+          "key": "audio",
+          "label": "Audio",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Whether to generate audio."
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Deterministic seed.",
+          "min": 0,
+          "max": 2147483647,
+          "step": 1
+        },
+        {
+          "key": "watermark",
+          "label": "Watermark",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Also return a watermarked result."
+        }
+      ],
+      "defaults": {
+        "resolution": "1080p",
+        "ratio": "adaptive",
+        "duration": 5,
+        "audio": "on",
+        "seed": "",
+        "watermark": "off"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "first_frame_url"
+      ],
+      "pricing": {
+        "unit": "output_second",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "resolution": "480p"
+            },
+            "usd": 0.0525
+          },
+          {
+            "spec": {
+              "resolution": "720p"
+            },
+            "usd": 0.105
+          },
+          {
+            "spec": {
+              "resolution": "1080p"
+            },
+            "usd": 0.21
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "alibaba/wan3.0-video/omni-video",
+      "vendor": "alibaba",
+      "fn": "omni-video",
+      "category": "video",
+      "name": "Wan 3.0 Omni Video",
+      "description": "Wan 3.0 Omni Video is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/alibaba/wan3.0-video/omni-video",
+      "textField": "prompt",
+      "textMaxLength": 20000,
+      "media": [
+        {
+          "field": "reference_image_urls",
+          "kinds": [
+            "image"
+          ],
+          "array": true,
+          "required": false,
+          "maxItems": 10
+        },
+        {
+          "field": "reference_video_urls",
+          "kinds": [
+            "video"
+          ],
+          "array": true,
+          "required": false,
+          "maxItems": 5
+        },
+        {
+          "field": "reference_audio_urls",
+          "kinds": [
+            "audio"
+          ],
+          "array": true,
+          "required": false,
+          "maxItems": 5
+        }
+      ],
+      "params": [
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "480p",
+            "720p",
+            "1080p"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        },
+        {
+          "key": "ratio",
+          "label": "Ratio",
+          "type": "select",
+          "options": [
+            "adaptive",
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio; 'adaptive' lets the model choose."
+        },
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "select",
+          "options": [
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26",
+            "27",
+            "28",
+            "29",
+            "30",
+            "auto"
+          ],
+          "valueType": "loose",
+          "description": "Output length in seconds (2-30), or 'auto' for smart duration."
+        },
+        {
+          "key": "audio",
+          "label": "Audio",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Whether to generate audio."
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Deterministic seed.",
+          "min": 0,
+          "max": 2147483647,
+          "step": 1
+        },
+        {
+          "key": "watermark",
+          "label": "Watermark",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Also return a watermarked result."
+        },
+        {
+          "key": "file_url",
+          "label": "File Url",
+          "type": "string",
+          "valueType": "string",
+          "description": "Document (https) to reference."
+        },
+        {
+          "key": "web_url",
+          "label": "Web Url",
+          "type": "string",
+          "valueType": "string",
+          "description": "Public web page to reference."
+        }
+      ],
+      "defaults": {
+        "resolution": "1080p",
+        "ratio": "adaptive",
+        "duration": 5,
+        "audio": "on",
+        "seed": "",
+        "watermark": "off",
+        "file_url": "",
+        "web_url": ""
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_second",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "resolution": "480p"
+            },
+            "usd": 0.0525
+          },
+          {
+            "spec": {
+              "resolution": "720p"
+            },
+            "usd": 0.105
+          },
+          {
+            "spec": {
+              "resolution": "1080p"
+            },
+            "usd": 0.21
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "alibaba/wan3.0-video/text-to-video",
+      "vendor": "alibaba",
+      "fn": "text-to-video",
+      "category": "video",
+      "name": "Wan 3.0 Text To Video",
+      "description": "Wan 3.0 Text To Video is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/alibaba/wan3.0-video/text-to-video",
+      "textField": "prompt",
+      "textMaxLength": 20000,
+      "media": [],
+      "params": [
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "480p",
+            "720p",
+            "1080p"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        },
+        {
+          "key": "ratio",
+          "label": "Ratio",
+          "type": "select",
+          "options": [
+            "adaptive",
+            "16:9",
+            "4:3",
+            "1:1",
+            "3:4",
+            "9:16"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio; 'adaptive' lets the model choose."
+        },
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "select",
+          "options": [
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "8",
+            "9",
+            "10",
+            "11",
+            "12",
+            "13",
+            "14",
+            "15",
+            "16",
+            "17",
+            "18",
+            "19",
+            "20",
+            "21",
+            "22",
+            "23",
+            "24",
+            "25",
+            "26",
+            "27",
+            "28",
+            "29",
+            "30",
+            "auto"
+          ],
+          "valueType": "loose",
+          "description": "Output length in seconds (2-30), or 'auto' for smart duration."
+        },
+        {
+          "key": "audio",
+          "label": "Audio",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Whether to generate audio."
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Deterministic seed.",
+          "min": 0,
+          "max": 2147483647,
+          "step": 1
+        },
+        {
+          "key": "watermark",
+          "label": "Watermark",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Also return a watermarked result."
+        }
+      ],
+      "defaults": {
+        "resolution": "1080p",
+        "ratio": "adaptive",
+        "duration": 5,
+        "audio": "on",
+        "seed": "",
+        "watermark": "off"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt"
+      ],
+      "pricing": {
+        "unit": "output_second",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "resolution": "480p"
+            },
+            "usd": 0.0525
+          },
+          {
+            "spec": {
+              "resolution": "720p"
+            },
+            "usd": 0.105
+          },
+          {
+            "spec": {
+              "resolution": "1080p"
+            },
+            "usd": 0.21
+          }
+        ]
+      }
+    },
+    {
       "apiId": "anthropic/claude-fable-5",
       "vendor": "anthropic",
       "fn": null,
@@ -758,6 +1267,34 @@
           }
         ],
         "inputUsd": 10.5
+      }
+    },
+    {
+      "apiId": "anthropic/claude-haiku-4.5",
+      "vendor": "anthropic",
+      "fn": null,
+      "category": "llm",
+      "name": "Anthropic Claude Haiku 4.5",
+      "description": "Anthropic Claude Haiku 4.5 is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/anthropic/claude-haiku-4.5",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 5.25
+          }
+        ],
+        "inputUsd": 1.05
       }
     },
     {
@@ -1555,6 +2092,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.0-fast/image-to-video",
       "textField": "prompt",
+      "textMaxLength": 4000,
       "media": [
         {
           "field": "image_url",
@@ -1619,7 +2157,6 @@
           "label": "Generate Audio",
           "type": "select",
           "options": [
-            "",
             "off",
             "on"
           ],
@@ -1638,6 +2175,18 @@
           "description": "Whether to add a watermark to the output video."
         },
         {
+          "key": "bitrate_mode",
+          "label": "Bitrate Mode",
+          "type": "select",
+          "options": [
+            "",
+            "standard",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
+        },
+        {
           "key": "resolution",
           "label": "Resolution",
           "type": "select",
@@ -1652,8 +2201,9 @@
       "defaults": {
         "duration": "4",
         "ratio": "",
-        "generate_audio": "",
+        "generate_audio": "on",
         "watermark": "off",
+        "bitrate_mode": "",
         "resolution": "720p"
       },
       "advanced": [],
@@ -1694,6 +2244,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.0-fast/reference-to-video",
       "textField": "prompt",
+      "textMaxLength": 4000,
       "media": [
         {
           "field": "image_urls",
@@ -1769,7 +2320,6 @@
           "label": "Generate Audio",
           "type": "select",
           "options": [
-            "",
             "off",
             "on"
           ],
@@ -1788,6 +2338,18 @@
           "description": "Whether to add a watermark to the output video."
         },
         {
+          "key": "bitrate_mode",
+          "label": "Bitrate Mode",
+          "type": "select",
+          "options": [
+            "",
+            "standard",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
+        },
+        {
           "key": "resolution",
           "label": "Resolution",
           "type": "select",
@@ -1802,8 +2364,9 @@
       "defaults": {
         "duration": "4",
         "ratio": "",
-        "generate_audio": "",
+        "generate_audio": "on",
         "watermark": "off",
+        "bitrate_mode": "",
         "resolution": "720p"
       },
       "advanced": [],
@@ -1861,6 +2424,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.0-fast/text-to-video",
       "textField": "prompt",
+      "textMaxLength": 4000,
       "media": [],
       "params": [
         {
@@ -1908,7 +2472,6 @@
           "label": "Generate Audio",
           "type": "select",
           "options": [
-            "",
             "off",
             "on"
           ],
@@ -1927,6 +2490,18 @@
           "description": "Whether to add a watermark to the output video."
         },
         {
+          "key": "bitrate_mode",
+          "label": "Bitrate Mode",
+          "type": "select",
+          "options": [
+            "",
+            "standard",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
+        },
+        {
           "key": "resolution",
           "label": "Resolution",
           "type": "select",
@@ -1941,8 +2516,9 @@
       "defaults": {
         "duration": "4",
         "ratio": "",
-        "generate_audio": "",
+        "generate_audio": "on",
         "watermark": "off",
+        "bitrate_mode": "",
         "resolution": "720p"
       },
       "advanced": [],
@@ -1982,6 +2558,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.0-mini/image-to-video",
       "textField": "prompt",
+      "textMaxLength": 4000,
       "media": [
         {
           "field": "image_url",
@@ -2046,7 +2623,6 @@
           "label": "Generate Audio",
           "type": "select",
           "options": [
-            "",
             "off",
             "on"
           ],
@@ -2065,6 +2641,18 @@
           "description": "Whether to add a watermark to the output video."
         },
         {
+          "key": "bitrate_mode",
+          "label": "Bitrate Mode",
+          "type": "select",
+          "options": [
+            "",
+            "standard",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
+        },
+        {
           "key": "resolution",
           "label": "Resolution",
           "type": "select",
@@ -2079,8 +2667,9 @@
       "defaults": {
         "duration": "4",
         "ratio": "",
-        "generate_audio": "",
+        "generate_audio": "on",
         "watermark": "off",
+        "bitrate_mode": "",
         "resolution": "720p"
       },
       "advanced": [],
@@ -2121,6 +2710,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.0-mini/reference-to-video",
       "textField": "prompt",
+      "textMaxLength": 4000,
       "media": [
         {
           "field": "image_urls",
@@ -2196,7 +2786,6 @@
           "label": "Generate Audio",
           "type": "select",
           "options": [
-            "",
             "off",
             "on"
           ],
@@ -2215,6 +2804,18 @@
           "description": "Whether to add a watermark to the output video."
         },
         {
+          "key": "bitrate_mode",
+          "label": "Bitrate Mode",
+          "type": "select",
+          "options": [
+            "",
+            "standard",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
+        },
+        {
           "key": "resolution",
           "label": "Resolution",
           "type": "select",
@@ -2229,8 +2830,9 @@
       "defaults": {
         "duration": "4",
         "ratio": "",
-        "generate_audio": "",
+        "generate_audio": "on",
         "watermark": "off",
+        "bitrate_mode": "",
         "resolution": "720p"
       },
       "advanced": [],
@@ -2288,6 +2890,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.0-mini/text-to-video",
       "textField": "prompt",
+      "textMaxLength": 4000,
       "media": [],
       "params": [
         {
@@ -2335,7 +2938,6 @@
           "label": "Generate Audio",
           "type": "select",
           "options": [
-            "",
             "off",
             "on"
           ],
@@ -2354,6 +2956,18 @@
           "description": "Whether to add a watermark to the output video."
         },
         {
+          "key": "bitrate_mode",
+          "label": "Bitrate Mode",
+          "type": "select",
+          "options": [
+            "",
+            "standard",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
+        },
+        {
           "key": "resolution",
           "label": "Resolution",
           "type": "select",
@@ -2368,8 +2982,9 @@
       "defaults": {
         "duration": "4",
         "ratio": "",
-        "generate_audio": "",
+        "generate_audio": "on",
         "watermark": "off",
+        "bitrate_mode": "",
         "resolution": "720p"
       },
       "advanced": [],
@@ -2409,6 +3024,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.0/image-to-video",
       "textField": "prompt",
+      "textMaxLength": 4000,
       "media": [
         {
           "field": "image_url",
@@ -2473,7 +3089,6 @@
           "label": "Generate Audio",
           "type": "select",
           "options": [
-            "",
             "off",
             "on"
           ],
@@ -2490,6 +3105,18 @@
           ],
           "valueType": "boolean",
           "description": "Whether to add a watermark to the output video."
+        },
+        {
+          "key": "bitrate_mode",
+          "label": "Bitrate Mode",
+          "type": "select",
+          "options": [
+            "",
+            "standard",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
         },
         {
           "key": "resolution",
@@ -2509,8 +3136,9 @@
       "defaults": {
         "duration": "4",
         "ratio": "",
-        "generate_audio": "",
+        "generate_audio": "on",
         "watermark": "off",
+        "bitrate_mode": "",
         "resolution": "480p"
       },
       "advanced": [],
@@ -2566,6 +3194,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.0/reference-to-video",
       "textField": "prompt",
+      "textMaxLength": 4000,
       "media": [
         {
           "field": "image_urls",
@@ -2641,7 +3270,6 @@
           "label": "Generate Audio",
           "type": "select",
           "options": [
-            "",
             "off",
             "on"
           ],
@@ -2658,6 +3286,18 @@
           ],
           "valueType": "boolean",
           "description": "Whether to add a watermark to the output video."
+        },
+        {
+          "key": "bitrate_mode",
+          "label": "Bitrate Mode",
+          "type": "select",
+          "options": [
+            "",
+            "standard",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
         },
         {
           "key": "resolution",
@@ -2677,8 +3317,9 @@
       "defaults": {
         "duration": "4",
         "ratio": "",
-        "generate_audio": "",
+        "generate_audio": "on",
         "watermark": "off",
+        "bitrate_mode": "",
         "resolution": "480p"
       },
       "advanced": [],
@@ -2769,6 +3410,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.0/text-to-video",
       "textField": "prompt",
+      "textMaxLength": 4000,
       "media": [],
       "params": [
         {
@@ -2816,7 +3458,6 @@
           "label": "Generate Audio",
           "type": "select",
           "options": [
-            "",
             "off",
             "on"
           ],
@@ -2833,6 +3474,18 @@
           ],
           "valueType": "boolean",
           "description": "Whether to add a watermark to the output video."
+        },
+        {
+          "key": "bitrate_mode",
+          "label": "Bitrate Mode",
+          "type": "select",
+          "options": [
+            "",
+            "standard",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
         },
         {
           "key": "resolution",
@@ -2852,8 +3505,9 @@
       "defaults": {
         "duration": "4",
         "ratio": "",
-        "generate_audio": "",
+        "generate_audio": "on",
         "watermark": "off",
+        "bitrate_mode": "",
         "resolution": "480p"
       },
       "advanced": [],
@@ -2908,6 +3562,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.5/image-to-video",
       "textField": "prompt",
+      "textMaxLength": 15000,
       "media": [
         {
           "field": "image_url",
@@ -2971,17 +3626,17 @@
           "type": "select",
           "options": [
             "480p",
-            "720p"
+            "720p",
+            "1080p"
           ],
           "valueType": "string",
-          "description": "Output resolution (480p/720p for 2.5)."
+          "description": "Output resolution (480p/720p/1080p for 2.5)."
         },
         {
           "key": "generate_audio",
           "label": "Generate Audio",
           "type": "select",
           "options": [
-            "",
             "off",
             "on"
           ],
@@ -3012,6 +3667,18 @@
           "description": "Output container format."
         },
         {
+          "key": "bitrate_mode",
+          "label": "Bitrate Mode",
+          "type": "select",
+          "options": [
+            "",
+            "standard",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
+        },
+        {
           "key": "ratio",
           "label": "Ratio",
           "type": "select",
@@ -3026,9 +3693,10 @@
       "defaults": {
         "duration": "4",
         "resolution": "720p",
-        "generate_audio": "",
+        "generate_audio": "on",
         "watermark": "off",
         "output_format": "",
+        "bitrate_mode": "",
         "ratio": ""
       },
       "advanced": [],
@@ -3042,6 +3710,13 @@
         "unit": "video_output_token",
         "quantity": 1000000,
         "tiers": [
+          {
+            "spec": {
+              "resolution": "1080p",
+              "mode": "standard"
+            },
+            "usd": 9.36
+          },
           {
             "spec": {
               "resolution": "480p",
@@ -3069,6 +3744,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.5/reference-to-video",
       "textField": "prompt",
+      "textMaxLength": 15000,
       "media": [
         {
           "field": "image_urls",
@@ -3143,17 +3819,17 @@
           "type": "select",
           "options": [
             "480p",
-            "720p"
+            "720p",
+            "1080p"
           ],
           "valueType": "string",
-          "description": "Output resolution (480p/720p for 2.5)."
+          "description": "Output resolution (480p/720p/1080p for 2.5)."
         },
         {
           "key": "generate_audio",
           "label": "Generate Audio",
           "type": "select",
           "options": [
-            "",
             "off",
             "on"
           ],
@@ -3184,6 +3860,18 @@
           "description": "Output container format."
         },
         {
+          "key": "bitrate_mode",
+          "label": "Bitrate Mode",
+          "type": "select",
+          "options": [
+            "",
+            "standard",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
+        },
+        {
           "key": "ratio",
           "label": "Ratio",
           "type": "select",
@@ -3204,9 +3892,10 @@
       "defaults": {
         "duration": "4",
         "resolution": "720p",
-        "generate_audio": "",
+        "generate_audio": "on",
         "watermark": "off",
         "output_format": "",
+        "bitrate_mode": "",
         "ratio": ""
       },
       "advanced": [],
@@ -3219,6 +3908,14 @@
         "unit": "video_output_token",
         "quantity": 1000000,
         "tiers": [
+          {
+            "spec": {
+              "resolution": "1080p",
+              "mode": "standard",
+              "variant": "with-video-input"
+            },
+            "usd": 5.6
+          },
           {
             "spec": {
               "resolution": "480p",
@@ -3234,6 +3931,14 @@
               "variant": "with-video-input"
             },
             "usd": 6.72
+          },
+          {
+            "spec": {
+              "resolution": "1080p",
+              "mode": "standard",
+              "variant": "no-video-input"
+            },
+            "usd": 9.36
           },
           {
             "spec": {
@@ -3264,6 +3969,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.5/text-to-video",
       "textField": "prompt",
+      "textMaxLength": 15000,
       "media": [],
       "params": [
         {
@@ -3310,17 +4016,17 @@
           "type": "select",
           "options": [
             "480p",
-            "720p"
+            "720p",
+            "1080p"
           ],
           "valueType": "string",
-          "description": "Output resolution (480p/720p for 2.5)."
+          "description": "Output resolution (480p/720p/1080p for 2.5)."
         },
         {
           "key": "generate_audio",
           "label": "Generate Audio",
           "type": "select",
           "options": [
-            "",
             "off",
             "on"
           ],
@@ -3351,6 +4057,18 @@
           "description": "Output container format."
         },
         {
+          "key": "bitrate_mode",
+          "label": "Bitrate Mode",
+          "type": "select",
+          "options": [
+            "",
+            "standard",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
+        },
+        {
           "key": "ratio",
           "label": "Ratio",
           "type": "select",
@@ -3371,9 +4089,10 @@
       "defaults": {
         "duration": "4",
         "resolution": "720p",
-        "generate_audio": "",
+        "generate_audio": "on",
         "watermark": "off",
         "output_format": "",
+        "bitrate_mode": "",
         "ratio": ""
       },
       "advanced": [],
@@ -3386,6 +4105,13 @@
         "unit": "video_output_token",
         "quantity": 1000000,
         "tiers": [
+          {
+            "spec": {
+              "resolution": "1080p",
+              "mode": "standard"
+            },
+            "usd": 9.36
+          },
           {
             "spec": {
               "resolution": "480p",
@@ -3918,6 +4644,34 @@
       }
     },
     {
+      "apiId": "deepseek/deepseek-v4-flash",
+      "vendor": "deepseek",
+      "fn": null,
+      "category": "llm",
+      "name": "DeepSeek V4 Flash",
+      "description": "DeepSeek V4 Flash (rolling latest snapshot) is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/deepseek/deepseek-v4-flash",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.28
+          }
+        ],
+        "inputUsd": 0.14
+      }
+    },
+    {
       "apiId": "deepseek/deepseek-v4-flash-0731",
       "vendor": "deepseek",
       "fn": null,
@@ -4124,6 +4878,75 @@
           {
             "spec": {},
             "usd": 0.105
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "elevenlabs/eleven-music/sound-effects",
+      "vendor": "elevenlabs",
+      "fn": "sound-effects",
+      "category": "audio",
+      "name": "Eleven Music Sound Effects",
+      "description": "Eleven Music Sound Effects is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/elevenlabs/eleven-music/sound-effects",
+      "textField": "prompt",
+      "textMaxLength": 4100,
+      "media": [],
+      "params": [
+        {
+          "key": "music_length_ms",
+          "label": "Music Length Ms",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Length of the track in milliseconds.",
+          "min": 3000,
+          "max": 600000,
+          "step": 1,
+          "required": true
+        },
+        {
+          "key": "force_instrumental",
+          "label": "Force Instrumental",
+          "type": "select",
+          "options": [
+            "",
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Whether to force an instrumental track with no vocals."
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seed for reproducible output. Defaults to a random seed.",
+          "min": 0,
+          "max": 2147483647,
+          "step": 1
+        }
+      ],
+      "defaults": {
+        "music_length_ms": 3000,
+        "force_instrumental": "",
+        "seed": ""
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt",
+        "music_length_ms"
+      ],
+      "pricing": {
+        "unit": "minute",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.158
           }
         ]
       }
@@ -4690,7 +5513,8 @@
           "label": "Output Format",
           "type": "select",
           "options": [
-            "png"
+            "png",
+            "jpeg"
           ],
           "valueType": "string",
           "description": "Image file format of the output."
@@ -4779,7 +5603,8 @@
           "label": "Output Format",
           "type": "select",
           "options": [
-            "png"
+            "png",
+            "jpeg"
           ],
           "valueType": "string",
           "description": "Image file format of the output."
@@ -4878,7 +5703,8 @@
           "label": "Output Format",
           "type": "select",
           "options": [
-            "png"
+            "png",
+            "jpeg"
           ],
           "valueType": "string",
           "description": "Image file format of the output."
@@ -4968,7 +5794,8 @@
           "label": "Output Format",
           "type": "select",
           "options": [
-            "png"
+            "png",
+            "jpeg"
           ],
           "valueType": "string",
           "description": "Image file format of the output."
@@ -5068,7 +5895,8 @@
           "label": "Output Format",
           "type": "select",
           "options": [
-            "png"
+            "png",
+            "jpeg"
           ],
           "valueType": "string",
           "description": "Image file format of the output."
@@ -5155,7 +5983,8 @@
           "label": "Output Format",
           "type": "select",
           "options": [
-            "png"
+            "png",
+            "jpeg"
           ],
           "valueType": "string",
           "description": "Image file format of the output."
@@ -5259,6 +6088,34 @@
       "description": "Gemini 3.6 Flash is available in the Business API catalog.",
       "method": "POST",
       "path": "/v1/media/google/gemini-3.6-flash",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 6
+          }
+        ],
+        "inputUsd": 1.2
+      }
+    },
+    {
+      "apiId": "google/gemini-3.7-flash",
+      "vendor": "google",
+      "fn": null,
+      "category": "llm",
+      "name": "Gemini 3.7 Flash",
+      "description": "Gemini 3.7 Flash is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/google/gemini-3.7-flash",
       "textField": null,
       "media": [],
       "params": [],
@@ -5731,6 +6588,39 @@
           "description": "Whether to generate audio for the video."
         },
         {
+          "key": "enhance_prompt",
+          "label": "Enhance Prompt",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Whether the provider may rewrite the prompt for better results."
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seed for reproducible generation. Defaults to a random seed.",
+          "min": 0,
+          "max": 4294967295,
+          "step": 1
+        },
+        {
+          "key": "compression_quality",
+          "label": "Compression Quality",
+          "type": "select",
+          "options": [
+            "",
+            "optimized",
+            "lossless"
+          ],
+          "valueType": "string",
+          "description": "Output encoding quality. Defaults to optimized (smaller files)."
+        },
+        {
           "key": "resolution",
           "label": "Resolution",
           "type": "select",
@@ -5749,6 +6639,9 @@
         "aspect_ratio": "16:9",
         "person_generation": "",
         "generate_audio": "on",
+        "enhance_prompt": "on",
+        "seed": "",
+        "compression_quality": "",
         "resolution": "720p"
       },
       "advanced": [],
@@ -5962,6 +6855,39 @@
           "description": "Whether to generate audio for the video."
         },
         {
+          "key": "enhance_prompt",
+          "label": "Enhance Prompt",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Whether the provider may rewrite the prompt for better results."
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seed for reproducible generation. Defaults to a random seed.",
+          "min": 0,
+          "max": 4294967295,
+          "step": 1
+        },
+        {
+          "key": "compression_quality",
+          "label": "Compression Quality",
+          "type": "select",
+          "options": [
+            "",
+            "optimized",
+            "lossless"
+          ],
+          "valueType": "string",
+          "description": "Output encoding quality. Defaults to optimized (smaller files)."
+        },
+        {
           "key": "resolution",
           "label": "Resolution",
           "type": "select",
@@ -5979,6 +6905,9 @@
         "aspect_ratio": "16:9",
         "person_generation": "",
         "generate_audio": "on",
+        "enhance_prompt": "on",
+        "seed": "",
+        "compression_quality": "",
         "resolution": "720p"
       },
       "advanced": [],
@@ -6103,6 +7032,39 @@
           "description": "Whether to generate audio for the video."
         },
         {
+          "key": "enhance_prompt",
+          "label": "Enhance Prompt",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Whether the provider may rewrite the prompt for better results."
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seed for reproducible generation. Defaults to a random seed.",
+          "min": 0,
+          "max": 4294967295,
+          "step": 1
+        },
+        {
+          "key": "compression_quality",
+          "label": "Compression Quality",
+          "type": "select",
+          "options": [
+            "",
+            "optimized",
+            "lossless"
+          ],
+          "valueType": "string",
+          "description": "Output encoding quality. Defaults to optimized (smaller files)."
+        },
+        {
           "key": "resolution",
           "label": "Resolution",
           "type": "select",
@@ -6121,6 +7083,9 @@
         "aspect_ratio": "16:9",
         "person_generation": "",
         "generate_audio": "on",
+        "enhance_prompt": "on",
+        "seed": "",
+        "compression_quality": "",
         "resolution": "720p"
       },
       "advanced": [],
@@ -7236,7 +8201,7 @@
           "label": "Sound Insert Time",
           "type": "number",
           "valueType": "integer",
-          "description": "Where in the video to insert the audio, in seconds.",
+          "description": "Where in the video to insert the audio, in milliseconds.",
           "min": 0,
           "step": 1
         },
@@ -7245,7 +8210,7 @@
           "label": "Sound Start Time",
           "type": "number",
           "valueType": "integer",
-          "description": "Where in the audio to start playback, in seconds.",
+          "description": "Where in the audio to start playback, in milliseconds.",
           "min": 0,
           "step": 1
         },
@@ -7254,7 +8219,7 @@
           "label": "Sound End Time",
           "type": "number",
           "valueType": "integer",
-          "description": "Where in the audio to stop playback, in seconds.",
+          "description": "Where in the audio to stop playback, in milliseconds.",
           "min": 0,
           "step": 1,
           "required": true
@@ -8578,6 +9543,7 @@
           "type": "select",
           "options": [
             "1K",
+            "2K",
             "4K"
           ],
           "valueType": "string",
@@ -8703,6 +9669,7 @@
           "type": "select",
           "options": [
             "1K",
+            "2K",
             "4K"
           ],
           "valueType": "string",
@@ -8876,17 +9843,6 @@
           "description": "Output resolution."
         },
         {
-          "key": "duration_s",
-          "label": "Duration S",
-          "type": "select",
-          "options": [
-            "5",
-            "10"
-          ],
-          "valueType": "number",
-          "description": "Video length in seconds."
-        },
-        {
           "key": "negative_prompt",
           "label": "Negative Prompt",
           "type": "string",
@@ -8900,13 +9856,24 @@
           "valueType": "integer",
           "description": "Seed for reproducible generation. Defaults to a random seed.",
           "step": 1
+        },
+        {
+          "key": "duration_s",
+          "label": "Duration S",
+          "type": "select",
+          "options": [
+            "5",
+            "10"
+          ],
+          "valueType": "number",
+          "description": "Video length in seconds."
         }
       ],
       "defaults": {
         "resolution": "1080p",
-        "duration_s": 5,
         "negative_prompt": "",
-        "seed": ""
+        "seed": "",
+        "duration_s": 5
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -8970,16 +9937,6 @@
           "description": "Output resolution."
         },
         {
-          "key": "duration_s",
-          "label": "Duration S",
-          "type": "select",
-          "options": [
-            "5"
-          ],
-          "valueType": "number",
-          "description": "Video length in seconds (5s only for text-to-video)."
-        },
-        {
           "key": "negative_prompt",
           "label": "Negative Prompt",
           "type": "string",
@@ -8993,13 +9950,23 @@
           "valueType": "integer",
           "description": "Seed for reproducible generation. Defaults to a random seed.",
           "step": 1
+        },
+        {
+          "key": "duration_s",
+          "label": "Duration S",
+          "type": "select",
+          "options": [
+            "5"
+          ],
+          "valueType": "number",
+          "description": "Video length in seconds (5s only for text-to-video)."
         }
       ],
       "defaults": {
         "resolution": "1080p",
-        "duration_s": 5,
         "negative_prompt": "",
-        "seed": ""
+        "seed": "",
+        "duration_s": 5
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -9023,6 +9990,395 @@
               "duration_s": 5
             },
             "usd": 0.09
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "pika/pika-audio/pika-music",
+      "vendor": "pika",
+      "fn": "pika-music",
+      "category": "audio",
+      "name": "Pika Music",
+      "description": "Generate original music from a text prompt, including voice-conditioned and music-cover modes.",
+      "method": "POST",
+      "path": "/v1/media/pika/pika-audio/pika-music",
+      "textField": "prompt",
+      "textMaxLength": 4000,
+      "media": [
+        {
+          "field": "reference_audio",
+          "kinds": [
+            "audio"
+          ],
+          "array": false,
+          "required": false
+        },
+        {
+          "field": "source_audio",
+          "kinds": [
+            "audio"
+          ],
+          "array": false,
+          "required": false
+        }
+      ],
+      "params": [
+        {
+          "key": "mode",
+          "label": "Mode",
+          "type": "select",
+          "options": [
+            "text_to_music",
+            "voice_conditioned_text_to_music",
+            "music_cover"
+          ],
+          "valueType": "string"
+        },
+        {
+          "key": "lyrics",
+          "label": "Lyrics",
+          "type": "string",
+          "valueType": "string",
+          "maxLength": 8000
+        },
+        {
+          "key": "clean_reference_audio",
+          "label": "Clean Reference Audio",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean"
+        },
+        {
+          "key": "voice_consent_attested",
+          "label": "Voice Consent Attested",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Set true to attest that you have the rights and permissions needed to clone the voice in reference_audio. Required when reference_audio is supplied."
+        },
+        {
+          "key": "rewrite_prompt",
+          "label": "Rewrite Prompt",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Expand the prompt with a model before generating. Leave off when the prompt already specifies the arrangement; turn it on for a short or vague one."
+        },
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "number",
+          "valueType": "number",
+          "min": 10,
+          "max": 360,
+          "step": 0.1
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "step": 1
+        }
+      ],
+      "defaults": {
+        "mode": "text_to_music",
+        "lyrics": "",
+        "clean_reference_audio": "off",
+        "voice_consent_attested": "off",
+        "rewrite_prompt": "off",
+        "duration": 30,
+        "seed": -1
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt"
+      ],
+      "pricing": {
+        "unit": "minute",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.015
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "pika/pika-audio/pika-sfx",
+      "vendor": "pika",
+      "fn": "pika-sfx",
+      "category": "audio",
+      "name": "Pika SFX",
+      "description": "Generate a sound effect from a text prompt.",
+      "method": "POST",
+      "path": "/v1/media/pika/pika-audio/pika-sfx",
+      "textField": "prompt",
+      "textMaxLength": 4000,
+      "media": [],
+      "params": [
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "number",
+          "valueType": "number",
+          "min": 1,
+          "max": 20,
+          "step": 0.1
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "step": 1
+        }
+      ],
+      "defaults": {
+        "duration": 10,
+        "seed": -1
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt"
+      ],
+      "pricing": {
+        "unit": "second",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.0002
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "pika/pika-audio/pika-soundtrack",
+      "vendor": "pika",
+      "fn": "pika-soundtrack",
+      "category": "audio",
+      "name": "Pika Soundtrack",
+      "description": "Generate a synchronized soundtrack for a video. The visuals and duration are untouched; only the audio is replaced.",
+      "method": "POST",
+      "path": "/v1/media/pika/pika-audio/pika-soundtrack",
+      "textField": null,
+      "media": [
+        {
+          "field": "video",
+          "kinds": [
+            "video"
+          ],
+          "array": false,
+          "required": true
+        }
+      ],
+      "params": [
+        {
+          "key": "instruction",
+          "label": "Instruction",
+          "type": "string",
+          "valueType": "string",
+          "description": "What the audio should be — sound effects, ambience, dialogue, music, or overall style — and how it should follow the visible action. Reaches the model verbatim. Omit it, or leave it blank, for natural sound design derived from the video alone.",
+          "maxLength": 10000
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Deterministic seed. -1 picks a random one.",
+          "min": -1,
+          "max": 2147483647,
+          "step": 1
+        }
+      ],
+      "defaults": {
+        "instruction": "",
+        "seed": -1
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "video"
+      ],
+      "pricing": {
+        "unit": "second",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.005
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "pika/pika-audio/pika-speech",
+      "vendor": "pika",
+      "fn": "pika-speech",
+      "category": "audio",
+      "name": "Pika Speech",
+      "description": "Fast voice-cloning text-to-speech. Clones a voice from a reference recording or one of 76 bundled presets and speaks the supplied script.",
+      "method": "POST",
+      "path": "/v1/media/pika/pika-audio/pika-speech",
+      "textField": null,
+      "media": [
+        {
+          "field": "reference_audio",
+          "kinds": [
+            "audio"
+          ],
+          "array": false,
+          "required": false
+        }
+      ],
+      "params": [
+        {
+          "key": "script",
+          "label": "Script",
+          "type": "string",
+          "valueType": "string",
+          "maxLength": 15000,
+          "required": true
+        },
+        {
+          "key": "voice_preset",
+          "label": "Voice Preset",
+          "type": "select",
+          "options": [
+            "",
+            "deep_trailer_bass",
+            "warm_honey_drawl",
+            "fast_talking_wiseguy",
+            "graceful_elder_storyteller",
+            "chill_surfer_dude",
+            "bubbly_it_girl",
+            "roaring_locker_room_coach",
+            "calm_documentary_narrator",
+            "velvet_radio_alto",
+            "gruff_slow_drawl",
+            "brassy_sharp_wit",
+            "vintage_radio_showman",
+            "gentle_hushed_librarian",
+            "rapid_sports_caller",
+            "warm_playful_spark",
+            "folksy_porch_storyteller",
+            "crisp_founder_pitch",
+            "smoky_noir_monotone",
+            "sunny_morning_host",
+            "cozy_grandpa_storyteller",
+            "plummy_posh_gentleman",
+            "cheeky_bright_charmer",
+            "rapid_market_banter",
+            "stern_clipped_headmistress",
+            "hearty_fireside_rumble",
+            "soft_thoughtful_lilt",
+            "musical_poetic_lilt",
+            "melodic_quick_storyteller",
+            "gravelly_deadpan",
+            "imperious_grande_dame",
+            "dry_cheerful_joker",
+            "polished_news_anchor",
+            "warm_grounded_friend",
+            "commanding_safari_guide",
+            "rhythmic_radio_charmer",
+            "mellow_wise_elder",
+            "lilting_warm_hostess",
+            "articulate_tech_lead",
+            "booming_epic_showman",
+            "cool_minimal_designer",
+            "precise_stern_engineer",
+            "breathy_chic_charm",
+            "slow_heavy_brooder",
+            "fiery_passionate_cook",
+            "loving_loud_grandma",
+            "gentle_careful_sweetness",
+            "velvet_worldly_narrator",
+            "deep_night_storyteller",
+            "bright_peppy_vlogger",
+            "poised_documentary_calm",
+            "grumpy_soft_heart",
+            "zany_kid_inventor",
+            "hammy_pirate_captain",
+            "theatrical_scheming_villain",
+            "slow_goofy_giant",
+            "wheezy_batty_wizard",
+            "raspy_scrappy_kid",
+            "chatty_beauty_bestie",
+            "hyped_gym_motivator",
+            "soft_cozy_aesthetic",
+            "smooth_hype_unboxer",
+            "bored_chic_trendsetter",
+            "joyful_food_fanatic",
+            "deadpan_ironic_fry",
+            "mellow_road_tripper",
+            "breathy_luxe_diva",
+            "fast_nerdy_reviewer",
+            "unhinged_arena_hype",
+            "abyssal_doom_growl",
+            "airhorn_club_mc",
+            "barking_drill_fury",
+            "smoky_mystic_drama",
+            "booming_ring_announcer",
+            "feather_whisper_asmr",
+            "seismic_boss_god",
+            "thunderous_revival_preacher"
+          ],
+          "valueType": "string"
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "min": -1,
+          "max": 2147483647,
+          "step": 1
+        },
+        {
+          "key": "voice_consent_attested",
+          "label": "Voice Consent Attested",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Set true to attest that you have the rights and permissions needed to clone the voice in reference_audio. Required when reference_audio is supplied."
+        }
+      ],
+      "defaults": {
+        "script": "",
+        "voice_preset": "",
+        "seed": -1,
+        "voice_consent_attested": "off"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "script"
+      ],
+      "pricing": {
+        "unit": "minute",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.01
           }
         ]
       }
@@ -9068,17 +10424,6 @@
           "description": "Output resolution."
         },
         {
-          "key": "duration_s",
-          "label": "Duration S",
-          "type": "select",
-          "options": [
-            "5",
-            "10"
-          ],
-          "valueType": "number",
-          "description": "Video length in seconds."
-        },
-        {
           "key": "negative_prompt",
           "label": "Negative Prompt",
           "type": "string",
@@ -9092,13 +10437,24 @@
           "valueType": "integer",
           "description": "Seed for reproducible generation. Defaults to a random seed.",
           "step": 1
+        },
+        {
+          "key": "duration_s",
+          "label": "Duration S",
+          "type": "select",
+          "options": [
+            "5",
+            "10"
+          ],
+          "valueType": "number",
+          "description": "Video length in seconds."
         }
       ],
       "defaults": {
         "resolution": "1080p",
-        "duration_s": 5,
         "negative_prompt": "",
-        "seed": ""
+        "seed": "",
+        "duration_s": 5
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -9311,6 +10667,96 @@
       }
     },
     {
+      "apiId": "pika/pikaframes/image-to-video",
+      "vendor": "pika",
+      "fn": "image-to-video",
+      "category": "video",
+      "name": "Pika 2.5 Keyframe",
+      "description": "Animate between 2-5 ordered keyframes with Pika 2.5.",
+      "method": "POST",
+      "path": "/v1/media/pika/pikaframes/image-to-video",
+      "textField": "prompt",
+      "media": [
+        {
+          "field": "images",
+          "kinds": [
+            "image"
+          ],
+          "array": true,
+          "required": true,
+          "maxItems": 5,
+          "minItems": 2
+        }
+      ],
+      "params": [
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "720p",
+            "1080p"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        },
+        {
+          "key": "negative_prompt",
+          "label": "Negative Prompt",
+          "type": "string",
+          "valueType": "string",
+          "description": "Text describing what to avoid in the video."
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seed for reproducible generation. Defaults to a random seed.",
+          "step": 1
+        },
+        {
+          "key": "transition_duration_s",
+          "label": "Transition Duration S",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seconds per transition. Over 5 seconds needs exactly 2 keyframes.",
+          "min": 1,
+          "max": 10,
+          "step": 1
+        }
+      ],
+      "defaults": {
+        "resolution": "1080p",
+        "negative_prompt": "",
+        "seed": "",
+        "transition_duration_s": 5
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "images"
+      ],
+      "pricing": {
+        "unit": "second",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "resolution": "720p"
+            },
+            "usd": 0.04
+          },
+          {
+            "spec": {
+              "resolution": "1080p"
+            },
+            "usd": 0.06
+          }
+        ]
+      }
+    },
+    {
       "apiId": "pika/pikaswaps/video-to-video",
       "vendor": "pika",
       "fn": "video-to-video",
@@ -9359,17 +10805,6 @@
           "description": "Output resolution."
         },
         {
-          "key": "duration_s",
-          "label": "Duration S",
-          "type": "select",
-          "options": [
-            "5",
-            "10"
-          ],
-          "valueType": "number",
-          "description": "Video length in seconds."
-        },
-        {
           "key": "negative_prompt",
           "label": "Negative Prompt",
           "type": "string",
@@ -9385,6 +10820,17 @@
           "step": 1
         },
         {
+          "key": "duration_s",
+          "label": "Duration S",
+          "type": "select",
+          "options": [
+            "5",
+            "10"
+          ],
+          "valueType": "number",
+          "description": "Video length in seconds."
+        },
+        {
           "key": "modify_region_roi",
           "label": "Modify Region Roi",
           "type": "string",
@@ -9394,9 +10840,9 @@
       ],
       "defaults": {
         "resolution": "1080p",
-        "duration_s": 5,
         "negative_prompt": "",
         "seed": "",
+        "duration_s": 5,
         "modify_region_roi": ""
       },
       "advanced": [],
@@ -10075,7 +11521,7 @@
       "fn": "image-upscale",
       "category": "image",
       "name": "Topaz Image Upscale",
-      "description": "Upscale and enhance images with Topaz Labs models. One endpoint; the `model` request field picks the enhancement model (Standard V2 by default), priced per image up to 24MP output. The standard family keeps the original flat price; the generative family (redefine, standard-max, wonder, wonder-3) adds synthesized detail at a higher rate.",
+      "description": "Upscale and enhance images with Topaz Labs models. One endpoint; the `model` request field picks the enhancement model (Standard V2 by default), priced per image up to 24MP output. The standard family keeps the original flat price; the generative family (redefine, standard-max, wonder, wonder-3, wonder-3.5) adds synthesized detail at a higher rate.",
       "method": "POST",
       "path": "/v1/media/topaz/topaz-image-upscale/image-upscale",
       "textField": "prompt",
@@ -10116,10 +11562,11 @@
             "redefine",
             "standard-max",
             "wonder",
-            "wonder-3"
+            "wonder-3",
+            "wonder-3.5"
           ],
           "valueType": "string",
-          "description": "Topaz enhancement model. Standard family (true-to-input upscaling): `standard-v2` (default, general purpose), `low-resolution-v2` (small/degraded sources), `cgi` (art and CGI), `high-fidelity-v2` (detail preservation), `text-refine` (text and shapes). Generative family (adds synthesized detail, priced higher): `redefine` (prompt-driven), `standard-max`, `wonder`, `wonder-3`."
+          "description": "Topaz enhancement model. Standard family (true-to-input upscaling): `standard-v2` (default, general purpose), `low-resolution-v2` (small/degraded sources), `cgi` (art and CGI), `high-fidelity-v2` (detail preservation), `text-refine` (text and shapes). Generative family (adds synthesized detail, priced higher): `redefine` (prompt-driven), `standard-max`, `wonder`, `wonder-3`, `wonder-3.5`."
         },
         {
           "key": "output_format",
@@ -10240,7 +11687,7 @@
             "on"
           ],
           "valueType": "boolean",
-          "description": "Auto-generate the guidance prompt (generative models except wonder-3; replaces `prompt`)."
+          "description": "Auto-generate the guidance prompt (generative models except wonder-3/wonder-3.5; replaces `prompt`)."
         },
         {
           "key": "creativity",
@@ -10295,7 +11742,7 @@
             "high"
           ],
           "valueType": "string",
-          "description": "Enhancement level (wonder-3 only); omitted lets Topaz auto-configure."
+          "description": "Enhancement level (wonder-3 and wonder-3.5 only); omitted lets Topaz auto-configure."
         }
       ],
       "defaults": {
@@ -10365,6 +11812,12 @@
           },
           {
             "spec": {
+              "variant": "wonder-3.5"
+            },
+            "usd": 0.378
+          },
+          {
+            "spec": {
               "variant": "redefine"
             },
             "usd": 0.756
@@ -10424,10 +11877,11 @@
             "starlight-mini",
             "starlight-hq",
             "starlight-sharp",
-            "starlight-fast-2"
+            "starlight-fast-2",
+            "starlight-precise-2.6"
           ],
           "valueType": "string",
-          "description": "Topaz enhancement model. `proteus` (default) is the general-purpose upscaler; the `starlight-*` models are the slower, higher-quality diffusion family (sources up to 30fps, output up to 4K and never below 720p — small sources come back larger than upscale_factor alone implies)."
+          "description": "Topaz enhancement model. `proteus` (default) is the general-purpose upscaler; the `starlight-*` models are the slower, higher-quality diffusion family (sources up to 30fps, output up to 4K). Except `starlight-precise-2.6`, which scales exactly by upscale_factor, starlight output never drops below 720p — small sources come back larger than upscale_factor alone implies."
         },
         {
           "key": "compression",
@@ -10537,6 +11991,12 @@
           {
             "spec": {
               "variant": "starlight-sharp"
+            },
+            "usd": 0.378
+          },
+          {
+            "spec": {
+              "variant": "starlight-precise-2.6"
             },
             "usd": 0.378
           }
@@ -11302,6 +12762,34 @@
           }
         ],
         "inputUsd": 1.4
+      }
+    },
+    {
+      "apiId": "z-ai/glm-5.3",
+      "vendor": "z-ai",
+      "fn": null,
+      "category": "llm",
+      "name": "Z.ai GLM 5.3",
+      "description": "Z.ai GLM 5.3 is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/z-ai/glm-5.3",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 4.62
+          }
+        ],
+        "inputUsd": 1.47
       }
     }
   ]
