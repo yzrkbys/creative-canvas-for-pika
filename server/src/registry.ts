@@ -122,6 +122,19 @@ const NODE_TYPE_BY_FUNCTION: Record<string, NodeType> = {
   "video-to-music": "video_to_audio",
   "video-to-sound-effects": "video_to_audio",
   "text-to-music": "audio_gen",
+  // Pika's own audio family names each endpoint after itself rather than after
+  // its shape, so every one of them needs an explicit row.
+  "pika-music": "audio_gen",
+  "pika-sfx": "audio_gen",
+  "pika-speech": "audio_gen",
+  // Video in, score out — the same shape as Kling's and Sonilo's scorers.
+  // Pika describes it as replacing the audio on the supplied video, so the
+  // result may well be a remuxed VIDEO rather than a bare track (as Kling
+  // Audio already returns an m4a carrying a picture stream). Either way the
+  // audio is what the downstream av_mux takes, so this node type holds; if a
+  // run shows it returning picture worth keeping, move it to video_gen the
+  // way sonilo's video-to-scored-video is routed.
+  "pika-soundtrack": "video_to_audio",
   // Returns a scored VIDEO, not a bare track — it belongs on a video node.
   "video-to-scored-video": "video_gen",
   // Output is text, not audio — routing on category alone would misplace this.
