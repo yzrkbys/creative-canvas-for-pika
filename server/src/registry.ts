@@ -252,10 +252,42 @@ const PIKA_MODELS: ModelSpec[] = CATALOG.entries
   .map(specOf)
   .filter((m): m is ModelSpec => m !== null);
 
+// Pika renames an endpoint family in place from time to time
+// (google/gemini-omni-1.1 -> google/gemini-omni-1.1-flash, 2026-08-28). A graph
+// stores the model id it was built with, so a rename orphans every node that
+// used it: settings and wiring intact, but "no valid model" the moment it runs.
+// Old ids therefore keep resolving to their successor. Prefix pairs, because a
+// rename hits every function under the family at once.
+const RENAMED_API_PREFIXES: [string, string][] = [
+  ["google/gemini-omni-1.1/", "google/gemini-omni-1.1-flash/"],
+  // Sonilo's scorer, renamed earlier — the same rename NODE_TYPE_BY_FUNCTION
+  // already accounts for above. An exact id, not a family prefix.
+  ["sonilo/sonilo-v1.1-music/video-to-audio", "sonilo/sonilo-v1.1-music/video-to-music"],
+];
+
+function currentApiId(apiId: string): string {
+  for (const [from, to] of RENAMED_API_PREFIXES) {
+    if (apiId.startsWith(from)) return to + apiId.slice(from.length);
+  }
+  return apiId;
+}
+
+/**
+ * The id a saved node should be using today. Unchanged for everything that was
+ * never renamed, so it is safe to run every stored id through it.
+ */
+export function currentModelId(id: string): string {
+  if (!id.startsWith("pika/")) return id;
+  return "pika/" + currentApiId(id.slice("pika/".length));
+}
+
 /** The generated catalog entry behind a model id — the adapter builds requests from it. */
 export function getEntry(modelId: string): CatalogEntry | undefined {
   const apiId = modelId.startsWith("pika/") ? modelId.slice("pika/".length) : modelId;
-  return CATALOG.entries.find((e) => e.apiId === apiId);
+  return (
+    CATALOG.entries.find((e) => e.apiId === apiId) ??
+    CATALOG.entries.find((e) => e.apiId === currentApiId(apiId))
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -305,13 +337,19 @@ const PREFERRED_DEFAULT: Partial<Record<NodeType, string>> = {
   video_gen: "pika/bytedance/seedance-2.0/reference-to-video",
   video_upscale: "pika/topaz/topaz-video-upscale/video-upscale",
   audio_gen: "pika/elevenlabs/eleven-multilingual-v2/text-to-speech",
-  video_to_audio: "pika/sonilo/sonilo-v1.1-music/video-to-audio",
+  // video-to-audio here was stale — Sonilo renamed it to video-to-music and this
+  // pointer kept naming an endpoint the catalog no longer has, so new nodes fell
+  // through to catalog order instead of the model meant to be picked.
+  video_to_audio: "pika/sonilo/sonilo-v1.1-music/video-to-music",
   transcribe: "pika/openai/whisper/transcription",
   llm_text: "pika/anthropic/claude-opus-5",
 };
 
 export function getModel(id: string): ModelSpec | undefined {
-  return MODELS.find((m) => m.id === id);
+  const hit = MODELS.find((m) => m.id === id);
+  if (hit) return hit;
+  const renamed = currentModelId(id);
+  return renamed === id ? undefined : MODELS.find((m) => m.id === renamed);
 }
 
 export function modelsForType(type: NodeType): ModelSpec[] {
