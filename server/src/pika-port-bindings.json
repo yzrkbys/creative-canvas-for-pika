@@ -41,6 +41,7 @@
     ],
     "image_urls": [
       "image_in",
+      "last_frame_in",
       "ref_in"
     ],
     "reference_image_urls": [

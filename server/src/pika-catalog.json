@@ -1,5 +1,5 @@
 {
-  "syncedAt": "2026-08-25T08:34:40.617Z",
+  "syncedAt": "2026-08-31T13:37:02.691Z",
   "base": "https://api.dev.pika.art",
   "entries": [
     {
@@ -5330,7 +5330,7 @@
       "method": "POST",
       "path": "/v1/media/elevenlabs/eleven-multilingual-v2/text-to-speech",
       "textField": "text",
-      "textMaxLength": 5000,
+      "textMaxLength": 10000,
       "media": [],
       "params": [
         {
@@ -5706,7 +5706,7 @@
       "method": "POST",
       "path": "/v1/media/elevenlabs/eleven-turbo-v2-5/text-to-speech",
       "textField": "text",
-      "textMaxLength": 5000,
+      "textMaxLength": 40000,
       "media": [],
       "params": [
         {
@@ -5965,6 +5965,34 @@
       }
     },
     {
+      "apiId": "google/gemini-3-pro-image",
+      "vendor": "google",
+      "fn": null,
+      "category": "image",
+      "name": "Nano Banana Pro (Gemini 3 Pro Image)",
+      "description": "Nano Banana Pro (Gemini 3 Pro Image) is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/google/gemini-3-pro-image",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "image_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 120
+          }
+        ],
+        "inputUsd": 2
+      }
+    },
+    {
       "apiId": "google/gemini-3-pro-image/image-to-image",
       "vendor": "google",
       "fn": "image-to-image",
@@ -6154,6 +6182,34 @@
           }
         ],
         "inputUsd": 2
+      }
+    },
+    {
+      "apiId": "google/gemini-3.1-flash-image",
+      "vendor": "google",
+      "fn": null,
+      "category": "image",
+      "name": "Nano Banana (Gemini 3.1 Flash Image)",
+      "description": "Nano Banana (Gemini 3.1 Flash Image) is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/google/gemini-3.1-flash-image",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "image_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 60
+          }
+        ],
+        "inputUsd": 0.5
       }
     },
     {
@@ -6648,6 +6704,248 @@
           }
         ],
         "inputUsd": 1.2
+      }
+    },
+    {
+      "apiId": "google/gemini-omni-1.1-flash/image-to-video",
+      "vendor": "google",
+      "fn": "image-to-video",
+      "category": "video",
+      "name": "Gemini Omni 1.1 Flash Image To Video",
+      "description": "Animate a start frame, or interpolate between a start and end frame, at 360p, 720p, or 1080p. Token-metered.",
+      "method": "POST",
+      "path": "/v1/media/google/gemini-omni-1.1-flash/image-to-video",
+      "textField": "prompt",
+      "textMaxLength": 10000,
+      "media": [
+        {
+          "field": "image_urls",
+          "kinds": [
+            "image"
+          ],
+          "array": true,
+          "required": true,
+          "maxItems": 2,
+          "minItems": 1
+        }
+      ],
+      "params": [
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "16:9",
+            "9:16"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio."
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "360p",
+            "720p",
+            "1080p",
+            "4k"
+          ],
+          "valueType": "string",
+          "description": "Output resolution. 360p is a fast draft mode."
+        }
+      ],
+      "defaults": {
+        "aspect_ratio": "16:9",
+        "resolution": "720p"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt",
+        "image_urls"
+      ],
+      "pricing": {
+        "unit": "video_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 17.5
+          }
+        ],
+        "inputUsd": 1.5
+      }
+    },
+    {
+      "apiId": "google/gemini-omni-1.1-flash/reference-to-video",
+      "vendor": "google",
+      "fn": "reference-to-video",
+      "category": "video",
+      "name": "Gemini Omni 1.1 Flash Reference To Video",
+      "description": "Generate video guided by up to 6 reference images at 360p, 720p, or 1080p. Token-metered.",
+      "method": "POST",
+      "path": "/v1/media/google/gemini-omni-1.1-flash/reference-to-video",
+      "textField": "prompt",
+      "textMaxLength": 10000,
+      "media": [
+        {
+          "field": "image_urls",
+          "kinds": [
+            "image"
+          ],
+          "array": true,
+          "required": true,
+          "maxItems": 6,
+          "minItems": 1
+        }
+      ],
+      "params": [
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "16:9",
+            "9:16"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio."
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "360p",
+            "720p",
+            "1080p",
+            "4k"
+          ],
+          "valueType": "string",
+          "description": "Output resolution. 360p is a fast draft mode."
+        }
+      ],
+      "defaults": {
+        "aspect_ratio": "16:9",
+        "resolution": "720p"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt",
+        "image_urls"
+      ],
+      "pricing": {
+        "unit": "video_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 17.5
+          }
+        ],
+        "inputUsd": 1.5
+      }
+    },
+    {
+      "apiId": "google/gemini-omni-1.1-flash/text-to-video",
+      "vendor": "google",
+      "fn": "text-to-video",
+      "category": "video",
+      "name": "Gemini Omni 1.1 Flash Text To Video",
+      "description": "Generate video with synchronized audio from a text prompt at 360p, 720p, or 1080p. Token-metered.",
+      "method": "POST",
+      "path": "/v1/media/google/gemini-omni-1.1-flash/text-to-video",
+      "textField": "prompt",
+      "textMaxLength": 10000,
+      "media": [],
+      "params": [
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "16:9",
+            "9:16"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio."
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "360p",
+            "720p",
+            "1080p",
+            "4k"
+          ],
+          "valueType": "string",
+          "description": "Output resolution. 360p is a fast draft mode."
+        }
+      ],
+      "defaults": {
+        "aspect_ratio": "16:9",
+        "resolution": "720p"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt"
+      ],
+      "pricing": {
+        "unit": "video_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 17.5
+          }
+        ],
+        "inputUsd": 1.5
+      }
+    },
+    {
+      "apiId": "google/gemini-omni-1.1-flash/video-to-video",
+      "vendor": "google",
+      "fn": "video-to-video",
+      "category": "video",
+      "name": "Gemini Omni 1.1 Flash Video Editing",
+      "description": "Edit a source video from a text prompt. Output inherits the source aspect ratio and resolution. Token-metered.",
+      "method": "POST",
+      "path": "/v1/media/google/gemini-omni-1.1-flash/video-to-video",
+      "textField": "prompt",
+      "textMaxLength": 10000,
+      "media": [
+        {
+          "field": "video_url",
+          "kinds": [
+            "video"
+          ],
+          "array": false,
+          "required": true
+        }
+      ],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt",
+        "video_url"
+      ],
+      "pricing": {
+        "unit": "video_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 17.5
+          }
+        ],
+        "inputUsd": 1.5
       }
     },
     {
@@ -10358,13 +10656,6 @@
           "description": "Output resolution."
         },
         {
-          "key": "negative_prompt",
-          "label": "Negative Prompt",
-          "type": "string",
-          "valueType": "string",
-          "description": "Text describing what to avoid in the video."
-        },
-        {
           "key": "seed",
           "label": "Seed",
           "type": "number",
@@ -10382,13 +10673,20 @@
           ],
           "valueType": "number",
           "description": "Video length in seconds."
+        },
+        {
+          "key": "negative_prompt",
+          "label": "Negative Prompt",
+          "type": "string",
+          "valueType": "string",
+          "description": "Text describing what to avoid in the video."
         }
       ],
       "defaults": {
         "resolution": "1080p",
-        "negative_prompt": "",
         "seed": "",
-        "duration_s": 5
+        "duration_s": 5,
+        "negative_prompt": ""
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -10452,13 +10750,6 @@
           "description": "Output resolution."
         },
         {
-          "key": "negative_prompt",
-          "label": "Negative Prompt",
-          "type": "string",
-          "valueType": "string",
-          "description": "Text describing what to avoid in the video."
-        },
-        {
           "key": "seed",
           "label": "Seed",
           "type": "number",
@@ -10475,13 +10766,20 @@
           ],
           "valueType": "number",
           "description": "Video length in seconds (5s only for text-to-video)."
+        },
+        {
+          "key": "negative_prompt",
+          "label": "Negative Prompt",
+          "type": "string",
+          "valueType": "string",
+          "description": "Text describing what to avoid in the video."
         }
       ],
       "defaults": {
         "resolution": "1080p",
-        "negative_prompt": "",
         "seed": "",
-        "duration_s": 5
+        "duration_s": 5,
+        "negative_prompt": ""
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -10923,13 +11221,6 @@
           "description": "Output resolution."
         },
         {
-          "key": "negative_prompt",
-          "label": "Negative Prompt",
-          "type": "string",
-          "valueType": "string",
-          "description": "Text describing what to avoid in the video."
-        },
-        {
           "key": "seed",
           "label": "Seed",
           "type": "number",
@@ -10947,13 +11238,20 @@
           ],
           "valueType": "number",
           "description": "Video length in seconds."
+        },
+        {
+          "key": "negative_prompt",
+          "label": "Negative Prompt",
+          "type": "string",
+          "valueType": "string",
+          "description": "Text describing what to avoid in the video."
         }
       ],
       "defaults": {
         "resolution": "1080p",
-        "negative_prompt": "",
         "seed": "",
-        "duration_s": 5
+        "duration_s": 5,
+        "negative_prompt": ""
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -11200,13 +11498,6 @@
           "description": "Output resolution."
         },
         {
-          "key": "negative_prompt",
-          "label": "Negative Prompt",
-          "type": "string",
-          "valueType": "string",
-          "description": "Text describing what to avoid in the video."
-        },
-        {
           "key": "seed",
           "label": "Seed",
           "type": "number",
@@ -11223,13 +11514,20 @@
           "min": 1,
           "max": 10,
           "step": 1
+        },
+        {
+          "key": "negative_prompt",
+          "label": "Negative Prompt",
+          "type": "string",
+          "valueType": "string",
+          "description": "Text describing what to avoid in the video."
         }
       ],
       "defaults": {
         "resolution": "1080p",
-        "negative_prompt": "",
         "seed": "",
-        "transition_duration_s": 5
+        "transition_duration_s": 5,
+        "negative_prompt": ""
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -11304,13 +11602,6 @@
           "description": "Output resolution."
         },
         {
-          "key": "negative_prompt",
-          "label": "Negative Prompt",
-          "type": "string",
-          "valueType": "string",
-          "description": "Text describing what to avoid in the video."
-        },
-        {
           "key": "seed",
           "label": "Seed",
           "type": "number",
@@ -11330,6 +11621,13 @@
           "description": "Video length in seconds."
         },
         {
+          "key": "negative_prompt",
+          "label": "Negative Prompt",
+          "type": "string",
+          "valueType": "string",
+          "description": "Text describing what to avoid in the video."
+        },
+        {
           "key": "modify_region_roi",
           "label": "Modify Region Roi",
           "type": "string",
@@ -11339,9 +11637,9 @@
       ],
       "defaults": {
         "resolution": "1080p",
-        "negative_prompt": "",
         "seed": "",
         "duration_s": 5,
+        "negative_prompt": "",
         "modify_region_roi": ""
       },
       "advanced": [],
