@@ -205,7 +205,14 @@ writes it to `server-port` in the data directory.
 **A generation fails with `file too large`.**
 Pika rejects uploads over **100 MiB** (104,857,600 bytes exactly), and the rejection happens
 before any bytes are sent. Generated clips reach that easily — a 30-second 1080p clip can be
-over 200 MiB. Use `video_trim`, or re-encode the clip smaller and import that instead.
+over 200 MiB.
+
+Where the model only *analyses* the clip and returns something else — scoring, transcription —
+the app re-encodes an oversized video down to fit automatically, capped at 720p with the audio
+stream copied untouched, and logs that it did. Where the input's pixels carry into the output —
+video-to-video, extension, upscale — it refuses instead, because quietly downscaling your master
+is a worse failure than stopping: you would never see it happen. Trim the clip with `video_trim`,
+or import a smaller re-encode.
 
 **A video job seems stuck for half an hour.**
 Some models genuinely take that long; a 30-second clip from an early-access model has been
