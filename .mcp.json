@@ -1,9 +1,12 @@
 {
   "mcpServers": {
-    "pika-canvas": {
+    "creative-canvas-pika": {
       "type": "stdio",
       "command": "npx",
-      "args": ["tsx", "mcp/src/index.ts"],
+      "args": [
+        "tsx",
+        "mcp/src/index.ts"
+      ],
       "env": {
         "PIKA_CANVAS_SERVER_URL": "http://localhost:8797"
       }

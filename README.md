@@ -1,162 +1,258 @@
-# Pika Canvas
+# Creative Canvas for Pika API Club
 
-![Pika Canvas — 字コンテ→キャラシート→背景→デプスマップ→R2V→音楽までを1枚のキャンバスで](docs/screenshot-canvas.png)
+> **Unofficial.** This is a personal project. It is not affiliated with, endorsed by, or
+> sponsored by Pika. "Pika" and "Pika API Club" are used only to say which API this app
+> talks to. Your use of that API is governed by Pika's own terms, and everything you
+> generate is billed to your own Pika account.
 
-ノードベースのクリエイティブ・キャンバス（画像・動画・音声・テキストをノードでつなぐデスクトップアプリ）。
-生成の実行はすべて **Pika API** に一本化されていて、**APIキー1本**でカタログ全モデルが使えます。
-**Claude Code から操作**できる MCP サーバを内蔵し、チャットで指示するだけでキャンバスを組み立て・生成できます。
+English | [日本語](README.ja.md)
 
-- デスクトップアプリ（Electron）＋内蔵サーバ＋ React キャンバス UI
-- `pika-canvas` MCP サーバ同梱（このフォルダを Claude Code で開くと自動登録）
-- 生成データはすべて**各自の端末ローカル**に保存（リポジトリでは共有されません）
+![The canvas: script → character sheet → background → depth map → reference-to-video → music, on one board](docs/screenshot-canvas.png)
 
-Creative Canvas（KIE / fal / xAI をプロバイダごとに実装していた版）のクローンで、
-**モデル層をカタログ駆動に置き換え**たものです。詳細は下の「モデルレジストリの仕組み」を参照。
+A node-based canvas for image, video, audio and text generation, running as a desktop app.
+Every generation goes through the **Pika API**, so **one API key** reaches the whole catalog,
+and a built-in **MCP server** lets **Claude Code** build the graph and run it for you.
+
+- Electron desktop app: bundled server + a React canvas
+- Ships an MCP server, so an agent can add nodes, wire them and generate
+- Everything you make stays **on your machine** — nothing is uploaded to this project
+
+The UI is in Japanese. The model catalog, prompts and this README are in English.
 
 ---
 
-## 必要なもの
+## Why this exists
 
-- **Node.js 18 以上**（推奨 LTS） … https://nodejs.org
+Most multi-provider canvases carry a hand-written adapter per model: a file that names the
+parameters, guesses the defaults and hard-codes the price. It rots the day a provider ships
+a new endpoint.
+
+Pika publishes the JSON Schema **and** the price tiers for every endpoint it serves, so this
+app has **no hand-written model definitions at all**. The model layer is generated from the
+catalog (`npm run sync:catalog`); adding a model means re-running the sync, not writing code.
+The only hand-maintained piece is a small table mapping media field names to canvas ports.
+
+That is also why the node list is short. `video_gen` covers text-to-video, image-to-video,
+first-last-frame, reference-to-video, video-to-video, extension, motion control and avatar —
+one node type, because the model's own schema decides which ports it needs.
+
+---
+
+## Requirements
+
+- **Node.js 18+** (LTS recommended) — https://nodejs.org
 - **git**
-- **Claude Code**
-- **Pika の API キー** … https://dev.pika.art のダッシュボードで発行
-  - 画像・動画・音声・LLM の全モデルがこのキー1本で動きます（課金は USD、**成功した生成のみ課金**）
-  - 無くても `MOCK_PROVIDER=1` でプレースホルダ生成のお試しは可能
-- **ffmpeg / ffprobe**（動画連結・フレーム抽出・音声合成のビルトインノード用）
+- A **Pika API key** — issue one at https://dev.pika.art
+  - One key covers image, video, audio and LLM models. You are billed for successful
+    generations only.
+  - No key? `MOCK_PROVIDER=1` runs the whole app against placeholder output, free.
+- **ffmpeg / ffprobe** — for the local nodes (concat, trim, frame extract, audio mux).
+  `brew install ffmpeg` on macOS.
+- **Claude Code** — optional, but it is how the MCP half is meant to be driven.
 
-対応 OS: **macOS / Windows**
-
----
-
-## セットアップ
-
-1. このフォルダを **Claude Code で開く**
-2. チャットで `/setup` を実行
-   → 依存インストール（`npm install`）→ ビルド＆起動（`npm run app`）まで自動で進みます。
-3. アプリが起動したら、メニュー **「Canvas → 設定（APIキー）を開く」** で `PIKA_API_KEY` を貼り付けて保存 → アプリを再起動。
-
-> 手動で進めたい場合:
-> ```bash
-> npm install
-> npm run app
-> ```
+Built and tested on **macOS (Apple Silicon)**. The code is cross-platform and the packaging
+config currently targets macOS only; a Windows build is not yet wired up.
 
 ---
 
-## ノードの種類
-
-| グループ | ノード | 入力 → 出力 |
-|---|---|---|
-| 画像 | `image_gen` / `image_edit` / `image_upload` | text・画像 → 画像 |
-| 動画 | `video_gen` / `video_upscale` / `video_concat` / `frame_extract` / `video_upload` | text・画像・動画・音声 → 動画 |
-| 音声 | `audio_gen` / `video_to_audio` / `av_mux` / `transcribe` / `audio_upload` | text・音声・動画 → 音声（`transcribe` はテキスト） |
-| テキスト | `llm_text` / `note` / `doc` / `web_clip` / `file_import` | text → text |
-| レイアウト | `frame` | 視覚的なグルーピング枠 |
-
-すべての生成ノードは **Pika の APIキー1本**で動きます（builtin の ffmpeg 系・Webクリップは無料）。
-それ以外の認証・アカウントは必要ありません。
-
-`video_gen` は t2v / i2v / first-last-frame / reference-to-video / video-to-video / extension /
-motion-control / avatar を**1つのノード種別**でカバーします。どのポートが要るかはモデル側のスキーマが決めるので、
-モデルを変えれば必要な配線も変わります（未接続・誤配線は**課金前に**弾かれます）。
-
-**スコアリングの往復**が閉じているのがこの版の特徴です:
-`video_gen → video_to_audio（劇伴/SEを生成）→ av_mux（映像に戻す）` がキャンバス内で完結します。
-
----
-
-## 使い方
-
-1. **Pika Canvas アプリを起動しておく**（内蔵サーバが `localhost:8797` で待ち受けます）。
-2. このフォルダを開いた Claude Code のチャットで指示するだけ。例:
-   - 「『夕焼けの富士山』の画像ノードを作って生成して」
-   - 「この画像から5秒の動画を作って」
-   - 「このカットに劇伴を付けて、映像に合成して」
-   MCP（`pika-canvas`）経由でノードの追加・接続・生成が行われ、キャンバスにリアルタイム反映されます。
-
----
-
-## モデルレジストリの仕組み（カタログ駆動）
-
-Pika は全エンドポイントの **JSON Schema と価格ティア**を公開しています
-（`GET /catalog/apis` と `GET /catalog/apis/{api_id}?expand=inputs`・どちらも認証不要）。
-そのため、このリポジトリには**手書きのモデル定義がありません**。
+## Install
 
 ```bash
-npm run sync:catalog     # → server/src/pika-catalog.json を再生成
+git clone https://github.com/yzrkbys/creative-canvas-for-pika.git
+cd creative-canvas-for-pika
+npm install
+npm run app
 ```
 
-同期スクリプトが生成するもの:
+`npm run app` builds the web bundle and the server, then launches the desktop app.
 
-- **パラメータUI** … enum → セレクト、整数 → 数値入力、`anyOf:[整数4-15, "auto"]` のような合成型も選択肢に展開
-- **既定値** … スキーマが宣言したものだけ。宣言が無ければ「（モデル既定）」＝**フィールドを送らない**
-  （勝手に先頭の選択肢を既定にすると Seedance が無言で 480p / 1:1 に固定されるため）
-- **ポート結線** … スキーマの `media_kinds` 注釈から、どのフィールドが画像/動画/音声を取るかを判定
-- **コスト計算** … 価格ティアの `spec` をノードのパラメータと突き合わせて単価を選択
+**Set your API key** from the app's menu: **Canvas → 設定（APIキー）を開く**. Paste
+`PIKA_API_KEY=...` into the file that opens, save, and restart the app. The key lives in
+your user data directory, never in the repository.
 
-手で保守するのは `server/src/pika-port-bindings.json` の**17個のフィールド名 → ポート対応表だけ**です。
-カタログに未知のメディアフィールドが増えると同期は**失敗して停止**します（黙って入力を落として課金するより良いため）。
+### Packaging a `.app`
 
-新モデルへの追随は「同期を再実行するだけ」で、アダプタの分岐を書く必要はありません。
-アプリを再ビルドせずに反映したい場合は、生成した `pika-catalog.json` を
-`~/Library/Application Support/Pika Canvas/` に置いてアプリを再起動すれば、同梱版より優先されます。
+```bash
+npm run app:dist        # → desktop/release/
+```
 
-### コスト表示について
+The build is **unsigned**, so macOS will refuse to open it on the first try
+("damaged / cannot be opened"). Either right-click the app and choose **Open**, or clear
+the quarantine flag:
 
-課金単位はモデルによって違い、**事前に金額を出せるものと出せないものがあります**。
+```bash
+xattr -dr com.apple.quarantine "/Applications/Creative Canvas for Pika API Club.app"
+```
 
-| 単位 | 例 | 事前見積り |
+Signing it yourself requires an Apple Developer ID.
+
+---
+
+## Driving it from Claude Code
+
+Open this folder in Claude Code. The bundled `.mcp.json` registers an MCP server named
+**`creative-canvas-pika`** (deliberately not `creative-canvas`, so it can coexist with other
+canvases you may have registered). Start the desktop app first — the MCP server talks to it
+over `localhost:8797` — then just ask:
+
+- "Make an image node for a sunset over Mount Fuji and generate it"
+- "Turn that image into a 5-second clip"
+- "Score this cut and mux the music back onto the picture"
+
+Nodes appear on the canvas as they are created, live.
+
+---
+
+## Node types
+
+| Group | Nodes | In → out |
 |---|---|---|
-| 秒 | Kling, Veo, HappyHorse | ○ 単価 × 尺 |
-| 枚 | Seedream, GPT-Image-2 | ○ 単価 × 枚数 |
-| 文字 | ElevenLabs TTS | ○ 単価 × プロンプト文字数 |
-| 回 | 一部モデル | ○ 定額 |
-| 分 | Sonilo スコアリング | △ 入力動画の尺に比例（実行前に計測しない） |
-| トークン | Seedance, Gemini Omni, LLM | **✗ 生成量が事前に不明** |
+| Image | `image_gen` · `image_edit` · `image_upload` | text, image → image |
+| Video | `video_gen` · `video_upscale` · `video_trim` · `video_concat` · `frame_extract` · `video_upload` | text, image, video, audio → video |
+| Audio | `audio_gen` · `video_to_audio` · `av_mux` · `transcribe` · `audio_upload` | text, audio, video → audio (`transcribe` → text) |
+| Text | `llm_text` · `note` · `doc` · `web_clip` · `file_import` | text → text |
+| Layout | `frame` | a visual grouping box |
 
-トークン課金のモデルは金額を**捏造せず**「事前見積り不可」と表示し、確認ダイアログを出します。
-`$0` は「無料」ではなく「見積り不能」の意味です。
+The ffmpeg-backed nodes (`video_trim`, `video_concat`, `frame_extract`, `av_mux`) and
+`web_clip` run locally and cost nothing.
 
----
-
-## 課金前ガード
-
-「配線が無視されたまま課金される」のを防ぐため、実行前に以下を検査して**止めます**（アップロードより前）。
-
-- 必須のメディア入力が未接続
-- そのモデルが**読まないポート**にメディアが繋がっている（例: t2i モデルに参照画像）
-- 単数フィールドに複数接続 / 配列フィールドの上限超過
-- プロンプトがモデルの文字数上限を超過
-- 構造化パラメータ（ElevenLabs のダイアログ、Kling omni-video）が未指定
-
-いずれもエラー文で「どのポートを外すか／どこに繋ぐか」を示します。
+The **scoring round trip** closes inside the canvas:
+`video_gen → video_to_audio` (score the cut) `→ av_mux` (put the track back on the picture).
 
 ---
 
-## データの保存場所（共有されません）
+## How the model registry works
 
-- macOS: `~/Library/Application Support/Pika Canvas/`
-- Windows: `%APPDATA%\Pika Canvas\`
+Pika serves the schema and pricing for every endpoint at `GET /catalog/apis` and
+`GET /catalog/apis/{api_id}?expand=inputs`. The sync turns that into
+`server/src/pika-catalog.json`:
 
-リポジトリには作業データ・`.env`（APIキー）は含まれません（`.gitignore` 済み）。
+```bash
+npm run sync:catalog
+# early-access models are gated: PIKA_API_KEY=... npm run sync:catalog
+```
+
+From the schema it derives:
+
+- **Parameter widgets** — enums become selects, integers become number inputs, and composite
+  types like `anyOf:[integer 4-15, "auto"]` expand into a single list of choices.
+- **Defaults** — only the ones the schema actually declares. Where none is declared the field
+  is shown as "model default" and **simply not sent**. Picking the first enum value instead
+  would silently pin models to 480p or 1:1 without anyone choosing that.
+- **Port wiring** — the `media_kinds` annotation says which fields take images, video or audio.
+- **Cost** — the price tier whose `spec` matches the node's parameters.
+
+The sync **fails loudly** if the catalog grows a media field it has no port for, rather than
+quietly dropping an input and billing you for the result.
+
+To pick up new models without rebuilding the app, drop the generated `pika-catalog.json` into
+your user data directory (see below) and restart; it takes precedence over the bundled copy.
+
+### What the cost figure means
+
+Billing units differ per model, and some genuinely cannot be quoted in advance:
+
+| Unit | Examples | Quotable up front |
+|---|---|---|
+| second | Kling, Veo, Wan | yes — rate × duration |
+| image | Seedream, GPT-Image | yes — rate × count |
+| character | ElevenLabs TTS | yes — rate × prompt length |
+| request | some models | yes — flat |
+| minute | Sonilo scoring | partly — scales with the input clip |
+| token | Seedance, Gemini Omni, LLMs | **no** — output volume is unknown until it exists |
+
+Token-billed models say "cannot be estimated" and ask for confirmation rather than inventing
+a number. **`$0` means "not quotable", not "free".**
 
 ---
 
-## ライセンス
+## Guards that run before you are billed
 
-MIT License（[LICENSE](LICENSE)）。
+Wiring mistakes are caught locally, **before anything is uploaded or submitted**:
 
-Pika API の利用には Pika の利用規約が適用されます。生成物の権利・課金はお使いの
-Pika アカウントに紐づきます。
+- a required media input is not connected
+- media is connected to a port the model never reads (a reference image on a t2i model)
+- several connections into a single-value field, or past an array's limit
+- a prompt over the model's character limit
+- structured parameters (ElevenLabs dialogue, Kling omni-video) left unset
 
-## 開発者向けメモ
+Each error names the port to disconnect or the one to use instead.
 
-- ブラウザ開発モード: `npm run dev`（server:8797 + web:5173）。`.env` は `.env.example` をコピーして作成。
-- 型チェック: `npm run typecheck`
-- 構成: `server/`（Express + WebSocket・内蔵API）/ `web/`（React + React Flow）/ `mcp/`（stdio MCP→HTTP）/ `desktop/`（Electron）
-- 走行中のアプリを止めずに検証する: 別ポート＋別データディレクトリで起動する
-  ```bash
-  PORT=8891 PIKA_CANVAS_DATA_DIR=/tmp/pikadev node_modules/.bin/tsx server/src/index.ts
-  ```
-- 配布パッケージ: `npm run app:dist`（現状 macOS ターゲット）
+---
+
+## Where your data lives
+
+- macOS: `~/Library/Application Support/Creative Canvas for Pika API Club/`
+- Windows: `%APPDATA%\Creative Canvas for Pika API Club\`
+
+Projects, generated media, and your `.env` (with the API key) are all there, and none of it is
+in the repository. Open it from the menu: **Canvas → 保存フォルダを開く**.
+
+> Upgrading from the old name: this app was called *Pika Canvas* until 2026-09-02. On first
+> launch it moves the old `Pika Canvas` folder to the new name, so existing projects follow
+> the app. If the move fails it keeps using the old folder and says so in the log — your work
+> is never left behind.
+
+---
+
+## Troubleshooting
+
+**The app opens to an empty window / "server not connected".**
+The bundled server failed to start. Launch from a terminal (`npm run app`) to see its log.
+The usual cause is port `8797` already being in use; the app falls back to a free port and
+writes it to `server-port` in the data directory.
+
+**A generation fails with `file too large`.**
+Pika rejects uploads over **100 MiB** (104,857,600 bytes exactly), and the rejection happens
+before any bytes are sent. Generated clips reach that easily — a 30-second 1080p clip can be
+over 200 MiB.
+
+Where the model only *analyses* the clip and returns something else — scoring, transcription —
+the app re-encodes an oversized video down to fit automatically, capped at 720p with the audio
+stream copied untouched, and logs that it did. Where the input's pixels carry into the output —
+video-to-video, extension, upscale — it refuses instead, because quietly downscaling your master
+is a worse failure than stopping: you would never see it happen. Trim the clip with `video_trim`,
+or import a smaller re-encode.
+
+**A video job seems stuck for half an hour.**
+Some models genuinely take that long; a 30-second clip from an early-access model has been
+measured at 44–55 minutes. The app polls for up to 180 minutes. Giving up earlier would
+orphan a job that Pika keeps running — and keeps billing.
+
+**`ffmpeg failed` / `ffmpeg の起動に失敗しました`.**
+ffmpeg is not on `PATH`. Install it, or point at it explicitly with `PIKA_CANVAS_FFMPEG` and
+`PIKA_CANVAS_FFPROBE`.
+
+**A model you can see on Pika's site is missing from the list.**
+Re-run the sync with your key (`PIKA_API_KEY=... npm run sync:catalog`); early-access models
+are only visible to allowlisted keys. A few catalog rows are vendor aliases that declare no
+function — those are skipped on purpose, and their real endpoints are already in the list.
+
+---
+
+## Development
+
+```bash
+npm run dev          # server on :8797 + Vite on :5173
+npm run typecheck    # server, mcp and web
+```
+
+Layout: `server/` (Express + WebSocket API) · `web/` (React + React Flow) · `mcp/` (stdio MCP
+→ HTTP) · `desktop/` (Electron shell).
+
+To try something without disturbing a running app, start a second server on its own port and
+its own data directory:
+
+```bash
+PORT=8891 PIKA_CANVAS_DATA_DIR=/tmp/canvas-dev node_modules/.bin/tsx server/src/index.ts
+```
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+The MIT license covers this source code only. It grants no rights in Pika's API, service or
+trademarks. Using the Pika API is subject to Pika's terms, and the rights to and the cost of
+anything you generate are between you and Pika.

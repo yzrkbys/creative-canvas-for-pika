@@ -513,7 +513,7 @@ function Flow() {
         <button className="back-btn" onClick={closeProject} aria-label="プロジェクト一覧へ">
           ←
         </button>
-        <strong>{projectName || "Pika Canvas"}</strong>
+        <strong>{projectName || "Creative Canvas"}</strong>
         <span className="sep" />
         <div className="addmenu">
           <button

@@ -150,7 +150,14 @@ export function Dashboard() {
   return (
     <div className="dash">
       <header className="dash-head">
-        <strong>Pika Canvas</strong>
+        <strong>Creative Canvas</strong>
+        {/* The full name is "Creative Canvas for Pika API Club". The header
+            shows the wordmark plus the qualifier that says whose API this
+            drives — spelled out, because "unofficial" has to be visible in the
+            product, not only in the README. */}
+        <span className="muted" title="Pika API Club 用の非公式クライアントです（Pika 社とは無関係）">
+          for Pika API Club
+        </span>
         <span className="muted">プロジェクト</span>
         <span
           className={`pill ${connected ? "ok" : "bad"}`}

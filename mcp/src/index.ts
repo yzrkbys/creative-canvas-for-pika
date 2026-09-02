@@ -40,7 +40,9 @@ function fail(err: unknown) {
   return { isError: true, content: [{ type: "text" as const, text: `Error: ${msg}` }] };
 }
 
-const server = new McpServer({ name: "pika-canvas", version: "0.0.0" });
+const server = // Not "creative-canvas": that name belongs to the app this was forked
+// from, and both can be registered in the same Claude Code session.
+new McpServer({ name: "creative-canvas-pika", version: "0.0.0" });
 
 // ---- projects ----
 server.tool(
