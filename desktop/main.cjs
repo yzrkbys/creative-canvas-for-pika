@@ -11,26 +11,72 @@ app.setName(APP_NAME);
 
 // The app was called "Pika Canvas" until 2026-09-02, and Electron derives the
 // data directory from the name — so renaming it would strand every existing
-// project in a folder the app no longer looks at. Move the old folder across
-// once, on the same volume, which is a rename rather than a 3+ GB copy.
-// If that fails for any reason, keep using the old folder: an app pointed at
-// the wrong-but-populated directory is recoverable, an empty one looks like
-// the work is gone.
+// project in a folder the app no longer reads: 3.6 GB of work, apparently gone,
+// with no error to explain it. First launch after the rename moves the old
+// folder's contents across.
+//
+// The test is what the new directory CONTAINS, not whether it exists. Electron
+// creates userData during startup, before this file's body runs, so by the time
+// we look it is always there — populated with Chromium's caches and nothing of
+// ours. Checking existence made the migration silently skip itself on the very
+// first real run.
+//
+// Only our own payload moves. Chromium state (caches, cookies) is disposable
+// and belongs to whichever directory produced it.
+const PAYLOAD = ["projects", ".env", "pika-catalog.json"];
+
+function hasProjects(dir) {
+  try {
+    return fs
+      .readdirSync(path.join(dir, "projects"))
+      .some((name) => fs.statSync(path.join(dir, "projects", name)).isDirectory());
+  } catch {
+    return false; // no projects directory at all
+  }
+}
+
+// A .env written by ensureEnvFile() but never filled in is not worth keeping:
+// the old one has the key the user actually pasted.
+function isPlaceholderEnv(file) {
+  try {
+    return !/^\s*PIKA_API_KEY\s*=\s*\S/m.test(fs.readFileSync(file, "utf8"));
+  } catch {
+    return true;
+  }
+}
+
 function resolveDataDir() {
   const wanted = app.getPath("userData");
   const previous = path.join(path.dirname(wanted), PREVIOUS_APP_NAME);
-  if (fs.existsSync(wanted) || !fs.existsSync(previous)) return wanted;
-  try {
-    fs.renameSync(previous, wanted);
-    console.log(`[app] migrated data directory: "${PREVIOUS_APP_NAME}" -> "${APP_NAME}"`);
-    return wanted;
-  } catch (err) {
-    console.error(
-      `[app] could not move "${previous}" to "${wanted}" (${err.message}); ` +
-        "continuing to use the old location so nothing is lost.",
-    );
-    return previous;
+  if (hasProjects(wanted) || !hasProjects(previous)) return wanted;
+
+  let moved = 0;
+  for (const name of PAYLOAD) {
+    const from = path.join(previous, name);
+    const to = path.join(wanted, name);
+    if (!fs.existsSync(from)) continue;
+    try {
+      if (fs.existsSync(to)) {
+        // Only .env is ever expected here, and only as an unfilled template.
+        if (name !== ".env" || !isPlaceholderEnv(to)) continue;
+        fs.rmSync(to);
+      }
+      fs.mkdirSync(wanted, { recursive: true });
+      fs.renameSync(from, to);
+      moved++;
+    } catch (err) {
+      console.error(`[app] could not move ${name}: ${err.message}`);
+    }
   }
+
+  if (moved) {
+    console.log(
+      `[app] migrated ${moved} item(s) from "${PREVIOUS_APP_NAME}" to "${APP_NAME}"`,
+    );
+  }
+  // If the projects never made it, use the folder that still has them rather
+  // than opening onto an empty canvas that looks like the work is gone.
+  return hasProjects(wanted) ? wanted : previous;
 }
 const DATA_DIR = resolveDataDir();
 const net = require("node:net");
