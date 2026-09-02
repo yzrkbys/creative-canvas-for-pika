@@ -10,6 +10,7 @@ import {
   projectDir,
   projectGraphFile,
 } from "./paths.js";
+import { currentModelId } from "./registry.js";
 import type { Graph } from "./types.js";
 
 export interface ProjectMeta {
@@ -196,7 +197,18 @@ export async function duplicateProject(id: string, name?: string): Promise<Proje
 // ---- graph load/save ----
 export async function loadProjectGraph(id: string): Promise<Graph | null> {
   try {
-    return JSON.parse(await fs.readFile(projectGraphFile(id), "utf8")) as Graph;
+    const graph = JSON.parse(await fs.readFile(projectGraphFile(id), "utf8")) as Graph;
+    // Follow endpoint renames on the way in. Resolving them only at run time
+    // would keep the node runnable but leave the model picker showing an id
+    // that is no longer on its list; rewriting here means the UI, the estimate
+    // and the request all agree. The file itself catches up on the next save.
+    for (const node of graph.nodes ?? []) {
+      const model = node.data?.model;
+      if (typeof model !== "string") continue;
+      const current = currentModelId(model);
+      if (current !== model) node.data.model = current;
+    }
+    return graph;
   } catch {
     return null;
   }

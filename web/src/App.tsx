@@ -27,6 +27,7 @@ import { Dashboard } from "./Dashboard";
 import { PORTS, inKind, outKind } from "./ports";
 import { labelOf } from "./labels";
 import type { NodeType, OutputKind, PortIn, PortOut } from "./types";
+import { useDismissibleLayer } from "./useDismissibleLayer";
 
 // node types that can receive an output of `kind`, with the input port to use
 function candidatesFor(kind: OutputKind): { type: NodeType; port: PortIn }[] {
@@ -94,6 +95,83 @@ const NODE_GROUPS: { label: string; types: NodeType[] }[] = [
   { label: "レイアウト", types: ["frame"] },
 ];
 
+const ALL_NODE_TYPES = Object.keys(PORTS) as NodeType[];
+
+function visibleNodeGroups(types: NodeType[], query: string) {
+  const allowed = new Set(types);
+  const normalized = query.trim().toLocaleLowerCase();
+  const matches = (type: NodeType) =>
+    !normalized ||
+    labelOf(type).toLocaleLowerCase().includes(normalized) ||
+    type.toLocaleLowerCase().includes(normalized);
+  const assigned = new Set(NODE_GROUPS.flatMap((group) => group.types));
+  const groups = NODE_GROUPS.map((group) => ({
+    ...group,
+    types: group.types.filter((type) => allowed.has(type) && matches(type)),
+  })).filter((group) => group.types.length > 0);
+  const other = types.filter((type) => !assigned.has(type) && matches(type));
+  return other.length ? [...groups, { label: "その他", types: other }] : groups;
+}
+
+function NodePalette({
+  title,
+  types,
+  onChoose,
+}: {
+  title: string;
+  types: NodeType[];
+  onChoose: (type: NodeType) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const groups = visibleNodeGroups(types, query);
+  const count = groups.reduce((sum, group) => sum + group.types.length, 0);
+  return (
+    <>
+      <div className="node-palette-head">
+        <div className="picker-title">{title}</div>
+        <span>{count}件</span>
+      </div>
+      <input
+        className="node-palette-search"
+        type="search"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        placeholder="ノードを検索…"
+        aria-label="ノードを検索"
+        data-autofocus
+      />
+      <div className="node-palette-results">
+        {groups.map((group) => (
+          <section key={group.label} className="addmenu-group" aria-label={group.label}>
+            <div className="addmenu-label">{group.label}</div>
+            {group.types.map((type) => (
+              <button key={type} onClick={() => onChoose(type)}>
+                <span>{labelOf(type)}</span>
+                <span className="node-type-id">{type}</span>
+              </button>
+            ))}
+          </section>
+        ))}
+        {groups.length === 0 && (
+          <div className="node-palette-empty">該当するノードはありません</div>
+        )}
+      </div>
+    </>
+  );
+}
+
+function floatingMenuPosition(
+  sx: number,
+  sy: number,
+  width: number,
+  height: number,
+) {
+  return {
+    left: Math.max(8, Math.min(sx, window.innerWidth - width - 8)),
+    top: Math.max(8, Math.min(sy, window.innerHeight - height - 8)),
+  };
+}
+
 function Flow() {
   const graph = useStore((s) => s.graph);
   const connected = useStore((s) => s.connected);
@@ -106,6 +184,10 @@ function Flow() {
   const connecting = useRef<{ nodeId: string; handleId: string } | null>(null);
   // ダブルクリックで開くノード作成メニュー。sx/sy は画面座標。
   const [spawn, setSpawn] = useState<{ sx: number; sy: number } | null>(null);
+  const spawnLayerRef = useDismissibleLayer<HTMLDivElement>(
+    spawn !== null,
+    () => setSpawn(null),
+  );
 
   // 画面座標を「そこにノードの中心が来る」flow 座標に変換する。
   // 左上を合わせると大きいノードほど狙った位置からずれるので中心合わせにする。
@@ -122,6 +204,10 @@ function Flow() {
     | null
     | { sx: number; sy: number; flow: { x: number; y: number }; source: string; handle: PortOut; kind: OutputKind }
   >(null);
+  const pickerLayerRef = useDismissibleLayer<HTMLDivElement>(
+    picker !== null,
+    () => setPicker(null),
+  );
   const dragDepth = useRef(0);
   const [dragOver, setDragOver] = useState(false);
 
@@ -408,38 +494,55 @@ function Flow() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [resyncing, setResyncing] = useState(false);
+  const addMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const archiveButtonRef = useRef<HTMLButtonElement>(null);
+  const addMenuLayerRef = useDismissibleLayer<HTMLDivElement>(
+    menuOpen,
+    () => setMenuOpen(false),
+    { returnFocusRef: addMenuButtonRef },
+  );
+  const archiveLayerRef = useDismissibleLayer<HTMLDivElement>(
+    archiveOpen,
+    () => setArchiveOpen(false),
+    { returnFocusRef: archiveButtonRef },
+  );
 
   return (
     <div className="app">
       <header className="toolbar">
-        <button className="back-btn" onClick={closeProject} title="プロジェクト一覧へ">
+        <button className="back-btn" onClick={closeProject} aria-label="プロジェクト一覧へ">
           ←
         </button>
         <strong>{projectName || "Creative Canvas"}</strong>
         <span className="sep" />
         <div className="addmenu">
-          <button className="addmenu-btn" onClick={() => setMenuOpen((o) => !o)}>
+          <button
+            ref={addMenuButtonRef}
+            className="addmenu-btn"
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-expanded={menuOpen}
+            aria-haspopup="dialog"
+            aria-controls="add-node-menu"
+          >
             + ノード ▾
           </button>
           {menuOpen && (
-            <div className="addmenu-panel" onMouseLeave={() => setMenuOpen(false)}>
-              {NODE_GROUPS.map((g) => (
-                <div key={g.label} className="addmenu-group">
-                  <div className="addmenu-label">{g.label}</div>
-                  {g.types.map((t) => (
-                    <button
-                      key={t}
-                      onClick={() => {
-                        addNode(t);
-                        setMenuOpen(false);
-                      }}
-                      title={t}
-                    >
-                      {labelOf(t)}
-                    </button>
-                  ))}
-                </div>
-              ))}
+            <div
+              ref={addMenuLayerRef}
+              id="add-node-menu"
+              className="addmenu-panel"
+              role="dialog"
+              aria-label="ノードを追加"
+              tabIndex={-1}
+            >
+              <NodePalette
+                title="ノードを追加"
+                types={ALL_NODE_TYPES}
+                onChoose={(type) => {
+                  void addNode(type);
+                  setMenuOpen(false);
+                }}
+              />
             </div>
           )}
         </div>
@@ -462,9 +565,12 @@ function Flow() {
           {resyncing ? "更新中…" : "↻ 再同期"}
         </button>
         <button
+          ref={archiveButtonRef}
           className={`archive-btn${archiveOpen ? " on" : ""}`}
           onClick={() => setArchiveOpen((o) => !o)}
           title="アーカイブ（不要アセットの格納庫・復元できます）"
+          aria-expanded={archiveOpen}
+          aria-controls="archive-panel"
         >
           🗄 アーカイブ{archivedNodes.length ? ` (${archivedNodes.length})` : ""}
         </button>
@@ -503,18 +609,19 @@ function Flow() {
         {spawn && (
           <>
             <div className="picker-backdrop" onClick={() => setSpawn(null)} />
-            <div className="picker-menu spawn-menu" style={{ left: spawn.sx, top: spawn.sy }}>
-              <div className="picker-title">ここにノードを作成</div>
-              {NODE_GROUPS.map((g) => (
-                <div key={g.label} className="spawn-group">
-                  <div className="spawn-group-label">{g.label}</div>
-                  {g.types.map((t) => (
-                    <button key={t} onClick={() => createAtSpawn(t)} title={t}>
-                      {labelOf(t)}
-                    </button>
-                  ))}
-                </div>
-              ))}
+            <div
+              ref={spawnLayerRef}
+              className="picker-menu spawn-menu"
+              style={floatingMenuPosition(spawn.sx, spawn.sy, 360, 620)}
+              role="dialog"
+              aria-label="ここにノードを作成"
+              tabIndex={-1}
+            >
+              <NodePalette
+                title="ここにノードを作成"
+                types={ALL_NODE_TYPES}
+                onChoose={(type) => void createAtSpawn(type)}
+              />
             </div>
           </>
         )}
@@ -522,11 +629,19 @@ function Flow() {
         {picker && (
           <>
             <div className="picker-backdrop" onClick={() => setPicker(null)} />
-            <div className="picker-menu" style={{ left: picker.sx, top: picker.sy }}>
+            <div
+              ref={pickerLayerRef}
+              className="picker-menu"
+              style={floatingMenuPosition(picker.sx, picker.sy, 240, 420)}
+              role="dialog"
+              aria-label="接続先ノードを作成"
+              tabIndex={-1}
+            >
               <div className="picker-title">接続して作成（{picker.kind}）</div>
               {candidatesFor(picker.kind).map(({ type, port }) => (
-                <button key={type} onClick={() => createConnected(type, port)} title={type}>
-                  {labelOf(type)} <span className="picker-port">{port}</span>
+                <button key={type} onClick={() => createConnected(type, port)}>
+                  <span>{labelOf(type)}</span>
+                  <span className="picker-port">{port}</span>
                 </button>
               ))}
             </div>
@@ -534,10 +649,17 @@ function Flow() {
         )}
 
         {archiveOpen && (
-          <div className="archive-panel nodrag">
+          <div
+            ref={archiveLayerRef}
+            id="archive-panel"
+            className="archive-panel nodrag"
+            role="dialog"
+            aria-label="アーカイブ"
+            tabIndex={-1}
+          >
             <div className="archive-head">
               <span>🗄 アーカイブ（{archivedNodes.length}）</span>
-              <button className="archive-x" onClick={() => setArchiveOpen(false)}>×</button>
+              <button className="archive-x" onClick={() => setArchiveOpen(false)} aria-label="アーカイブを閉じる">×</button>
             </div>
             <div className="archive-hint">Deleteキー / 📥でここに格納。Ctrl+Zで直前の格納を即復元。</div>
             <div className="archive-list">

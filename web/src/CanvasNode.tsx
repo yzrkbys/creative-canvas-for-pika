@@ -1,11 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Handle, NodeResizer, Position, type NodeProps } from "@xyflow/react";
-import type { GraphNode, OutputKind, ParamField } from "./types";
+import type { GraphNode, OutputKind } from "./types";
 import { PORTS } from "./ports";
 import { labelOf, labelOfPort } from "./labels";
 import { useStore, archiveNode } from "./store";
 import { api } from "./api";
+import { NodeInspector } from "./NodeInspector";
+import { useDismissibleLayer } from "./useDismissibleLayer";
 
 const STATUS_COLOR: Record<string, string> = {
   idle: "#6b7280",
@@ -23,14 +25,18 @@ const KIND_COLOR: Record<OutputKind, string> = {
 const isVideoUrl = (url: string) => /\.(mp4|webm|mov)$/i.test(url);
 const shortModel = (m: string) => m.replace(/^.*\//, "");
 
-type Pop = null | "model" | "prompt" | "params";
-
 export function CanvasNode({ data, selected }: NodeProps) {
   const node = (data as { node: GraphNode }).node;
   const models = useStore((s) => s.models);
   const def = PORTS[node.type];
-  const usable = models.filter((m) => m.nodeTypes.includes(node.type));
-  const spec = models.find((m) => m.id === node.data.model);
+  const usable = useMemo(
+    () => models.filter((model) => model.nodeTypes.includes(node.type)),
+    [models, node.type],
+  );
+  const spec = useMemo(
+    () => models.find((model) => model.id === node.data.model),
+    [models, node.data.model],
+  );
 
   const isUpload = node.type === "image_upload";
   const isVideoUpload = node.type === "video_upload";
@@ -59,9 +65,14 @@ export function CanvasNode({ data, selected }: NodeProps) {
     if (!focused.current) setPrompt(node.data.prompt);
   }, [node.data.prompt]);
   const [busy, setBusy] = useState(false);
-  const [pop, setPop] = useState<Pop>(null);
+  const [inspectorOpen, setInspectorOpen] = useState(false);
   const [lightbox, setLightbox] = useState(false);
   const [copied, setCopied] = useState(false);
+  const inspectorButtonRef = useRef<HTMLButtonElement>(null);
+  const lightboxRef = useDismissibleLayer<HTMLDivElement>(
+    lightbox,
+    () => setLightbox(false),
+  );
 
   const out = node.data.outputs[node.data.outputs.length - 1];
   // image/video can be expanded in a lightbox; audio/text cannot.
@@ -76,14 +87,8 @@ export function CanvasNode({ data, selected }: NodeProps) {
     if (prompt !== node.data.prompt)
       api.updateNode(node.id, { data: { prompt } }).catch(() => {});
   }
-  function updateParam(field: ParamField, value: string) {
-    // "" means "leave unset" — the server omits the field so the model applies
-    // its own default. Number("") is 0, which would silently pin the param.
-    const v = value === "" ? "" : field.type === "number" ? Number(value) : value;
-    api.updateNode(node.id, { data: { params: { [field.key]: v } } }).catch(() => {});
-  }
   async function onRun() {
-    setPop(null);
+    setInspectorOpen(false);
     setBusy(true);
     try {
       const res = await api.run(node.id, false);
@@ -201,19 +206,15 @@ export function CanvasNode({ data, selected }: NodeProps) {
     : node.type === "llm_text" ? "指示（プロンプト）を書いて Run"
     : "Run で生成";
 
-  // While a config popover (model / prompt / params) is open, hide the floating
-  // toolbar: its big "ID: …" chip sits above the node (z-index 10) and would cover
-  // the tall model list (z-index 6). The popover takes priority — the user is
-  // picking a model, not reading the asset ID.
-  const floatBar = selected && !pop && (
+  const floatBar = selected && !inspectorOpen && (
     <div className="cn-floatbar nodrag">
-      <button className="cn-fb cn-fb-id" title={`アセットID: ${node.id}（クリックでコピー）`} onClick={copyId}>
+      <button className="cn-fb cn-fb-id" aria-label={`アセットID ${node.id} をコピー`} onClick={copyId}>
         {copied ? "✓ コピーしました" : `ID: ${node.id}`}
       </button>
-      {hasRun && <button className="cn-fb" title="実行" onClick={() => void onRun()} disabled={blocked}>{generating ? "⏳" : node.data.outputs.length ? "↻" : "▶"}</button>}
-      {mediaOut && <button className="cn-fb" title="拡大" onClick={() => setLightbox(true)}>⤢</button>}
-      {out && <button className="cn-fb" title="ダウンロード" onClick={download}>⬇</button>}
-      <button className="cn-fb" title="アーカイブ（後で復元できます）" onClick={() => archiveNode(node.id)}>📥</button>
+      {hasRun && <button className="cn-fb" aria-label={generating ? "生成中" : node.data.outputs.length ? "再実行" : "実行"} onClick={() => void onRun()} disabled={blocked}>{generating ? "⏳" : node.data.outputs.length ? "↻" : "▶"}</button>}
+      {mediaOut && <button className="cn-fb" aria-label="プレビューを拡大" onClick={() => setLightbox(true)}>⤢</button>}
+      {out && <button className="cn-fb" aria-label="出力をダウンロード" onClick={download}>⬇</button>}
+      <button className="cn-fb" aria-label="アーカイブへ移動（後で復元できます）" onClick={() => archiveNode(node.id)}>📥</button>
     </div>
   );
 
@@ -260,17 +261,15 @@ export function CanvasNode({ data, selected }: NodeProps) {
           <div className="cn-chip-type">{labelOf(node.type)}</div>
           <span className="cn-status-dot" style={{ background: STATUS_COLOR[node.status] }} title={node.error || node.status} />
         </div>
-        {lightbox && mediaOut &&
-          createPortal(
-            <div className="cn-lightbox" onClick={() => setLightbox(false)}>
-              {isVideoUrl(mediaOut.url) ? (
-                <video src={mediaOut.url} controls autoPlay loop />
-              ) : (
-                <img src={mediaOut.url} alt="output" />
-              )}
-            </div>,
-            document.body,
-          )}
+        {lightbox && mediaOut && createPortal(
+          <div className="cn-lightbox" onClick={() => setLightbox(false)}>
+            <div ref={lightboxRef} className="cn-lightbox-content" role="dialog" aria-modal="true" aria-label="出力プレビュー" tabIndex={-1} onClick={(event) => event.stopPropagation()}>
+              <button className="cn-lightbox-close" onClick={() => setLightbox(false)} aria-label="プレビューを閉じる">×</button>
+              {isVideoUrl(mediaOut.url) ? <video src={mediaOut.url} controls autoPlay loop /> : <img src={mediaOut.url} alt="生成結果" />}
+            </div>
+          </div>,
+          document.body,
+        )}
       </>
     );
   }
@@ -330,7 +329,7 @@ export function CanvasNode({ data, selected }: NodeProps) {
         <div className="cn-chip-type">{labelOf(node.type)}</div>
         <span className="cn-status-dot" style={{ background: STATUS_COLOR[node.status] }} title={node.error || node.status} />
 
-        {/* always-on overlaid control bar (icons + pulldowns) */}
+        {/* always-on controls; detailed settings live in the side inspector */}
         <div className="cn-overlaybar nodrag">
           {hasRun && (
             <button className="cn-ob-run" onClick={() => void onRun()} disabled={blocked}>
@@ -362,67 +361,52 @@ export function CanvasNode({ data, selected }: NodeProps) {
             </label>
           )}
           {hasModel && (
-            <button className="cn-ob-chip" title={node.data.model} onClick={() => setPop(pop === "model" ? null : "model")}>
-              {shortModel(node.data.model) || "model"} ▾
+            <button
+              className="cn-ob-chip"
+              aria-label={`モデルを選択。現在: ${spec?.label || node.data.model || "未選択"}`}
+              onClick={() => setInspectorOpen(true)}
+            >
+              {spec?.label || shortModel(node.data.model) || "モデル選択"}
             </button>
           )}
-          {hasPrompt && (
-            <button className={`cn-ob-btn${pop === "prompt" ? " on" : ""}`} title="プロンプト" onClick={() => setPop(pop === "prompt" ? null : "prompt")}>✎</button>
-          )}
-          {hasParams && (
-            <button className={`cn-ob-btn${pop === "params" ? " on" : ""}`} title="パラメータ" onClick={() => setPop(pop === "params" ? null : "params")}>⚙</button>
+          {(hasPrompt || hasParams || hasModel) && (
+            <button
+              ref={inspectorButtonRef}
+              className={`cn-ob-btn${inspectorOpen ? " on" : ""}`}
+              onClick={() => setInspectorOpen(true)}
+              aria-expanded={inspectorOpen}
+              aria-haspopup="dialog"
+            >
+              設定
+            </button>
           )}
         </div>
-
-        {/* pulldown popovers (open above the bar, within the node) */}
-        {pop === "model" && hasModel && (
-          <div className="cn-pop nodrag">
-            {usable.map((m) => (
-              <button key={m.id} className={`cn-pop-opt${m.id === node.data.model ? " sel" : ""}`}
-                title={`${m.id}${m.description ? `\n\n${m.description}` : ""}`}
-                onClick={() => { api.updateNode(node.id, { data: { model: m.id } }).catch(() => {}); setPop(null); }}>
-                {m.label || m.id} · {m.priceHint}
-              </button>
-            ))}
-          </div>
-        )}
-        {pop === "prompt" && hasPrompt && (
-          <div className="cn-pop nodrag">
-            <textarea className="cn-pop-prompt" value={prompt} placeholder="prompt..."
-              onFocus={() => (focused.current = true)} onBlur={saveContent} onChange={(e) => setPrompt(e.target.value)} />
-          </div>
-        )}
-        {pop === "params" && hasParams && (
-          <div className="cn-pop nodrag">
-            {spec!.paramSchema.map((f) => {
-              const val = String(node.data.params[f.key] ?? spec!.defaults[f.key] ?? "");
-              return (
-                <label key={f.key} className="cn-field" title={f.description ?? undefined}>
-                  <span>{f.label}</span>
-                  {f.type === "select" ? (
-                    <select value={val} onChange={(e) => updateParam(f, e.target.value)}>
-                      {/* "" is emitted by the catalog sync when a model declares
-                          no default — picking it lets Pika choose. */}
-                      {f.options?.map((o) => <option key={o} value={o}>{o === "" ? "（モデル既定）" : o}</option>)}
-                    </select>
-                  ) : (
-                    <input type={f.type === "number" ? "number" : "text"} min={f.min} max={f.max} step={f.step} value={val} onChange={(e) => updateParam(f, e.target.value)} />
-                  )}
-                </label>
-              );
-            })}
-          </div>
-        )}
       </div>
+
+      {inspectorOpen && createPortal(
+        <NodeInspector
+          node={node}
+          models={usable}
+          prompt={prompt}
+          setPrompt={setPrompt}
+          onPromptFocus={() => (focused.current = true)}
+          onPromptBlur={saveContent}
+          onClose={() => {
+            saveContent();
+            setInspectorOpen(false);
+          }}
+          returnFocusRef={inspectorButtonRef}
+        />,
+        document.body,
+      )}
 
       {lightbox && mediaOut &&
         createPortal(
           <div className="cn-lightbox" onClick={() => setLightbox(false)}>
-            {isVideoUrl(mediaOut.url) ? (
-              <video src={mediaOut.url} controls autoPlay loop />
-            ) : (
-              <img src={mediaOut.url} alt="output" />
-            )}
+            <div ref={lightboxRef} className="cn-lightbox-content" role="dialog" aria-modal="true" aria-label="出力プレビュー" tabIndex={-1} onClick={(event) => event.stopPropagation()}>
+              <button className="cn-lightbox-close" onClick={() => setLightbox(false)} aria-label="プレビューを閉じる">×</button>
+              {isVideoUrl(mediaOut.url) ? <video src={mediaOut.url} controls autoPlay loop /> : <img src={mediaOut.url} alt="生成結果" />}
+            </div>
           </div>,
           document.body,
         )}
