@@ -2,8 +2,8 @@
   "name": "desktop",
   "version": "0.0.0",
   "private": true,
-  "description": "Pika Canvas desktop app (Electron)",
-  "author": "Pika Canvas",
+  "description": "Creative Canvas for Pika API Club — desktop app (Electron)",
+  "author": "yzrkbys",
   "main": "main.cjs",
   "scripts": {
     "build:server": "node build-server.mjs",
@@ -19,8 +19,8 @@
     "esbuild": "^0.24.2"
   },
   "build": {
-    "appId": "com.pikacanvas.app",
-    "productName": "Pika Canvas",
+    "appId": "com.creativecanvas.pikaapiclub",
+    "productName": "Creative Canvas for Pika API Club",
     "electronVersion": "33.4.11",
     "npmRebuild": false,
     "directories": {

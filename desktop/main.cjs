@@ -1,10 +1,38 @@
 const { app, BrowserWindow, Menu, shell, dialog } = require("electron");
-// Must be set before any getPath("userData") so settings/data live under a
-// "Pika Canvas" folder rather than the package name.
-app.setName("Pika Canvas");
 const { fork } = require("node:child_process");
 const path = require("node:path");
 const fs = require("node:fs");
+
+// Must be set before any getPath("userData") so settings and projects live in a
+// folder named after the app rather than after the npm package.
+const APP_NAME = "Creative Canvas for Pika API Club";
+const PREVIOUS_APP_NAME = "Pika Canvas";
+app.setName(APP_NAME);
+
+// The app was called "Pika Canvas" until 2026-09-02, and Electron derives the
+// data directory from the name — so renaming it would strand every existing
+// project in a folder the app no longer looks at. Move the old folder across
+// once, on the same volume, which is a rename rather than a 3+ GB copy.
+// If that fails for any reason, keep using the old folder: an app pointed at
+// the wrong-but-populated directory is recoverable, an empty one looks like
+// the work is gone.
+function resolveDataDir() {
+  const wanted = app.getPath("userData");
+  const previous = path.join(path.dirname(wanted), PREVIOUS_APP_NAME);
+  if (fs.existsSync(wanted) || !fs.existsSync(previous)) return wanted;
+  try {
+    fs.renameSync(previous, wanted);
+    console.log(`[app] migrated data directory: "${PREVIOUS_APP_NAME}" -> "${APP_NAME}"`);
+    return wanted;
+  } catch (err) {
+    console.error(
+      `[app] could not move "${previous}" to "${wanted}" (${err.message}); ` +
+        "continuing to use the old location so nothing is lost.",
+    );
+    return previous;
+  }
+}
+const DATA_DIR = resolveDataDir();
 const net = require("node:net");
 const http = require("node:http");
 
@@ -14,7 +42,7 @@ let port = 0;
 
 // --- settings (.env in writable userData dir) ---
 function envPath() {
-  return path.join(app.getPath("userData"), ".env");
+  return path.join(DATA_DIR, ".env");
 }
 function ensureEnvFile() {
   const p = envPath();
@@ -23,7 +51,7 @@ function ensureEnvFile() {
     fs.writeFileSync(
       p,
       [
-        "# Pika Canvas 設定ファイル",
+        `# ${APP_NAME} 設定ファイル`,
         "# 変更したら、アプリを再起動してください。",
         "",
         "# Pika の APIキー。これ1本で画像・動画・音声・LLM の全モデルが動きます。",
@@ -115,7 +143,7 @@ async function startServer() {
   // discover us even when we fall back off the preferred port.
   try {
     fs.writeFileSync(
-      path.join(app.getPath("userData"), "server-port"),
+      path.join(DATA_DIR, "server-port"),
       String(port),
       "utf8",
     );
@@ -127,7 +155,7 @@ async function startServer() {
       ...userEnv,
       ELECTRON_RUN_AS_NODE: "1",
       PORT: String(port),
-      PIKA_CANVAS_DATA_DIR: app.getPath("userData"),
+      PIKA_CANVAS_DATA_DIR: DATA_DIR,
       PIKA_CANVAS_WEB_DIR: resourcePath("web"),
     },
     stdio: ["ignore", "pipe", "pipe", "ipc"],
@@ -157,7 +185,7 @@ function createWindow() {
     width: 1400,
     height: 900,
     backgroundColor: "#0f1419",
-    title: "Pika Canvas",
+    title: APP_NAME,
     ...(icon ? { icon } : {}),
     webPreferences: { contextIsolation: true, nodeIntegration: false },
   });
@@ -188,7 +216,7 @@ function buildMenu() {
         },
         {
           label: "保存フォルダを開く",
-          click: () => shell.openPath(app.getPath("userData")),
+          click: () => shell.openPath(DATA_DIR),
         },
         { type: "separator" },
         { role: "reload" },
