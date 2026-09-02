@@ -98,6 +98,65 @@ export async function probeDuration(file: string): Promise<number> {
   }
 }
 
+/**
+ * Re-encode a clip so it fits inside `maxBytes`, for models that only *analyse*
+ * the picture (scoring, transcription) and never return it. The audio is copied
+ * untouched wherever the container allows it — a transcript must not be read off
+ * a re-compressed track — and only the video is squeezed: capped at 720p and
+ * given whatever bitrate the remaining budget allows.
+ *
+ * Callers must check the result: a long enough clip cannot be made to fit at any
+ * sane bitrate, and silently shipping a smear would be worse than failing.
+ */
+export async function shrinkForUpload(
+  input: string,
+  outPath: string,
+  maxBytes: number,
+): Promise<void> {
+  const duration = await probeDuration(input);
+  if (!duration) throw new Error(`尺を測れませんでした: ${input}`);
+
+  // 8% headroom for container overhead and rate-control overshoot.
+  const budgetBits = maxBytes * 8 * 0.92;
+  const audioBits = 160_000; // whatever the copied track costs, generously
+  // Spend the budget, but not pointlessly: 8 Mbps is already generous for a 720p
+  // clip nobody will watch, and a smaller proxy uploads faster. A long clip gets
+  // whatever the budget allows instead, which is the whole reason for the min().
+  const videoBps = Math.max(
+    200_000,
+    Math.min(8_000_000, Math.floor(budgetBits / duration - audioBits)),
+  );
+
+  // Resolve the target height here rather than with an ffmpeg expression:
+  // min(720\,ih) has to survive both a JS string and ffmpeg's own comma
+  // splitting, and when the escaping slips the filtergraph breaks at run time.
+  const { h } = await probeSize(input);
+  const targetH = Math.max(2, (Math.min(720, h || 720) >> 1) << 1); // even, never upscaled
+
+  const args = [
+    "-y", "-i", input,
+    "-vf", `scale=-2:${targetH}`,
+    "-c:v", "libx264", "-preset", "veryfast",
+    "-b:v", String(videoBps),
+    "-maxrate", String(Math.floor(videoBps * 1.25)),
+    "-bufsize", String(videoBps * 2),
+    "-pix_fmt", "yuv420p",
+    "-c:a", "copy",
+    "-movflags", "+faststart",
+    outPath,
+  ];
+  try {
+    await run(FFMPEG, args);
+  } catch {
+    // Some sources carry audio the mp4 container will not take verbatim
+    // (pcm, opus in an odd layout). Re-encode it rather than lose the clip.
+    const reAudio = args.slice();
+    reAudio[reAudio.indexOf("copy")] = "aac";
+    reAudio.splice(reAudio.indexOf("-movflags"), 0, "-b:a", "160k");
+    await run(FFMPEG, reAudio);
+  }
+}
+
 // Lay an audio track over a video, replacing whatever audio the clip had.
 // This is the second half of the scoring loop: video_to_audio produces a bare
 // mp3, and the picture has to get it back. `mode` decides what happens when the

@@ -1,9 +1,10 @@
 import { promises as fs } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { getEntry, getModel, isOpaqueUnit } from "../registry.js";
 import type { CatalogEntry, CatalogMediaField, CatalogPricing } from "../registry.js";
 import { resolveAssetPath } from "../paths.js";
-import { probeDuration } from "../ffmpeg.js";
+import { probeDuration, shrinkForUpload } from "../ffmpeg.js";
 import bindingsFile from "../pika-port-bindings.json" with { type: "json" };
 import type {
   CostEstimate,
@@ -129,18 +130,67 @@ const MIME: Record<string, string> = {
   flac: "audio/flac",
 };
 
+// Pika rejects an upload larger than this with a bare `413 file too large`,
+// before it hands back a presigned URL. Measured against the live API on
+// 2026-09-02: 104,857,600 bytes is accepted, 104,857,601 is not, for video,
+// audio and image alike. A 30s 1080p Wan 3.0 clip lands around 207 MiB — this
+// is not an edge case, it is the normal size of a long generated clip.
+const UPLOAD_MAX_BYTES = 100 * 1024 * 1024;
+
+const mib = (n: number) => `${(n / 1024 / 1024).toFixed(1)} MiB`;
+
 // Canvas assets are written once under a nanoid filename and never mutated, so
 // the local URL is a safe cache key. Without this, re-running a node would
 // re-upload the same multi-megabyte clip on every attempt.
 const uploadCache = new Map<string, string>();
 
-/** Local /assets/* URLs become Pika-hosted URLs; public URLs pass through. */
-async function toPikaUrl(url: string): Promise<string> {
+/**
+ * Local /assets/* URLs become Pika-hosted URLs; public URLs pass through.
+ *
+ * `shrinkable` says the receiving model only reads this clip and returns
+ * something else (a score, a transcript) — then an oversized video may be
+ * re-encoded down to fit. It is false wherever the input's pixels carry into
+ * the output, because quietly downscaling someone's master before a v2v pass
+ * is a worse failure than refusing: they would never see it happen.
+ */
+async function toPikaUrl(url: string, shrinkable = false): Promise<string> {
   if (/^https?:\/\//.test(url) && !/localhost|127\.0\.0\.1/.test(url)) return url;
-  const cached = uploadCache.get(url);
+  const cacheKey = shrinkable ? `${url}|shrunk` : url;
+  const cached = uploadCache.get(cacheKey);
   if (cached) return cached;
 
-  const filePath = resolveAssetPath(url);
+  let filePath = resolveAssetPath(url);
+  let tempProxy: string | null = null;
+  // stat, not readFile: a 200 MiB buffer allocated only to learn a number the
+  // filesystem already knows, and then thrown away on rejection.
+  const size = (await fs.stat(filePath)).size;
+  if (size > UPLOAD_MAX_BYTES) {
+    if (!shrinkable) {
+      throw new Error(
+        `${path.basename(filePath)} は ${mib(size)} で、Pika のアップロード上限 ${mib(UPLOAD_MAX_BYTES)} を超えています。` +
+          `このモデルは入力の画がそのまま出力に載るため、勝手に再エンコードして画質を落とすことはしません。` +
+          `動画トリムで短くするか、解像度・ビットレートを落としたものを取り込んでから繋いでください。`,
+      );
+    }
+    tempProxy = path.join(os.tmpdir(), `pika-proxy-${Date.now()}-${path.basename(filePath)}`);
+    await shrinkForUpload(filePath, tempProxy, UPLOAD_MAX_BYTES);
+    const proxySize = (await fs.stat(tempProxy)).size;
+    if (proxySize > UPLOAD_MAX_BYTES) {
+      await fs.rm(tempProxy, { force: true });
+      throw new Error(
+        `${path.basename(filePath)}（${mib(size)}）を上限 ${mib(UPLOAD_MAX_BYTES)} 以下に再エンコードできませんでした` +
+          `（${mib(proxySize)} まで。尺が長すぎます）。動画トリムで分割してから繋いでください。`,
+      );
+    }
+    // Analysis-only, so this never reaches the output — but say it out loud
+    // rather than let a silent re-encode look like the original was sent.
+    console.log(
+      `[pika] ${path.basename(filePath)} ${mib(size)} > ${mib(UPLOAD_MAX_BYTES)}: ` +
+        `解析用に ${mib(proxySize)} へ再エンコードして送信します（出力は音声/テキストなので画質に影響しません）`,
+    );
+    filePath = tempProxy;
+  }
+
   const buf = await fs.readFile(filePath);
   const ext = (path.extname(filePath).slice(1) || "png").toLowerCase();
   const contentType = MIME[ext] ?? "application/octet-stream";
@@ -154,9 +204,13 @@ async function toPikaUrl(url: string): Promise<string> {
     headers: { "content-type": contentType },
     body: new Uint8Array(buf),
   });
-  if (!put.ok) throw new Error(`Pika upload PUT failed (${put.status}) for ${path.basename(filePath)}`);
+  if (!put.ok) {
+    if (tempProxy) await fs.rm(tempProxy, { force: true });
+    throw new Error(`Pika upload PUT failed (${put.status}) for ${path.basename(filePath)}`);
+  }
+  if (tempProxy) await fs.rm(tempProxy, { force: true });
 
-  uploadCache.set(url, res.url);
+  uploadCache.set(cacheKey, res.url);
   return res.url;
 }
 
@@ -817,9 +871,14 @@ export const pikaAdapter: ProviderAdapter = {
 
     // Then upload local assets, preserving each input's port identity so the
     // body builder can still tell a reference from a first frame.
+    // A video the model only listens to or reads (scoring, transcription) may be
+    // re-encoded to clear Pika's upload cap; one that becomes the output must not.
+    const analysesVideo = spec.kind !== "video";
     const resolved: ResolvedInput[] = await Promise.all(
       args.inputs.map(async (i) =>
-        i.kind === "text" ? i : { ...i, url: await toPikaUrl(i.url) },
+        i.kind === "text"
+          ? i
+          : { ...i, url: await toPikaUrl(i.url, i.kind === "video" && analysesVideo) },
       ),
     );
 
