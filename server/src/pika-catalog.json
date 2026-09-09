@@ -1,5 +1,5 @@
 {
-  "syncedAt": "2026-08-31T13:37:02.691Z",
+  "syncedAt": "2026-09-09T01:42:05.274Z",
   "base": "https://api.dev.pika.art",
   "entries": [
     {
@@ -2601,7 +2601,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.0-fast/image-to-video",
       "textField": "prompt",
-      "textMaxLength": 4000,
+      "textMaxLength": 30000,
       "media": [
         {
           "field": "image_url",
@@ -2753,7 +2753,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.0-fast/reference-to-video",
       "textField": "prompt",
-      "textMaxLength": 4000,
+      "textMaxLength": 30000,
       "media": [
         {
           "field": "image_urls",
@@ -2933,7 +2933,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.0-fast/text-to-video",
       "textField": "prompt",
-      "textMaxLength": 4000,
+      "textMaxLength": 30000,
       "media": [],
       "params": [
         {
@@ -3067,7 +3067,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.0-mini/image-to-video",
       "textField": "prompt",
-      "textMaxLength": 4000,
+      "textMaxLength": 30000,
       "media": [
         {
           "field": "image_url",
@@ -3219,7 +3219,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.0-mini/reference-to-video",
       "textField": "prompt",
-      "textMaxLength": 4000,
+      "textMaxLength": 30000,
       "media": [
         {
           "field": "image_urls",
@@ -3399,7 +3399,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.0-mini/text-to-video",
       "textField": "prompt",
-      "textMaxLength": 4000,
+      "textMaxLength": 30000,
       "media": [],
       "params": [
         {
@@ -3533,7 +3533,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.0/image-to-video",
       "textField": "prompt",
-      "textMaxLength": 4000,
+      "textMaxLength": 30000,
       "media": [
         {
           "field": "image_url",
@@ -3703,7 +3703,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.0/reference-to-video",
       "textField": "prompt",
-      "textMaxLength": 4000,
+      "textMaxLength": 30000,
       "media": [
         {
           "field": "image_urls",
@@ -3919,7 +3919,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.0/text-to-video",
       "textField": "prompt",
-      "textMaxLength": 4000,
+      "textMaxLength": 30000,
       "media": [],
       "params": [
         {
@@ -4071,7 +4071,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.5/image-to-video",
       "textField": "prompt",
-      "textMaxLength": 15000,
+      "textMaxLength": 30000,
       "media": [
         {
           "field": "image_url",
@@ -4253,7 +4253,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.5/reference-to-video",
       "textField": "prompt",
-      "textMaxLength": 15000,
+      "textMaxLength": 30000,
       "media": [
         {
           "field": "image_urls",
@@ -4395,7 +4395,20 @@
             "adaptive"
           ],
           "valueType": "string",
-          "description": "Output aspect ratio."
+          "description": "Output aspect ratio. A video edit or extension keeps the source video's shape and accepts only 'adaptive' (or no ratio)."
+        },
+        {
+          "key": "omni_reference_task_type",
+          "label": "Omni Reference Task Type",
+          "type": "select",
+          "options": [
+            "auto",
+            "reference",
+            "edit",
+            "extend"
+          ],
+          "valueType": "string",
+          "description": "How the reference task is treated. 'auto' (default) lets the model classify the task from the prompt after the job is queued. An explicit 'edit' requires at least one reference video, duration 'auto', and an adaptive (or omitted) ratio; an explicit 'extend' requires at least one reference video and an adaptive (or omitted) ratio, with a numeric duration setting the continuation length; 'reference' is unconstrained and forwards ratio and duration as given."
         }
       ],
       "defaults": {
@@ -4405,7 +4418,8 @@
         "watermark": "off",
         "output_format": "",
         "bitrate_mode": "",
-        "ratio": ""
+        "ratio": "",
+        "omni_reference_task_type": "auto"
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -4478,7 +4492,7 @@
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.5/text-to-video",
       "textField": "prompt",
-      "textMaxLength": 15000,
+      "textMaxLength": 30000,
       "media": [],
       "params": [
         {
@@ -6289,13 +6303,25 @@
           ],
           "valueType": "string",
           "description": "Output resolution."
+        },
+        {
+          "key": "thinking_level",
+          "label": "Thinking Level",
+          "type": "select",
+          "options": [
+            "minimal",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "How much the model reasons before rendering. `high` helps complex compositions at the cost of latency and thinking tokens."
         }
       ],
       "defaults": {
         "num_images": 1,
         "aspect_ratio": "1:1",
         "output_format": "png",
-        "resolution": "1K"
+        "resolution": "1K",
+        "thinking_level": "minimal"
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -6381,13 +6407,25 @@
           ],
           "valueType": "string",
           "description": "Output resolution."
+        },
+        {
+          "key": "thinking_level",
+          "label": "Thinking Level",
+          "type": "select",
+          "options": [
+            "minimal",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "How much the model reasons before rendering. `high` helps complex compositions at the cost of latency and thinking tokens."
         }
       ],
       "defaults": {
         "num_images": 1,
         "aspect_ratio": "1:1",
         "output_format": "png",
-        "resolution": "1K"
+        "resolution": "1K",
+        "thinking_level": "minimal"
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -6480,13 +6518,25 @@
           ],
           "valueType": "string",
           "description": "Output resolution (1K only for Flash Lite)."
+        },
+        {
+          "key": "thinking_level",
+          "label": "Thinking Level",
+          "type": "select",
+          "options": [
+            "minimal",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "How much the model reasons before rendering. `high` helps complex compositions at the cost of latency and thinking tokens."
         }
       ],
       "defaults": {
         "num_images": 1,
         "aspect_ratio": "1:1",
         "output_format": "png",
-        "resolution": "1K"
+        "resolution": "1K",
+        "thinking_level": "minimal"
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -6569,13 +6619,25 @@
           ],
           "valueType": "string",
           "description": "Output resolution (1K only for Flash Lite)."
+        },
+        {
+          "key": "thinking_level",
+          "label": "Thinking Level",
+          "type": "select",
+          "options": [
+            "minimal",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "How much the model reasons before rendering. `high` helps complex compositions at the cost of latency and thinking tokens."
         }
       ],
       "defaults": {
         "num_images": 1,
         "aspect_ratio": "1:1",
         "output_format": "png",
-        "resolution": "1K"
+        "resolution": "1K",
+        "thinking_level": "minimal"
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -8029,6 +8091,637 @@
       }
     },
     {
+      "apiId": "ideogram/ideogram-4.0-transparent/text-to-image",
+      "vendor": "ideogram",
+      "fn": "text-to-image",
+      "category": "image",
+      "name": "Ideogram 4.0 Transparent Text to Image",
+      "description": "Ideogram 4.0 transparent-background image generation at 1K to 8K, priced per rendering speed and output resolution.",
+      "method": "POST",
+      "path": "/v1/media/ideogram/ideogram-4.0-transparent/text-to-image",
+      "textField": null,
+      "media": [],
+      "params": [
+        {
+          "key": "text_prompt",
+          "label": "Text Prompt",
+          "type": "string",
+          "valueType": "string"
+        },
+        {
+          "key": "rendering_speed",
+          "label": "Rendering Speed",
+          "type": "select",
+          "options": [
+            "TURBO",
+            "DEFAULT",
+            "QUALITY"
+          ],
+          "valueType": "string"
+        },
+        {
+          "key": "enable_copyright_detection",
+          "label": "Enable Copyright Detection",
+          "type": "select",
+          "options": [
+            "",
+            "off",
+            "on"
+          ],
+          "valueType": "boolean"
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "AUTO",
+            "1x4",
+            "1x3",
+            "1x2",
+            "9x16",
+            "10x16",
+            "2x3",
+            "3x4",
+            "4x5",
+            "1x1",
+            "5x4",
+            "4x3",
+            "3x2",
+            "16x10",
+            "16x9",
+            "2x1",
+            "3x1",
+            "4x1"
+          ],
+          "valueType": "string"
+        },
+        {
+          "key": "output_resolution",
+          "label": "Output Resolution",
+          "type": "select",
+          "options": [
+            "1K",
+            "2K",
+            "4K",
+            "8K"
+          ],
+          "valueType": "string"
+        }
+      ],
+      "defaults": {
+        "text_prompt": "",
+        "rendering_speed": "DEFAULT",
+        "enable_copyright_detection": "",
+        "aspect_ratio": "AUTO",
+        "output_resolution": "1K"
+      },
+      "advanced": [
+        {
+          "key": "json_prompt",
+          "label": "Json prompt",
+          "required": false,
+          "schema": {
+            "additionalProperties": false,
+            "description": "The Ideogram 4.0 structured prompt; supplying it disables magic-prompt.",
+            "properties": {
+              "high_level_description": {
+                "minLength": 1,
+                "title": "High Level Description",
+                "type": "string"
+              },
+              "style_description": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/IdeogramStyleDescription"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "compositional_deconstruction": {
+                "additionalProperties": false,
+                "properties": {
+                  "background": {
+                    "minLength": 1,
+                    "title": "Background",
+                    "type": "string"
+                  },
+                  "elements": {
+                    "items": {
+                      "discriminator": {
+                        "mapping": {
+                          "obj": "#/$defs/IdeogramObjElement",
+                          "text": "#/$defs/IdeogramTextElement"
+                        },
+                        "propertyName": "type"
+                      },
+                      "oneOf": [
+                        {
+                          "$ref": "#/$defs/IdeogramObjElement"
+                        },
+                        {
+                          "$ref": "#/$defs/IdeogramTextElement"
+                        }
+                      ]
+                    },
+                    "title": "Elements",
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "background",
+                  "elements"
+                ],
+                "title": "IdeogramCompositionalDeconstruction",
+                "type": "object"
+              }
+            },
+            "required": [
+              "high_level_description",
+              "compositional_deconstruction"
+            ],
+            "title": "IdeogramJsonPrompt",
+            "type": "object"
+          }
+        }
+      ],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "image",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "mode": "TURBO",
+              "resolution": "1K"
+            },
+            "usd": 0.0315
+          },
+          {
+            "spec": {
+              "mode": "TURBO",
+              "resolution": "2K"
+            },
+            "usd": 0.0315
+          },
+          {
+            "spec": {
+              "mode": "DEFAULT",
+              "resolution": "1K"
+            },
+            "usd": 0.063
+          },
+          {
+            "spec": {
+              "mode": "DEFAULT",
+              "resolution": "2K"
+            },
+            "usd": 0.063
+          },
+          {
+            "spec": {
+              "mode": "QUALITY",
+              "resolution": "1K"
+            },
+            "usd": 0.105
+          },
+          {
+            "spec": {
+              "mode": "QUALITY",
+              "resolution": "2K"
+            },
+            "usd": 0.105
+          },
+          {
+            "spec": {
+              "mode": "TURBO",
+              "resolution": "4K"
+            },
+            "usd": 0.1995
+          },
+          {
+            "spec": {
+              "mode": "DEFAULT",
+              "resolution": "4K"
+            },
+            "usd": 0.231
+          },
+          {
+            "spec": {
+              "mode": "QUALITY",
+              "resolution": "4K"
+            },
+            "usd": 0.273
+          },
+          {
+            "spec": {
+              "mode": "TURBO",
+              "resolution": "8K"
+            },
+            "usd": 0.3675
+          },
+          {
+            "spec": {
+              "mode": "DEFAULT",
+              "resolution": "8K"
+            },
+            "usd": 0.399
+          },
+          {
+            "spec": {
+              "mode": "QUALITY",
+              "resolution": "8K"
+            },
+            "usd": 0.441
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "ideogram/ideogram-4.0/text-to-image",
+      "vendor": "ideogram",
+      "fn": "text-to-image",
+      "category": "image",
+      "name": "Ideogram 4.0 Text to Image",
+      "description": "Ideogram 4.0 image generation with best-in-class typography, priced per rendering speed (Turbo, Default, Quality).",
+      "method": "POST",
+      "path": "/v1/media/ideogram/ideogram-4.0/text-to-image",
+      "textField": null,
+      "media": [],
+      "params": [
+        {
+          "key": "text_prompt",
+          "label": "Text Prompt",
+          "type": "string",
+          "valueType": "string"
+        },
+        {
+          "key": "rendering_speed",
+          "label": "Rendering Speed",
+          "type": "select",
+          "options": [
+            "TURBO",
+            "DEFAULT",
+            "QUALITY"
+          ],
+          "valueType": "string"
+        },
+        {
+          "key": "enable_copyright_detection",
+          "label": "Enable Copyright Detection",
+          "type": "select",
+          "options": [
+            "",
+            "off",
+            "on"
+          ],
+          "valueType": "boolean"
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "",
+            "2048x2048",
+            "1440x2880",
+            "2880x1440",
+            "1664x2496",
+            "2496x1664",
+            "1792x2240",
+            "2240x1792",
+            "1440x2560",
+            "2560x1440",
+            "1600x2560",
+            "2560x1600",
+            "1728x2304",
+            "2304x1728",
+            "1296x3168",
+            "3168x1296",
+            "1152x2944",
+            "2944x1152",
+            "1248x3328",
+            "3328x1248",
+            "1280x3072",
+            "3072x1280",
+            "1024x3072",
+            "3072x1024",
+            "1024x1024",
+            "896x1120",
+            "1120x896",
+            "864x1152",
+            "1152x864",
+            "832x1248",
+            "1248x832",
+            "800x1280",
+            "1280x800",
+            "720x1280",
+            "1280x720",
+            "720x1440",
+            "1440x720",
+            "512x1536",
+            "1536x512"
+          ],
+          "valueType": "string"
+        }
+      ],
+      "defaults": {
+        "text_prompt": "",
+        "rendering_speed": "DEFAULT",
+        "enable_copyright_detection": "",
+        "resolution": ""
+      },
+      "advanced": [
+        {
+          "key": "json_prompt",
+          "label": "Json prompt",
+          "required": false,
+          "schema": {
+            "additionalProperties": false,
+            "description": "The Ideogram 4.0 structured prompt; supplying it disables magic-prompt.",
+            "properties": {
+              "high_level_description": {
+                "minLength": 1,
+                "title": "High Level Description",
+                "type": "string"
+              },
+              "style_description": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/IdeogramStyleDescription"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
+              },
+              "compositional_deconstruction": {
+                "additionalProperties": false,
+                "properties": {
+                  "background": {
+                    "minLength": 1,
+                    "title": "Background",
+                    "type": "string"
+                  },
+                  "elements": {
+                    "items": {
+                      "discriminator": {
+                        "mapping": {
+                          "obj": "#/$defs/IdeogramObjElement",
+                          "text": "#/$defs/IdeogramTextElement"
+                        },
+                        "propertyName": "type"
+                      },
+                      "oneOf": [
+                        {
+                          "$ref": "#/$defs/IdeogramObjElement"
+                        },
+                        {
+                          "$ref": "#/$defs/IdeogramTextElement"
+                        }
+                      ]
+                    },
+                    "title": "Elements",
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "background",
+                  "elements"
+                ],
+                "title": "IdeogramCompositionalDeconstruction",
+                "type": "object"
+              }
+            },
+            "required": [
+              "high_level_description",
+              "compositional_deconstruction"
+            ],
+            "title": "IdeogramJsonPrompt",
+            "type": "object"
+          }
+        }
+      ],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "image",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "mode": "TURBO"
+            },
+            "usd": 0.0315
+          },
+          {
+            "spec": {
+              "mode": "DEFAULT"
+            },
+            "usd": 0.063
+          },
+          {
+            "spec": {
+              "mode": "QUALITY"
+            },
+            "usd": 0.105
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "ideogram/p-image/text-to-image",
+      "vendor": "ideogram",
+      "fn": "text-to-image",
+      "category": "image",
+      "name": "Ideogram P-Image Text to Image",
+      "description": "Fast, low-cost Ideogram P-Image generation at 1K or 2K, priced per quality level and resolution; custom dimensions bill the tier matching their pixel count.",
+      "method": "POST",
+      "path": "/v1/media/ideogram/p-image/text-to-image",
+      "textField": "prompt",
+      "media": [],
+      "params": [
+        {
+          "key": "prompt_upsampling",
+          "label": "Prompt Upsampling",
+          "type": "select",
+          "options": [
+            "AUTO",
+            "ON",
+            "OFF"
+          ],
+          "valueType": "string"
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "min": 0,
+          "max": 2147483647,
+          "step": 1
+        },
+        {
+          "key": "quality",
+          "label": "Quality",
+          "type": "select",
+          "options": [
+            "VERY_LOW",
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ],
+          "valueType": "string"
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "",
+            "1K",
+            "2K"
+          ],
+          "valueType": "string"
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "",
+            "1x3",
+            "3x1",
+            "1x2",
+            "2x1",
+            "9x16",
+            "16x9",
+            "10x16",
+            "16x10",
+            "2x3",
+            "3x2",
+            "3x4",
+            "4x3",
+            "4x5",
+            "5x4",
+            "1x1"
+          ],
+          "valueType": "string"
+        },
+        {
+          "key": "custom_width",
+          "label": "Custom Width",
+          "type": "number",
+          "valueType": "integer",
+          "min": 16,
+          "max": 4096,
+          "step": 1
+        },
+        {
+          "key": "custom_height",
+          "label": "Custom Height",
+          "type": "number",
+          "valueType": "integer",
+          "min": 16,
+          "max": 4096,
+          "step": 1
+        },
+        {
+          "key": "enable_copyright_detection",
+          "label": "Enable Copyright Detection",
+          "type": "select",
+          "options": [
+            "",
+            "off",
+            "on"
+          ],
+          "valueType": "boolean"
+        }
+      ],
+      "defaults": {
+        "prompt_upsampling": "AUTO",
+        "seed": "",
+        "quality": "MEDIUM",
+        "resolution": "",
+        "aspect_ratio": "",
+        "custom_width": "",
+        "custom_height": "",
+        "enable_copyright_detection": ""
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt"
+      ],
+      "pricing": {
+        "unit": "image",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "quality": "VERY_LOW",
+              "resolution": "1K"
+            },
+            "usd": 0.0032
+          },
+          {
+            "spec": {
+              "quality": "VERY_LOW",
+              "resolution": "2K"
+            },
+            "usd": 0.0063
+          },
+          {
+            "spec": {
+              "quality": "LOW",
+              "resolution": "1K"
+            },
+            "usd": 0.0079
+          },
+          {
+            "spec": {
+              "quality": "MEDIUM",
+              "resolution": "1K"
+            },
+            "usd": 0.0105
+          },
+          {
+            "spec": {
+              "quality": "LOW",
+              "resolution": "2K"
+            },
+            "usd": 0.0158
+          },
+          {
+            "spec": {
+              "quality": "HIGH",
+              "resolution": "1K"
+            },
+            "usd": 0.0158
+          },
+          {
+            "spec": {
+              "quality": "MEDIUM",
+              "resolution": "2K"
+            },
+            "usd": 0.021
+          },
+          {
+            "spec": {
+              "quality": "HIGH",
+              "resolution": "2K"
+            },
+            "usd": 0.0315
+          }
+        ]
+      }
+    },
+    {
       "apiId": "kling/kling-3.0-turbo/image-to-video",
       "vendor": "kling",
       "fn": "image-to-video",
@@ -8276,34 +8969,134 @@
           "key": "elements",
           "label": "Elements",
           "required": false,
-          "description": "Up to 3 Elements to place in the scene.",
+          "description": "Up to 3 inline or preset elements to place in the scene.",
           "schema": {
             "items": {
-              "additionalProperties": false,
-              "properties": {
-                "element_id": {
-                  "description": "Stored Element id from the Element API.",
-                  "minLength": 1,
-                  "title": "Element Id",
-                  "type": "string"
+              "discriminator": {
+                "mapping": {
+                  "element": "#/$defs/Kling3ImageElement",
+                  "preset_element": "#/$defs/Kling3PresetElement",
+                  "video_element": "#/$defs/Kling3VideoElement"
                 },
-                "id": {
-                  "description": "Handle the prompt references as @id.",
-                  "minLength": 1,
-                  "title": "Id",
-                  "type": "string"
-                }
+                "propertyName": "type"
               },
-              "required": [
-                "element_id",
-                "id"
-              ],
-              "title": "Kling3ElementRef",
-              "type": "object"
+              "oneOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "element",
+                      "description": "element: a multi-image element registered from `frontal_image_url` and `reference_image_urls`; the prompt references it as @id.",
+                      "title": "Type",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "Handle the prompt references as @id.",
+                      "minLength": 1,
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "frontal_image_url": {
+                      "description": "Frontal image of the subject (type element): jpg/png, <=10MB, >=300px, aspect between 1:2.5 and 2.5:1.",
+                      "media_kinds": [
+                        "image"
+                      ],
+                      "pattern": "^https?://",
+                      "title": "Frontal Image Url",
+                      "type": "string"
+                    },
+                    "reference_image_urls": {
+                      "description": "1-3 additional views of the same subject (type element): jpg/png, <=10MB, >=300px, aspect between 1:2.5 and 2.5:1.",
+                      "items": {
+                        "media_kinds": [
+                          "image"
+                        ],
+                        "pattern": "^https?://",
+                        "type": "string"
+                      },
+                      "maxItems": 3,
+                      "minItems": 1,
+                      "title": "Reference Image Urls",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "id",
+                    "frontal_image_url",
+                    "reference_image_urls"
+                  ],
+                  "title": "Kling3ImageElement",
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "video_element",
+                      "description": "video_element: a video-character element registered from `video_url`; the prompt references it as @id.",
+                      "title": "Type",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "Handle the prompt references as @id.",
+                      "minLength": 1,
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "video_url": {
+                      "description": "One mp4/mov of a realistic person (type video_element), 3-8s, 1080p, 16:9 or 9:16, <=200MB. Speech in the clip becomes the element's voice.",
+                      "media_kinds": [
+                        "video"
+                      ],
+                      "pattern": "^https?://",
+                      "title": "Video Url",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "id",
+                    "video_url"
+                  ],
+                  "title": "Kling3VideoElement",
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "preset_element",
+                      "description": "preset_element: an element from Kling's preset library named by `element_id`; the prompt references it as @id.",
+                      "title": "Type",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "Handle the prompt references as @id.",
+                      "minLength": 1,
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "element_id": {
+                      "description": "Id of an element in Kling's preset library (type preset_element).",
+                      "minLength": 1,
+                      "title": "Element Id",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "id",
+                    "element_id"
+                  ],
+                  "title": "Kling3PresetElement",
+                  "type": "object"
+                }
+              ]
             },
             "maxItems": 3,
             "type": "array",
-            "description": "Up to 3 Elements to place in the scene.",
+            "description": "Up to 3 inline or preset elements to place in the scene.",
             "default": null,
             "title": "Elements"
           }
@@ -8460,74 +9253,8 @@
       "method": "POST",
       "path": "/v1/media/kling/kling-3.0/omni-video",
       "textField": null,
-      "media": [
-        {
-          "field": "contents",
-          "kinds": [
-            "image",
-            "video"
-          ],
-          "array": true,
-          "required": true,
-          "minItems": 1,
-          "itemField": "url",
-          "itemExtras": [
-            {
-              "key": "type",
-              "label": "Type",
-              "description": "Input kind: prompt text, reference image/video, or an Element.",
-              "required": true
-            },
-            {
-              "key": "text",
-              "label": "Text",
-              "description": "Prompt text (type='prompt').",
-              "required": false
-            },
-            {
-              "key": "element_id",
-              "label": "Element Id",
-              "description": "Element ID (type='element').",
-              "required": false
-            },
-            {
-              "key": "id",
-              "label": "Id",
-              "description": "Index id referenced from the prompt as @id.",
-              "required": false
-            }
-          ]
-        }
-      ],
+      "media": [],
       "params": [
-        {
-          "key": "contents_type",
-          "label": "Contents · Type",
-          "type": "string",
-          "valueType": "string",
-          "description": "Input kind: prompt text, reference image/video, or an Element. 接続したメディアと同数をカンマ区切りで指定します（空欄ならモデルに任せます）。"
-        },
-        {
-          "key": "contents_text",
-          "label": "Contents · Text",
-          "type": "string",
-          "valueType": "string",
-          "description": "Prompt text (type='prompt'). 接続したメディアと同数をカンマ区切りで指定します（空欄ならモデルに任せます）。"
-        },
-        {
-          "key": "contents_element_id",
-          "label": "Contents · Element Id",
-          "type": "string",
-          "valueType": "string",
-          "description": "Element ID (type='element'). 接続したメディアと同数をカンマ区切りで指定します（空欄ならモデルに任せます）。"
-        },
-        {
-          "key": "contents_id",
-          "label": "Contents · Id",
-          "type": "string",
-          "valueType": "string",
-          "description": "Index id referenced from the prompt as @id. 接続したメディアと同数をカンマ区切りで指定します（空欄ならモデルに任せます）。"
-        },
         {
           "key": "duration",
           "label": "Duration",
@@ -8600,10 +9327,6 @@
         }
       ],
       "defaults": {
-        "contents_type": "",
-        "contents_text": "",
-        "contents_element_id": "",
-        "contents_id": "",
         "duration": 5,
         "resolution": "720p",
         "aspect_ratio": "16:9",
@@ -8611,8 +9334,223 @@
         "multi_shot": "",
         "watermark": ""
       },
-      "advanced": [],
-      "requiredAdvanced": [],
+      "advanced": [
+        {
+          "key": "contents",
+          "label": "Contents",
+          "required": true,
+          "description": "Reference inputs: prompt, images, videos, inline or preset elements.",
+          "schema": {
+            "description": "Reference inputs: prompt, images, videos, inline or preset elements.",
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "base_video": "#/$defs/Kling3MaterialContent",
+                  "element": "#/$defs/Kling3ImageElement",
+                  "feature_video": "#/$defs/Kling3MaterialContent",
+                  "first_frame": "#/$defs/Kling3MaterialContent",
+                  "last_frame": "#/$defs/Kling3MaterialContent",
+                  "preset_element": "#/$defs/Kling3PresetElement",
+                  "prompt": "#/$defs/Kling3PromptContent",
+                  "refer_image": "#/$defs/Kling3MaterialContent",
+                  "video_element": "#/$defs/Kling3VideoElement"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "prompt",
+                      "description": "prompt: the text prompt item; carries `text`.",
+                      "title": "Type",
+                      "type": "string"
+                    },
+                    "text": {
+                      "description": "Prompt text (type prompt).",
+                      "maxLength": 3072,
+                      "minLength": 1,
+                      "title": "Text",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "text"
+                  ],
+                  "title": "Kling3PromptContent",
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "description": "first_frame, last_frame, refer_image, feature_video or base_video: an image or video material; carries `url` and an optional `id` handle.",
+                      "enum": [
+                        "first_frame",
+                        "last_frame",
+                        "refer_image",
+                        "feature_video",
+                        "base_video"
+                      ],
+                      "title": "Type",
+                      "type": "string"
+                    },
+                    "url": {
+                      "description": "Image or video URL (material types).",
+                      "media_kinds": [
+                        "image",
+                        "video"
+                      ],
+                      "pattern": "^https?://",
+                      "title": "Url",
+                      "type": "string"
+                    },
+                    "id": {
+                      "anyOf": [
+                        {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "Optional handle the prompt references as @id (material types).",
+                      "title": "Id"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "url"
+                  ],
+                  "title": "Kling3MaterialContent",
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "element",
+                      "description": "element: a multi-image element registered from `frontal_image_url` and `reference_image_urls`; the prompt references it as @id.",
+                      "title": "Type",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "Handle the prompt references as @id.",
+                      "minLength": 1,
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "frontal_image_url": {
+                      "description": "Frontal image of the subject (type element): jpg/png, <=10MB, >=300px, aspect between 1:2.5 and 2.5:1.",
+                      "media_kinds": [
+                        "image"
+                      ],
+                      "pattern": "^https?://",
+                      "title": "Frontal Image Url",
+                      "type": "string"
+                    },
+                    "reference_image_urls": {
+                      "description": "1-3 additional views of the same subject (type element): jpg/png, <=10MB, >=300px, aspect between 1:2.5 and 2.5:1.",
+                      "items": {
+                        "media_kinds": [
+                          "image"
+                        ],
+                        "pattern": "^https?://",
+                        "type": "string"
+                      },
+                      "maxItems": 3,
+                      "minItems": 1,
+                      "title": "Reference Image Urls",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "id",
+                    "frontal_image_url",
+                    "reference_image_urls"
+                  ],
+                  "title": "Kling3ImageElement",
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "video_element",
+                      "description": "video_element: a video-character element registered from `video_url`; the prompt references it as @id.",
+                      "title": "Type",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "Handle the prompt references as @id.",
+                      "minLength": 1,
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "video_url": {
+                      "description": "One mp4/mov of a realistic person (type video_element), 3-8s, 1080p, 16:9 or 9:16, <=200MB. Speech in the clip becomes the element's voice.",
+                      "media_kinds": [
+                        "video"
+                      ],
+                      "pattern": "^https?://",
+                      "title": "Video Url",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "id",
+                    "video_url"
+                  ],
+                  "title": "Kling3VideoElement",
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "preset_element",
+                      "description": "preset_element: an element from Kling's preset library named by `element_id`; the prompt references it as @id.",
+                      "title": "Type",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "Handle the prompt references as @id.",
+                      "minLength": 1,
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "element_id": {
+                      "description": "Id of an element in Kling's preset library (type preset_element).",
+                      "minLength": 1,
+                      "title": "Element Id",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "id",
+                    "element_id"
+                  ],
+                  "title": "Kling3PresetElement",
+                  "type": "object"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Contents",
+            "type": "array"
+          }
+        }
+      ],
+      "requiredAdvanced": [
+        "contents"
+      ],
       "requiredFields": [
         "contents"
       ],
@@ -9079,6 +10017,228 @@
           {
             "spec": {},
             "usd": 0.012
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "meta/muse-image-1.0/image-to-image",
+      "vendor": "meta",
+      "fn": "image-to-image",
+      "category": "image",
+      "name": "Muse Image Edit Image",
+      "description": "Muse Image editing: combine up to 10 source images with a text prompt. Source images are not billed; only generated images are.",
+      "method": "POST",
+      "path": "/v1/media/meta/muse-image-1.0/image-to-image",
+      "textField": "prompt",
+      "media": [
+        {
+          "field": "image_urls",
+          "kinds": [
+            "image"
+          ],
+          "array": true,
+          "required": true,
+          "maxItems": 10,
+          "minItems": 1
+        }
+      ],
+      "params": [
+        {
+          "key": "num_images",
+          "label": "Num Images",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Images to generate. Each one is billed.",
+          "min": 1,
+          "max": 10,
+          "step": 1
+        },
+        {
+          "key": "size",
+          "label": "Size",
+          "type": "string",
+          "valueType": "string",
+          "description": "Shape of the output as \"WxH\". Only the ratio is read, never the magnitude: 16x9, 1920x1080 and 3840x2160 all render the same image, sized by the model. \"auto\" lets it pick the shape too."
+        },
+        {
+          "key": "output_format",
+          "label": "Output Format",
+          "type": "select",
+          "options": [
+            "png",
+            "jpeg",
+            "webp"
+          ],
+          "valueType": "string",
+          "description": "Encoding of the returned image."
+        },
+        {
+          "key": "reasoning_strength",
+          "label": "Reasoning Strength",
+          "type": "select",
+          "options": [
+            "low",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "\"high\" refines over several passes; \"low\" returns after one, trading polish for speed. Same price either way."
+        }
+      ],
+      "defaults": {
+        "num_images": 1,
+        "size": "auto",
+        "output_format": "webp",
+        "reasoning_strength": "high"
+      },
+      "advanced": [
+        {
+          "key": "tool_enablement",
+          "label": "Tool enablement",
+          "required": false,
+          "description": "Turn off the grounding tools the model runs while it works. All on by default.",
+          "schema": {
+            "additionalProperties": false,
+            "description": "Muse Image's built-in grounding tools, all on by default. Turning them off trades\naccuracy on real places, products, and current facts for speed.",
+            "properties": {
+              "enable_image_search": {
+                "default": true,
+                "title": "Enable Image Search",
+                "type": "boolean"
+              },
+              "enable_web_search": {
+                "default": true,
+                "title": "Enable Web Search",
+                "type": "boolean"
+              },
+              "enable_shell": {
+                "default": true,
+                "title": "Enable Shell",
+                "type": "boolean"
+              }
+            },
+            "title": "MetaToolEnablement",
+            "type": "object"
+          }
+        }
+      ],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt",
+        "image_urls"
+      ],
+      "pricing": {
+        "unit": "image",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.0105
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "meta/muse-image-1.0/text-to-image",
+      "vendor": "meta",
+      "fn": "text-to-image",
+      "category": "image",
+      "name": "Muse Image Text to Image",
+      "description": "Muse Image generation with built-in web and image search grounding, billed per generated image.",
+      "method": "POST",
+      "path": "/v1/media/meta/muse-image-1.0/text-to-image",
+      "textField": "prompt",
+      "media": [],
+      "params": [
+        {
+          "key": "num_images",
+          "label": "Num Images",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Images to generate. Each one is billed.",
+          "min": 1,
+          "max": 10,
+          "step": 1
+        },
+        {
+          "key": "size",
+          "label": "Size",
+          "type": "string",
+          "valueType": "string",
+          "description": "Shape of the output as \"WxH\". Only the ratio is read, never the magnitude: 16x9, 1920x1080 and 3840x2160 all render the same image, sized by the model. \"auto\" lets it pick the shape too."
+        },
+        {
+          "key": "output_format",
+          "label": "Output Format",
+          "type": "select",
+          "options": [
+            "png",
+            "jpeg",
+            "webp"
+          ],
+          "valueType": "string",
+          "description": "Encoding of the returned image."
+        },
+        {
+          "key": "reasoning_strength",
+          "label": "Reasoning Strength",
+          "type": "select",
+          "options": [
+            "low",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "\"high\" refines over several passes; \"low\" returns after one, trading polish for speed. Same price either way."
+        }
+      ],
+      "defaults": {
+        "num_images": 1,
+        "size": "auto",
+        "output_format": "webp",
+        "reasoning_strength": "high"
+      },
+      "advanced": [
+        {
+          "key": "tool_enablement",
+          "label": "Tool enablement",
+          "required": false,
+          "description": "Turn off the grounding tools the model runs while it works. All on by default.",
+          "schema": {
+            "additionalProperties": false,
+            "description": "Muse Image's built-in grounding tools, all on by default. Turning them off trades\naccuracy on real places, products, and current facts for speed.",
+            "properties": {
+              "enable_image_search": {
+                "default": true,
+                "title": "Enable Image Search",
+                "type": "boolean"
+              },
+              "enable_web_search": {
+                "default": true,
+                "title": "Enable Web Search",
+                "type": "boolean"
+              },
+              "enable_shell": {
+                "default": true,
+                "title": "Enable Shell",
+                "type": "boolean"
+              }
+            },
+            "title": "MetaToolEnablement",
+            "type": "object"
+          }
+        }
+      ],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt"
+      ],
+      "pricing": {
+        "unit": "image",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.0105
           }
         ]
       }
@@ -10279,6 +11439,550 @@
       }
     },
     {
+      "apiId": "openai/gpt-image-2.5-flare/image-to-image",
+      "vendor": "openai",
+      "fn": "image-to-image",
+      "category": "image",
+      "name": "GPT Image 2.5 Flare Edit Image",
+      "description": "GPT Image 2.5 Flare Edit Image is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/openai/gpt-image-2.5-flare/image-to-image",
+      "textField": "prompt",
+      "media": [
+        {
+          "field": "image_urls",
+          "kinds": [
+            "image"
+          ],
+          "array": true,
+          "required": true,
+          "maxItems": 16,
+          "minItems": 1
+        },
+        {
+          "field": "mask_image_url",
+          "kinds": [
+            "image"
+          ],
+          "array": false,
+          "required": false
+        }
+      ],
+      "params": [
+        {
+          "key": "num_images",
+          "label": "Num Images",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Number of images to generate.",
+          "min": 1,
+          "max": 10,
+          "step": 1
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "1:1",
+            "2:3",
+            "3:2",
+            "3:4",
+            "4:3",
+            "4:5",
+            "5:4",
+            "9:16",
+            "16:9",
+            "21:9"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio. Ignored when 'size' is set."
+        },
+        {
+          "key": "output_format",
+          "label": "Output Format",
+          "type": "select",
+          "options": [
+            "png",
+            "jpeg",
+            "webp"
+          ],
+          "valueType": "string",
+          "description": "Image file format of the output."
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "1K",
+            "2K",
+            "4K"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        },
+        {
+          "key": "background",
+          "label": "Background",
+          "type": "select",
+          "options": [
+            "",
+            "auto",
+            "opaque",
+            "transparent"
+          ],
+          "valueType": "string",
+          "description": "Background of the output. 'transparent' needs a png or webp output_format."
+        },
+        {
+          "key": "size",
+          "label": "Size",
+          "type": "string",
+          "valueType": "string",
+          "description": "Explicit output size as 'WxH' (e.g. '1024x1024'), or 'auto' to let the provider choose. Overrides aspect_ratio and resolution."
+        },
+        {
+          "key": "quality",
+          "label": "Quality",
+          "type": "select",
+          "options": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ],
+          "valueType": "string",
+          "description": "Rendering quality of the output."
+        }
+      ],
+      "defaults": {
+        "num_images": 1,
+        "aspect_ratio": "1:1",
+        "output_format": "png",
+        "resolution": "1K",
+        "background": "",
+        "size": "",
+        "quality": "medium"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt",
+        "image_urls"
+      ],
+      "pricing": {
+        "unit": "image_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 30
+          }
+        ],
+        "inputUsd": 5
+      }
+    },
+    {
+      "apiId": "openai/gpt-image-2.5-flare/text-to-image",
+      "vendor": "openai",
+      "fn": "text-to-image",
+      "category": "image",
+      "name": "GPT Image 2.5 Flare Image Generation",
+      "description": "GPT Image 2.5 Flare Image Generation is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/openai/gpt-image-2.5-flare/text-to-image",
+      "textField": "prompt",
+      "media": [],
+      "params": [
+        {
+          "key": "num_images",
+          "label": "Num Images",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Number of images to generate.",
+          "min": 1,
+          "max": 10,
+          "step": 1
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "1:1",
+            "2:3",
+            "3:2",
+            "3:4",
+            "4:3",
+            "4:5",
+            "5:4",
+            "9:16",
+            "16:9",
+            "21:9"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio. Ignored when 'size' is set."
+        },
+        {
+          "key": "output_format",
+          "label": "Output Format",
+          "type": "select",
+          "options": [
+            "png",
+            "jpeg",
+            "webp"
+          ],
+          "valueType": "string",
+          "description": "Image file format of the output."
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "1K",
+            "2K",
+            "4K"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        },
+        {
+          "key": "background",
+          "label": "Background",
+          "type": "select",
+          "options": [
+            "",
+            "auto",
+            "opaque",
+            "transparent"
+          ],
+          "valueType": "string",
+          "description": "Background of the output. 'transparent' needs a png or webp output_format."
+        },
+        {
+          "key": "size",
+          "label": "Size",
+          "type": "string",
+          "valueType": "string",
+          "description": "Explicit output size as 'WxH' (e.g. '1024x1024'), or 'auto' to let the provider choose. Overrides aspect_ratio and resolution."
+        },
+        {
+          "key": "quality",
+          "label": "Quality",
+          "type": "select",
+          "options": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ],
+          "valueType": "string",
+          "description": "Rendering quality of the output."
+        }
+      ],
+      "defaults": {
+        "num_images": 1,
+        "aspect_ratio": "1:1",
+        "output_format": "png",
+        "resolution": "1K",
+        "background": "",
+        "size": "",
+        "quality": "medium"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt"
+      ],
+      "pricing": {
+        "unit": "image_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 30
+          }
+        ],
+        "inputUsd": 5
+      }
+    },
+    {
+      "apiId": "openai/gpt-image-2.5-sunburst/image-to-image",
+      "vendor": "openai",
+      "fn": "image-to-image",
+      "category": "image",
+      "name": "GPT Image 2.5 Sunburst Edit Image",
+      "description": "GPT Image 2.5 Sunburst Edit Image is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/openai/gpt-image-2.5-sunburst/image-to-image",
+      "textField": "prompt",
+      "media": [
+        {
+          "field": "image_urls",
+          "kinds": [
+            "image"
+          ],
+          "array": true,
+          "required": true,
+          "maxItems": 16,
+          "minItems": 1
+        },
+        {
+          "field": "mask_image_url",
+          "kinds": [
+            "image"
+          ],
+          "array": false,
+          "required": false
+        }
+      ],
+      "params": [
+        {
+          "key": "num_images",
+          "label": "Num Images",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Number of images to generate.",
+          "min": 1,
+          "max": 10,
+          "step": 1
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "1:1",
+            "2:3",
+            "3:2",
+            "3:4",
+            "4:3",
+            "4:5",
+            "5:4",
+            "9:16",
+            "16:9",
+            "21:9"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio. Ignored when 'size' is set."
+        },
+        {
+          "key": "output_format",
+          "label": "Output Format",
+          "type": "select",
+          "options": [
+            "png",
+            "jpeg",
+            "webp"
+          ],
+          "valueType": "string",
+          "description": "Image file format of the output."
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "1K",
+            "2K",
+            "4K"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        },
+        {
+          "key": "background",
+          "label": "Background",
+          "type": "select",
+          "options": [
+            "",
+            "auto",
+            "opaque",
+            "transparent"
+          ],
+          "valueType": "string",
+          "description": "Background of the output. 'transparent' needs a png or webp output_format."
+        },
+        {
+          "key": "size",
+          "label": "Size",
+          "type": "string",
+          "valueType": "string",
+          "description": "Explicit output size as 'WxH' (e.g. '1024x1024'), or 'auto' to let the provider choose. Overrides aspect_ratio and resolution."
+        },
+        {
+          "key": "quality",
+          "label": "Quality",
+          "type": "select",
+          "options": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ],
+          "valueType": "string",
+          "description": "Rendering quality of the output."
+        }
+      ],
+      "defaults": {
+        "num_images": 1,
+        "aspect_ratio": "1:1",
+        "output_format": "png",
+        "resolution": "1K",
+        "background": "",
+        "size": "",
+        "quality": "medium"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt",
+        "image_urls"
+      ],
+      "pricing": {
+        "unit": "image_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 30
+          }
+        ],
+        "inputUsd": 5
+      }
+    },
+    {
+      "apiId": "openai/gpt-image-2.5-sunburst/text-to-image",
+      "vendor": "openai",
+      "fn": "text-to-image",
+      "category": "image",
+      "name": "GPT Image 2.5 Sunburst Image Generation",
+      "description": "GPT Image 2.5 Sunburst Image Generation is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/openai/gpt-image-2.5-sunburst/text-to-image",
+      "textField": "prompt",
+      "media": [],
+      "params": [
+        {
+          "key": "num_images",
+          "label": "Num Images",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Number of images to generate.",
+          "min": 1,
+          "max": 10,
+          "step": 1
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "1:1",
+            "2:3",
+            "3:2",
+            "3:4",
+            "4:3",
+            "4:5",
+            "5:4",
+            "9:16",
+            "16:9",
+            "21:9"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio. Ignored when 'size' is set."
+        },
+        {
+          "key": "output_format",
+          "label": "Output Format",
+          "type": "select",
+          "options": [
+            "png",
+            "jpeg",
+            "webp"
+          ],
+          "valueType": "string",
+          "description": "Image file format of the output."
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "1K",
+            "2K",
+            "4K"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        },
+        {
+          "key": "background",
+          "label": "Background",
+          "type": "select",
+          "options": [
+            "",
+            "auto",
+            "opaque",
+            "transparent"
+          ],
+          "valueType": "string",
+          "description": "Background of the output. 'transparent' needs a png or webp output_format."
+        },
+        {
+          "key": "size",
+          "label": "Size",
+          "type": "string",
+          "valueType": "string",
+          "description": "Explicit output size as 'WxH' (e.g. '1024x1024'), or 'auto' to let the provider choose. Overrides aspect_ratio and resolution."
+        },
+        {
+          "key": "quality",
+          "label": "Quality",
+          "type": "select",
+          "options": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ],
+          "valueType": "string",
+          "description": "Rendering quality of the output."
+        }
+      ],
+      "defaults": {
+        "num_images": 1,
+        "aspect_ratio": "1:1",
+        "output_format": "png",
+        "resolution": "1K",
+        "background": "",
+        "size": "",
+        "quality": "medium"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt"
+      ],
+      "pricing": {
+        "unit": "image_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 30
+          }
+        ],
+        "inputUsd": 5
+      }
+    },
+    {
       "apiId": "openai/gpt-image-2/image-to-image",
       "vendor": "openai",
       "fn": "image-to-image",
@@ -10363,19 +12067,6 @@
           "description": "Output resolution."
         },
         {
-          "key": "quality",
-          "label": "Quality",
-          "type": "select",
-          "options": [
-            "auto",
-            "low",
-            "medium",
-            "high"
-          ],
-          "valueType": "string",
-          "description": "Rendering quality of the output; 'auto' lets the provider choose."
-        },
-        {
           "key": "background",
           "label": "Background",
           "type": "select",
@@ -10394,6 +12085,19 @@
           "type": "string",
           "valueType": "string",
           "description": "Explicit output size as 'WxH' (e.g. '1024x1024'), or 'auto' to let the provider choose. Overrides aspect_ratio and resolution."
+        },
+        {
+          "key": "quality",
+          "label": "Quality",
+          "type": "select",
+          "options": [
+            "auto",
+            "low",
+            "medium",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "Rendering quality of the output; 'auto' lets the provider choose."
         }
       ],
       "defaults": {
@@ -10401,9 +12105,9 @@
         "aspect_ratio": "1:1",
         "output_format": "png",
         "resolution": "1K",
-        "quality": "medium",
         "background": "",
-        "size": ""
+        "size": "",
+        "quality": "medium"
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -10489,19 +12193,6 @@
           "description": "Output resolution."
         },
         {
-          "key": "quality",
-          "label": "Quality",
-          "type": "select",
-          "options": [
-            "auto",
-            "low",
-            "medium",
-            "high"
-          ],
-          "valueType": "string",
-          "description": "Rendering quality of the output; 'auto' lets the provider choose."
-        },
-        {
           "key": "background",
           "label": "Background",
           "type": "select",
@@ -10520,6 +12211,19 @@
           "type": "string",
           "valueType": "string",
           "description": "Explicit output size as 'WxH' (e.g. '1024x1024'), or 'auto' to let the provider choose. Overrides aspect_ratio and resolution."
+        },
+        {
+          "key": "quality",
+          "label": "Quality",
+          "type": "select",
+          "options": [
+            "auto",
+            "low",
+            "medium",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "Rendering quality of the output; 'auto' lets the provider choose."
         }
       ],
       "defaults": {
@@ -10527,9 +12231,9 @@
         "aspect_ratio": "1:1",
         "output_format": "png",
         "resolution": "1K",
-        "quality": "medium",
         "background": "",
-        "size": ""
+        "size": "",
+        "quality": "medium"
       },
       "advanced": [],
       "requiredAdvanced": [],
