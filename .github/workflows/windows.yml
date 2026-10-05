@@ -1,0 +1,55 @@
+# Builds and smoke-tests the Windows app on a real Windows runner.
+#
+# The app is developed on macOS, where the Windows installer can be
+# cross-built but not run. This checks the parts that actually differ by
+# platform — native paths, ffmpeg discovery, spawning child processes — by
+# running the bundled server in mock mode (no API key, no cost), then builds
+# the NSIS installer and keeps it as an artifact.
+name: windows
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-smoke:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # Chocolatey puts ffmpeg.exe under %ProgramData%\chocolatey\bin, one of the
+      # locations the server looks in before PATH.
+      - name: Install ffmpeg
+        run: choco install ffmpeg -y --no-progress
+
+      - name: Build web + server bundle
+        run: npm -w desktop run build:all
+
+      - name: Smoke test the bundled server
+        run: npm -w desktop run smoke
+
+      - name: Build installer
+        run: npm -w desktop run dist:win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: desktop/release/*.exe
+          if-no-files-found: error
+          retention-days: 14

@@ -98,6 +98,9 @@
     "start_video_url": [
       "video_in"
     ],
+    "videos": [
+      "clip_in"
+    ],
     "contents": {
       "roleField": "type",
       "urlField": "url",

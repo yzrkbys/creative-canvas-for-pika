@@ -12,11 +12,12 @@ import {
   PORTS,
   MULTI_INPUT_PORTS,
 } from "./ports.js";
-import { getModel, defaultModelFor, MODELS } from "./registry.js";
+import { getModel, defaultModelFor, MODELS, BUILTIN_CONCAT_MODEL } from "./registry.js";
 import { adapterFor } from "./providers/index.js";
 import { downloadToAssets, saveBytesToAssets } from "./assets.js";
 import { saveProjectGraph } from "./persistence.js";
 import type {
+  CostEstimate,
   Edge,
   Graph,
   GraphNode,
@@ -28,6 +29,8 @@ import type {
   PortIn,
   PortOut,
   ResolvedInput,
+  RunInfo,
+  RunRequest,
 } from "./types.js";
 
 export type CanvasEvent =
@@ -36,7 +39,7 @@ export type CanvasEvent =
   | { type: "node:deleted"; id: string }
   | { type: "edge:added"; edge: Edge }
   | { type: "edge:removed"; id: string }
-  | { type: "node:status"; id: string; status: NodeStatus; error?: string }
+  | { type: "node:status"; id: string; status: NodeStatus; error?: string; lastRun?: RunInfo }
   | { type: "node:output"; id: string; output: Output }
   | { type: "viewport"; viewport: Graph["viewport"] };
 
@@ -155,6 +158,9 @@ export class Canvas extends EventEmitter {
         n.status = "failed";
         n.error = "アプリ終了により中断されました";
       }
+      // video_concat had no model before Pika Video Merge joined it; an empty
+      // id always meant the local ffmpeg concat, so say so explicitly.
+      if (n.type === "video_concat" && !n.data.model) n.data.model = BUILTIN_CONCAT_MODEL;
     }
   }
 
@@ -413,8 +419,48 @@ export class Canvas extends EventEmitter {
     return { text: this.textOf(this.node(id)) ?? "" };
   }
 
-  private resolveInputs(node: GraphNode): ResolvedInput[] {
+  /**
+   * Edges into `node`, in the order their sources should be read. Clips on
+   * clip_in play left to right by node position — the order the canvas shows
+   * and the local concat has always used — so Pika Video Merge gets the same
+   * order rather than the order the wires happened to be drawn in.
+   */
+  private incomingEdges(node: GraphNode): Edge[] {
     const incoming = this.graph.edges.filter((e) => e.target === node.id);
+    const pos = (e: Edge) => this.graph.nodes.find((n) => n.id === e.source)?.position;
+    const clips = incoming
+      .filter((e) => e.targetHandle === "clip_in")
+      .sort((a, b) => {
+        const pa = pos(a), pb = pos(b);
+        return (pa?.x ?? 0) - (pb?.x ?? 0) || (pa?.y ?? 0) - (pb?.y ?? 0);
+      });
+    return [...incoming.filter((e) => e.targetHandle !== "clip_in"), ...clips];
+  }
+
+  /**
+   * What is wired into `node` right now, for the run record. Unlike
+   * resolveInputs this never throws: the builtin nodes report a missing input
+   * from inside their job, and the record should still say what was there.
+   */
+  private describeIncoming(node: GraphNode): RunRequest["inputs"] {
+    const out: RunRequest["inputs"] = [];
+    for (const e of this.incomingEdges(node)) {
+      const src = this.graph.nodes.find((n) => n.id === e.source);
+      const kind = inputKindOf(node.type, e.targetHandle);
+      if (!src || !kind) continue;
+      if (kind === "text") {
+        const text = this.textOf(src);
+        if (text) out.push({ port: e.targetHandle, kind, url: "", textChars: text.length });
+        continue;
+      }
+      const o = [...src.data.outputs].reverse().find((x) => x.kind === kind);
+      if (o) out.push({ port: e.targetHandle, kind, url: o.url });
+    }
+    return out;
+  }
+
+  private resolveInputs(node: GraphNode): ResolvedInput[] {
+    const incoming = this.incomingEdges(node);
     const resolved: ResolvedInput[] = [];
     for (const e of incoming) {
       const src = this.graph.nodes.find((n) => n.id === e.source);
@@ -447,13 +493,24 @@ export class Canvas extends EventEmitter {
     if (node.type === "note" || node.type === "doc" || node.type === "frame")
       throw new Error(`${node.type} nodes don't run`);
     if (node.type === "web_clip") return this.runWebClip(node);
-    if (node.type === "video_concat") return this.runVideoConcat(node);
+    // video_concat runs locally unless Pika Video Merge is selected on it.
+    if (node.type === "video_concat" && !node.data.model.startsWith("pika/"))
+      return this.runVideoConcat(node);
     if (node.type === "video_trim") return this.runVideoTrim(node);
     if (node.type === "frame_extract") return this.runFrameExtract(node);
     if (node.type === "av_mux") return this.runAvMux(node);
 
     const spec = getModel(node.data.model);
-    if (!spec) throw new Error(`node ${id} has no valid model`);
+    if (!spec) {
+      // Pika retires endpoints (deepseek-v4-flash, eleven-music sfx in 2026-09),
+      // and a saved node keeps naming the one it was built with.
+      throw new Error(
+        node.data.model
+          ? `モデル「${node.data.model}」は現在の Pika カタログにありません（提供終了または名称変更）。` +
+              "ノードの「設定」から別のモデルを選んでください。"
+          : `ノード ${id} にモデルが選ばれていません。「設定」からモデルを選んでください。`,
+      );
+    }
     const adapter = adapterFor(node.data.model);
 
     const resolved = this.resolveInputs(node); // throws on missing required input
@@ -487,20 +544,68 @@ export class Canvas extends EventEmitter {
       };
     }
 
+    // Freeze what this run uses. The inspector stays editable while the job
+    // runs (a video job can take an hour), so the job must not read the node
+    // again — an edit made meanwhile belongs to the next run.
+    const params = { ...node.data.params };
+    const request: RunRequest = {
+      model: node.data.model,
+      prompt: effPrompt,
+      promptSource: node.type !== "llm_text" && textIn ? "text_in" : "node",
+      params: this.paramsSent(spec, params),
+      inputs: this.describeIncoming(node),
+    };
+    const job = this.beginJob(node, request, estimate);
+
+    // dispatch async
+    void this.execute(job, node, mediaInputs, params, request);
+    return { jobId: job.id };
+  }
+
+  /** The model params a run actually carries: declared by the model and set. */
+  private paramsSent(spec: ModelSpec, params: Record<string, unknown>): Record<string, unknown> {
+    const declared = new Set(spec.paramSchema.map((f) => f.key));
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(params)) {
+      // "" means "leave it to the model" and is never sent.
+      if (declared.has(k) && v !== "" && v !== undefined && v !== null) out[k] = v;
+    }
+    return out;
+  }
+
+  /** Builtin nodes keep their settings among the UI-owned params; pick them out by name. */
+  private builtinRequest(node: GraphNode, keys: string[]): RunRequest {
+    const params: Record<string, unknown> = {};
+    for (const k of keys) {
+      const v = node.data.params[k];
+      if (v !== "" && v !== undefined && v !== null) params[k] = v;
+    }
+    return {
+      model: node.data.model || `builtin/${node.type}`,
+      prompt: "",
+      promptSource: "node",
+      params,
+      inputs: this.describeIncoming(node),
+    };
+  }
+
+  /**
+   * Register a job and record on the node what it is about to run on, so the
+   * inspector can show the prompt and settings while the job is still going.
+   */
+  private beginJob(node: GraphNode, request: RunRequest, estimate?: CostEstimate): Job {
     const job: Job = {
       id: nanoid(),
-      nodeId: id,
+      nodeId: node.id,
       status: "queued",
       progress: 0,
       estimate,
       createdAt: new Date().toISOString(),
     };
     this.jobs.set(job.id, job);
+    node.lastRun = { ...request, jobId: job.id, startedAt: job.createdAt, estimate };
     this.setStatus(node, "queued");
-
-    // dispatch async
-    void this.execute(job, node, mediaInputs, effPrompt);
-    return { jobId: job.id };
+    return job;
   }
 
   // ノードから実行中ジョブを引いて止める。UI は jobId を保持しないので、
@@ -536,15 +641,7 @@ export class Canvas extends EventEmitter {
 
   // ---- web_clip (builtin: fetch a URL -> readable text) ----
   private runWebClip(node: GraphNode): RunResult {
-    const job: Job = {
-      id: nanoid(),
-      nodeId: node.id,
-      status: "queued",
-      progress: 0,
-      createdAt: new Date().toISOString(),
-    };
-    this.jobs.set(job.id, job);
-    this.setStatus(node, "queued");
+    const job = this.beginJob(node, this.builtinRequest(node, ["url", "maxChars"]));
     void this.executeWebClip(job, node);
     return { jobId: job.id };
   }
@@ -586,15 +683,7 @@ export class Canvas extends EventEmitter {
 
   // ---- video_concat (builtin: join clips A->B->… with ffmpeg) ----
   private runVideoConcat(node: GraphNode): RunResult {
-    const job: Job = {
-      id: nanoid(),
-      nodeId: node.id,
-      status: "queued",
-      progress: 0,
-      createdAt: new Date().toISOString(),
-    };
-    this.jobs.set(job.id, job);
-    this.setStatus(node, "queued");
+    const job = this.beginJob(node, this.builtinRequest(node, []));
     void this.executeConcat(job, node);
     return { jobId: job.id };
   }
@@ -649,15 +738,7 @@ export class Canvas extends EventEmitter {
 
   // ---- frame_extract (builtin: grab one frame from a video at a chosen time) ----
   private runVideoTrim(node: GraphNode): RunResult {
-    const job: Job = {
-      id: nanoid(),
-      nodeId: node.id,
-      status: "queued",
-      progress: 0,
-      createdAt: new Date().toISOString(),
-    };
-    this.jobs.set(job.id, job);
-    this.setStatus(node, "queued");
+    const job = this.beginJob(node, this.builtinRequest(node, ["start", "end"]));
     void this.executeVideoTrim(job, node);
     return { jobId: job.id };
   }
@@ -725,15 +806,7 @@ export class Canvas extends EventEmitter {
   }
 
   private runFrameExtract(node: GraphNode): RunResult {
-    const job: Job = {
-      id: nanoid(),
-      nodeId: node.id,
-      status: "queued",
-      progress: 0,
-      createdAt: new Date().toISOString(),
-    };
-    this.jobs.set(job.id, job);
-    this.setStatus(node, "queued");
+    const job = this.beginJob(node, this.builtinRequest(node, ["time"]));
     void this.executeFrameExtract(job, node);
     return { jobId: job.id };
   }
@@ -799,15 +872,7 @@ export class Canvas extends EventEmitter {
 
   // ---- av_mux (builtin: put an audio track onto a video with ffmpeg) ----
   private runAvMux(node: GraphNode): RunResult {
-    const job: Job = {
-      id: nanoid(),
-      nodeId: node.id,
-      status: "queued",
-      progress: 0,
-      createdAt: new Date().toISOString(),
-    };
-    this.jobs.set(job.id, job);
-    this.setStatus(node, "queued");
+    const job = this.beginJob(node, this.builtinRequest(node, ["length"]));
     void this.executeAvMux(job, node);
     return { jobId: job.id };
   }
@@ -863,8 +928,10 @@ export class Canvas extends EventEmitter {
   private setStatus(node: GraphNode, status: NodeStatus, error?: string) {
     node.status = status;
     node.error = error;
+    if ((status === "succeeded" || status === "failed") && node.lastRun && !node.lastRun.finishedAt)
+      node.lastRun.finishedAt = new Date().toISOString();
     this.touch();
-    this.emitEvent({ type: "node:status", id: node.id, status, error });
+    this.emitEvent({ type: "node:status", id: node.id, status, error, lastRun: node.lastRun });
   }
 
   // When a media node re-generates, the output it currently shows would otherwise
@@ -880,14 +947,25 @@ export class Canvas extends EventEmitter {
   private archiveSupersededOutput(node: GraphNode): void {
     const prev = node.data.outputs[node.data.outputs.length - 1];
     if (!prev || prev.kind === "text") return;
+    // The node's settings have usually moved on since `prev` was made — that is
+    // why it is being re-run. The archived copy should carry what made `prev`,
+    // which the output remembers (outputs from before it did fall back).
+    const req = prev.meta.request;
+    const uiOwned = Object.fromEntries(
+      Object.entries(node.data.params).filter(([k]) => UI_OWNED_PARAMS.has(k)),
+    );
     const snapshot: GraphNode = {
       id: nanoid(),
       type: node.type,
       position: { x: node.position.x + 36, y: node.position.y + 36 },
       data: {
-        prompt: node.data.prompt,
-        model: node.data.model,
-        params: { ...node.data.params, archived: true, archivedReason: "superseded" },
+        prompt: req && req.promptSource === "node" ? req.prompt : node.data.prompt,
+        model: req?.model ?? node.data.model,
+        params: {
+          ...(req ? { ...uiOwned, ...req.params } : node.data.params),
+          archived: true,
+          archivedReason: "superseded",
+        },
         outputs: [{ ...prev, id: nanoid() }],
       },
       status: "succeeded",
@@ -901,18 +979,34 @@ export class Canvas extends EventEmitter {
     job: Job,
     node: GraphNode,
     inputs: ResolvedInput[],
-    prompt: string,
+    params: Record<string, unknown>,
+    request: RunRequest,
   ): Promise<void> {
-    const adapter = adapterFor(node.data.model);
-    const spec = getModel(node.data.model)!;
+    // Everything below reads the frozen request, never node.data: the user may
+    // switch the node's model mid-run, and the output must still be filed under
+    // the model that actually made it.
+    const model = request.model;
+    const adapter = adapterFor(model);
     try {
       job.status = "running";
       this.setStatus(node, "running");
 
-      const result = await adapter.run(node.data.model, {
-        prompt,
-        params: node.data.params,
+      const result = await adapter.run(model, {
+        prompt: request.prompt,
+        params,
         inputs,
+        onSubmitted: (providerJobId) => {
+          if (node.lastRun?.jobId !== job.id) return; // a newer run has taken over
+          node.lastRun.providerJobId = providerJobId;
+          this.touch();
+          this.emitEvent({
+            type: "node:status",
+            id: node.id,
+            status: node.status,
+            error: node.error,
+            lastRun: node.lastRun,
+          });
+        },
       });
 
       if (this.cancelled.has(job.id)) {
@@ -941,10 +1035,12 @@ export class Canvas extends EventEmitter {
             height: raw.height,
             durationSec: raw.durationSec,
             provider: adapter.id,
-            model: node.data.model,
+            model,
             cost: result.cost,
             usage: result.usage,
             seed: raw.seed,
+            request,
+            providerJobId: result.providerJobId,
           },
           createdAt: new Date().toISOString(),
         };
@@ -956,7 +1052,6 @@ export class Canvas extends EventEmitter {
       job.status = "succeeded";
       job.progress = 1;
       this.setStatus(node, "succeeded");
-      void spec;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       job.status = "failed";

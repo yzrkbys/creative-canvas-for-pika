@@ -96,9 +96,13 @@ async function main() {
   void checkCatalogDrift();
 
   const port = Number(process.env.PORT ?? 8797);
-  server.listen(port, () => {
-    console.log(`[canvas-server] http://localhost:${port}`);
-    console.log(`[canvas-server] ws   ws://localhost:${port}/ws`);
+  // Loopback only. Listening on every interface put a paid-API front end on
+  // the LAN, and on Windows it raises a Defender Firewall prompt on first
+  // launch. PIKA_CANVAS_HOST=0.0.0.0 opts back in (e.g. reaching it from WSL2).
+  const host = process.env.PIKA_CANVAS_HOST || "127.0.0.1";
+  server.listen(port, host, () => {
+    console.log(`[canvas-server] http://${host}:${port}`);
+    console.log(`[canvas-server] ws   ws://${host}:${port}/ws`);
     console.log(
       `[canvas-server] provider: ${
         isMockMode()

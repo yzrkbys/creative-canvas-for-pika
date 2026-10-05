@@ -56,7 +56,9 @@ function applyEvent(ev: ServerEvent) {
       break;
     case "node:status":
       nodes = nodes.map((n) =>
-        n.id === ev.id ? { ...n, status: ev.status, error: ev.error } : n,
+        n.id === ev.id
+          ? { ...n, status: ev.status, error: ev.error, lastRun: ev.lastRun ?? n.lastRun }
+          : n,
       );
       break;
     case "node:output":

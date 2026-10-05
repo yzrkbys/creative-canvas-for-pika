@@ -50,8 +50,28 @@ export interface Output {
     cost?: number | null; // null = metered on an unquotable unit, NOT free
     usage?: Record<string, unknown>;
     seed?: number;
+    request?: RunRequest; // what produced this output
+    providerJobId?: string; // Pika's job id
   };
   createdAt: string;
+}
+
+// What a run was started with (frozen at start; editing the node mid-run only
+// affects the next run).
+export interface RunRequest {
+  model: string;
+  prompt: string;
+  promptSource: "node" | "text_in";
+  params: Record<string, unknown>;
+  inputs: { port: PortIn; kind: OutputKind; url: string; textChars?: number }[];
+}
+
+export interface RunInfo extends RunRequest {
+  jobId: string;
+  startedAt: string;
+  finishedAt?: string;
+  providerJobId?: string;
+  estimate?: { amount: number; currency: string; note?: string; metered?: boolean };
 }
 
 export interface NodeData {
@@ -68,6 +88,7 @@ export interface GraphNode {
   data: NodeData;
   status: NodeStatus;
   error?: string;
+  lastRun?: RunInfo;
 }
 
 export interface Edge {
@@ -128,7 +149,7 @@ export type ServerEvent =
   | { type: "node:deleted"; id: string }
   | { type: "edge:added"; edge: Edge }
   | { type: "edge:removed"; id: string }
-  | { type: "node:status"; id: string; status: NodeStatus; error?: string }
+  | { type: "node:status"; id: string; status: NodeStatus; error?: string; lastRun?: RunInfo }
   | { type: "node:output"; id: string; output: Output }
   | { type: "viewport"; viewport: Graph["viewport"] };
 

@@ -3,7 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
-const BASE = process.env.PIKA_CANVAS_SERVER_URL ?? "http://localhost:8797";
+const BASE = process.env.PIKA_CANVAS_SERVER_URL ?? "http://127.0.0.1:8797";
 
 async function api<T = any>(method: string, path: string, body?: unknown): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
@@ -133,7 +133,9 @@ server.tool(
     "image_upload/video_upload/audio_upload = a user-supplied media source (attach bytes via the upload tools/UI). " +
     "note/doc = editable text (set content with canvas_set_prompt; doc is long-form). " +
     "web_clip = fetch a URL to text (set params.url, then canvas_run). " +
-    "video_concat = join clips on clip_in (ordered left->right by node x). " +
+    "video_concat = join clips on clip_in (ordered left->right by node x). Its default model " +
+    "builtin/video-concat runs ffmpeg locally (free, picture only); set pika/pika/video-merge/merge-videos " +
+    "to keep each clip's audio (2-10 clips, billed per second). " +
     "video_trim = cut a sub-range out of video_in (params.start / params.end, each seconds | first | last | NN%), then canvas_run -> video_out. Generated clips arrive at the model's minimum length, so this is how a shot is cut to its intended duration without leaving the canvas. " +
     "frame_extract = grab one frame from video_in at params.time (seconds | first | last | NN%), then canvas_run -> image_out. " +
     "frame = visual group/label box (set title with canvas_set_prompt).",

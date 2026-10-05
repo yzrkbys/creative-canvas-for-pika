@@ -1,5 +1,5 @@
 {
-  "syncedAt": "2026-09-09T01:42:05.274Z",
+  "syncedAt": "2026-10-05T17:29:43.616Z",
   "base": "https://api.dev.pika.art",
   "entries": [
     {
@@ -1759,6 +1759,34 @@
       "description": "Anthropic Claude Fable 5 is available in the Business API catalog.",
       "method": "POST",
       "path": "/v1/media/anthropic/claude-fable-5",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 52.5
+          }
+        ],
+        "inputUsd": 10.5
+      }
+    },
+    {
+      "apiId": "anthropic/claude-fable-5.1",
+      "vendor": "anthropic",
+      "fn": null,
+      "category": "llm",
+      "name": "Anthropic Claude Fable 5.1",
+      "description": "Anthropic Claude Fable 5.1 is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/anthropic/claude-fable-5.1",
       "textField": null,
       "media": [],
       "params": [],
@@ -4062,12 +4090,89 @@
       }
     },
     {
+      "apiId": "bytedance/seedance-2.5/draft-to-video",
+      "vendor": "bytedance",
+      "fn": "draft-to-video",
+      "category": "video",
+      "name": "Seedance 2.5 Draft To Video",
+      "description": "Seedance 2.5 Draft To Video renders the 1080p final of a completed Seedance 2.5 draft job. It inherits the draft's prompt, inputs, duration, ratio and audio; output format and watermark can be set. Billed per million video output tokens at the 1080p rate, cheaper when the draft's input included video. A draft can be finalized for 7 days, and each final is charged separately.",
+      "method": "POST",
+      "path": "/v1/media/bytedance/seedance-2.5/draft-to-video",
+      "textField": null,
+      "media": [],
+      "params": [
+        {
+          "key": "draft_job_id",
+          "label": "Draft Job Id",
+          "type": "string",
+          "valueType": "string",
+          "description": "Id of a completed, undeleted Seedance 2.5 draft job of this organization, created in the last 7 days. The final inherits the draft's prompt, inputs, duration, ratio and audio. One draft can be finalized more than once; each final is its own paid job.",
+          "required": true
+        },
+        {
+          "key": "output_format",
+          "label": "Output Format",
+          "type": "select",
+          "options": [
+            "",
+            "mp4",
+            "mov"
+          ],
+          "valueType": "string",
+          "description": "Output container format."
+        },
+        {
+          "key": "watermark",
+          "label": "Watermark",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Whether to add a watermark to the output video."
+        }
+      ],
+      "defaults": {
+        "draft_job_id": "",
+        "output_format": "",
+        "watermark": "off"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "draft_job_id"
+      ],
+      "pricing": {
+        "unit": "video_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {
+              "resolution": "1080p",
+              "mode": "standard",
+              "variant": "with-video-input"
+            },
+            "usd": 7.35
+          },
+          {
+            "spec": {
+              "resolution": "1080p",
+              "mode": "standard",
+              "variant": "no-video-input"
+            },
+            "usd": 12.285
+          }
+        ]
+      }
+    },
+    {
       "apiId": "bytedance/seedance-2.5/image-to-video",
       "vendor": "bytedance",
       "fn": "image-to-video",
       "category": "video",
       "name": "Seedance 2.5 Image To Video",
-      "description": "Seedance 2.5 Image To Video is available in the Business API catalog.",
+      "description": "Seedance 2.5 Image To Video is available in the Business API catalog. A draft renders a cheap 480p preview that can be finalized at 1080p through bytedance/seedance-2.5/draft-to-video within 7 days.",
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.5/image-to-video",
       "textField": "prompt",
@@ -4091,6 +4196,17 @@
         }
       ],
       "params": [
+        {
+          "key": "draft",
+          "label": "Draft",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Render a 480p draft preview. A draft can be finalized at 1080p through 'bytedance/seedance-2.5/draft-to-video' within 7 days, charged as its own job."
+        },
         {
           "key": "duration",
           "label": "Duration",
@@ -4200,6 +4316,7 @@
         }
       ],
       "defaults": {
+        "draft": "off",
         "duration": "4",
         "resolution": "720p",
         "generate_audio": "on",
@@ -4221,13 +4338,6 @@
         "tiers": [
           {
             "spec": {
-              "resolution": "1080p",
-              "mode": "standard"
-            },
-            "usd": 9.36
-          },
-          {
-            "spec": {
               "resolution": "480p",
               "mode": "standard"
             },
@@ -4239,6 +4349,20 @@
               "mode": "standard"
             },
             "usd": 11.235
+          },
+          {
+            "spec": {
+              "resolution": "480p",
+              "mode": "draft"
+            },
+            "usd": 11.235
+          },
+          {
+            "spec": {
+              "resolution": "1080p",
+              "mode": "standard"
+            },
+            "usd": 12.285
           }
         ]
       }
@@ -4249,7 +4373,7 @@
       "fn": "reference-to-video",
       "category": "video",
       "name": "Seedance 2.5 Reference To Video",
-      "description": "Seedance 2.5 Reference To Video: generate, edit, or extend video guided by reference images, videos, and audio; editing and extension are requested through the prompt. Billed per million video output tokens; the rate depends on whether the input includes video.",
+      "description": "Seedance 2.5 Reference To Video: generate, edit, or extend video guided by reference images, videos, and audio; editing and extension are requested through the prompt. Billed per million video output tokens; the rate depends on whether the input includes video. A draft renders a cheap 480p preview that can be finalized at 1080p through bytedance/seedance-2.5/draft-to-video within 7 days.",
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.5/reference-to-video",
       "textField": "prompt",
@@ -4284,6 +4408,17 @@
         }
       ],
       "params": [
+        {
+          "key": "draft",
+          "label": "Draft",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Render a 480p draft preview. A draft can be finalized at 1080p through 'bytedance/seedance-2.5/draft-to-video' within 7 days, charged as its own job."
+        },
         {
           "key": "duration",
           "label": "Duration",
@@ -4412,6 +4547,7 @@
         }
       ],
       "defaults": {
+        "draft": "off",
         "duration": "4",
         "resolution": "720p",
         "generate_audio": "on",
@@ -4433,14 +4569,6 @@
         "tiers": [
           {
             "spec": {
-              "resolution": "1080p",
-              "mode": "standard",
-              "variant": "with-video-input"
-            },
-            "usd": 5.6
-          },
-          {
-            "spec": {
               "resolution": "480p",
               "mode": "standard",
               "variant": "with-video-input"
@@ -4457,11 +4585,19 @@
           },
           {
             "spec": {
+              "resolution": "480p",
+              "mode": "draft",
+              "variant": "with-video-input"
+            },
+            "usd": 6.72
+          },
+          {
+            "spec": {
               "resolution": "1080p",
               "mode": "standard",
-              "variant": "no-video-input"
+              "variant": "with-video-input"
             },
-            "usd": 9.36
+            "usd": 7.35
           },
           {
             "spec": {
@@ -4478,6 +4614,22 @@
               "variant": "no-video-input"
             },
             "usd": 11.235
+          },
+          {
+            "spec": {
+              "resolution": "480p",
+              "mode": "draft",
+              "variant": "no-video-input"
+            },
+            "usd": 11.235
+          },
+          {
+            "spec": {
+              "resolution": "1080p",
+              "mode": "standard",
+              "variant": "no-video-input"
+            },
+            "usd": 12.285
           }
         ]
       }
@@ -4488,13 +4640,24 @@
       "fn": "text-to-video",
       "category": "video",
       "name": "Seedance 2.5 Text To Video",
-      "description": "Seedance 2.5 Text To Video is available in the Business API catalog.",
+      "description": "Seedance 2.5 Text To Video is available in the Business API catalog. A draft renders a cheap 480p preview that can be finalized at 1080p through bytedance/seedance-2.5/draft-to-video within 7 days.",
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.5/text-to-video",
       "textField": "prompt",
       "textMaxLength": 30000,
       "media": [],
       "params": [
+        {
+          "key": "draft",
+          "label": "Draft",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Render a 480p draft preview. A draft can be finalized at 1080p through 'bytedance/seedance-2.5/draft-to-video' within 7 days, charged as its own job."
+        },
         {
           "key": "duration",
           "label": "Duration",
@@ -4610,6 +4773,7 @@
         }
       ],
       "defaults": {
+        "draft": "off",
         "duration": "4",
         "resolution": "720p",
         "generate_audio": "on",
@@ -4630,13 +4794,6 @@
         "tiers": [
           {
             "spec": {
-              "resolution": "1080p",
-              "mode": "standard"
-            },
-            "usd": 9.36
-          },
-          {
-            "spec": {
               "resolution": "480p",
               "mode": "standard"
             },
@@ -4648,6 +4805,20 @@
               "mode": "standard"
             },
             "usd": 11.235
+          },
+          {
+            "spec": {
+              "resolution": "480p",
+              "mode": "draft"
+            },
+            "usd": 11.235
+          },
+          {
+            "spec": {
+              "resolution": "1080p",
+              "mode": "standard"
+            },
+            "usd": 12.285
           }
         ]
       }
@@ -4862,7 +5033,7 @@
       "fn": "image-to-image",
       "category": "image",
       "name": "Seedream 5.0 Lite Image Editing",
-      "description": "Seedream 5.0 Lite image editing: edit or combine up to 14 reference images with a text prompt.",
+      "description": "Seedream 5.0 Lite image editing at 2K, 3K or 4K resolution with an optional aspect ratio: edit or combine up to 14 reference images with a text prompt.",
       "method": "POST",
       "path": "/v1/media/bytedance/seedream-5.0-lite/image-to-image",
       "textField": "prompt",
@@ -4910,13 +5081,32 @@
             "4K"
           ],
           "valueType": "string",
-          "description": "Output resolution."
+          "description": "Output resolution (defaults to 2K)."
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "",
+            "1:1",
+            "4:3",
+            "3:4",
+            "16:9",
+            "9:16",
+            "3:2",
+            "2:3",
+            "21:9"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio; omitted, the model picks one from the prompt."
         }
       ],
       "defaults": {
         "num_images": 1,
         "seed": "",
-        "size": ""
+        "size": "",
+        "aspect_ratio": ""
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -4943,7 +5133,7 @@
       "fn": "text-to-image",
       "category": "image",
       "name": "Seedream 5.0 Lite Image Generation",
-      "description": "Seedream 5.0 Lite Image Generation is available in the Business API catalog.",
+      "description": "Seedream 5.0 Lite image generation at 2K, 3K or 4K resolution with an optional aspect ratio.",
       "method": "POST",
       "path": "/v1/media/bytedance/seedream-5.0-lite/text-to-image",
       "textField": "prompt",
@@ -4980,13 +5170,32 @@
             "4K"
           ],
           "valueType": "string",
-          "description": "Output resolution."
+          "description": "Output resolution (defaults to 2K)."
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "",
+            "1:1",
+            "4:3",
+            "3:4",
+            "16:9",
+            "9:16",
+            "3:2",
+            "2:3",
+            "21:9"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio; omitted, the model picks one from the prompt."
         }
       ],
       "defaults": {
         "num_images": 1,
         "seed": "",
-        "size": ""
+        "size": "",
+        "aspect_ratio": ""
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -5012,7 +5221,7 @@
       "fn": "image-to-image",
       "category": "image",
       "name": "Seedream 5.0 Pro Image Editing",
-      "description": "Flagship Seedream 5.0 Pro image editing at 1K or 2K resolution (priced per resolution): combine up to 10 reference images with a text prompt. The first reference is free; each additional reference is billed per image.",
+      "description": "Flagship Seedream 5.0 Pro image editing at 1K, 1.5K or 2K resolution with an optional aspect ratio (1.5K priced as 1K): combine up to 10 reference images with a text prompt. The first reference is free; each additional reference is billed per image.",
       "method": "POST",
       "path": "/v1/media/bytedance/seedream-5.0-pro/image-to-image",
       "textField": "prompt",
@@ -5056,16 +5265,36 @@
           "options": [
             "",
             "1K",
+            "1.5K",
             "2K"
           ],
           "valueType": "string",
-          "description": "Output resolution (defaults to 2K)."
+          "description": "Output resolution (defaults to 2K); 1.5K is priced as 1K."
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "",
+            "1:1",
+            "4:3",
+            "3:4",
+            "16:9",
+            "9:16",
+            "3:2",
+            "2:3",
+            "21:9"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio; omitted, the model picks one from the prompt."
         }
       ],
       "defaults": {
         "num_images": 1,
         "seed": "",
-        "size": ""
+        "size": "",
+        "aspect_ratio": ""
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -5085,6 +5314,12 @@
           },
           {
             "spec": {
+              "resolution": "1.5K"
+            },
+            "usd": 0.045
+          },
+          {
+            "spec": {
               "resolution": "2K"
             },
             "usd": 0.09
@@ -5098,7 +5333,7 @@
       "fn": "text-to-image",
       "category": "image",
       "name": "Seedream 5.0 Pro Text to Image",
-      "description": "Flagship Seedream 5.0 Pro image generation at 1K or 2K resolution, priced per resolution.",
+      "description": "Flagship Seedream 5.0 Pro image generation at 1K, 1.5K or 2K resolution with an optional aspect ratio; 1.5K is priced as 1K.",
       "method": "POST",
       "path": "/v1/media/bytedance/seedream-5.0-pro/text-to-image",
       "textField": "prompt",
@@ -5131,16 +5366,36 @@
           "options": [
             "",
             "1K",
+            "1.5K",
             "2K"
           ],
           "valueType": "string",
-          "description": "Output resolution (defaults to 2K)."
+          "description": "Output resolution (defaults to 2K); 1.5K is priced as 1K."
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "",
+            "1:1",
+            "4:3",
+            "3:4",
+            "16:9",
+            "9:16",
+            "3:2",
+            "2:3",
+            "21:9"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio; omitted, the model picks one from the prompt."
         }
       ],
       "defaults": {
         "num_images": 1,
         "seed": "",
-        "size": ""
+        "size": "",
+        "aspect_ratio": ""
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -5159,67 +5414,17 @@
           },
           {
             "spec": {
+              "resolution": "1.5K"
+            },
+            "usd": 0.045
+          },
+          {
+            "spec": {
               "resolution": "2K"
             },
             "usd": 0.09
           }
         ]
-      }
-    },
-    {
-      "apiId": "deepseek/deepseek-v4-flash",
-      "vendor": "deepseek",
-      "fn": null,
-      "category": "llm",
-      "name": "DeepSeek V4 Flash",
-      "description": "DeepSeek V4 Flash (rolling latest snapshot) is available in the Business API catalog.",
-      "method": "POST",
-      "path": "/v1/media/deepseek/deepseek-v4-flash",
-      "textField": null,
-      "media": [],
-      "params": [],
-      "defaults": {},
-      "advanced": [],
-      "requiredAdvanced": [],
-      "requiredFields": [],
-      "pricing": {
-        "unit": "output_token",
-        "quantity": 1000000,
-        "tiers": [
-          {
-            "spec": {},
-            "usd": 0.28
-          }
-        ],
-        "inputUsd": 0.14
-      }
-    },
-    {
-      "apiId": "deepseek/deepseek-v4-flash-0731",
-      "vendor": "deepseek",
-      "fn": null,
-      "category": "llm",
-      "name": "DeepSeek V4 Flash",
-      "description": "DeepSeek V4 Flash (0731 snapshot) is available in the Business API catalog.",
-      "method": "POST",
-      "path": "/v1/media/deepseek/deepseek-v4-flash-0731",
-      "textField": null,
-      "media": [],
-      "params": [],
-      "defaults": {},
-      "advanced": [],
-      "requiredAdvanced": [],
-      "requiredFields": [],
-      "pricing": {
-        "unit": "output_token",
-        "quantity": 1000000,
-        "tiers": [
-          {
-            "spec": {},
-            "usd": 0.28
-          }
-        ],
-        "inputUsd": 0.14
       }
     },
     {
@@ -5248,6 +5453,34 @@
           }
         ],
         "inputUsd": 0.435
+      }
+    },
+    {
+      "apiId": "deepseek/deepseek-v4.1-flash",
+      "vendor": "deepseek",
+      "fn": null,
+      "category": "llm",
+      "name": "DeepSeek V4.1 Flash",
+      "description": "DeepSeek V4.1 Flash is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/deepseek/deepseek-v4.1-flash",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 1.26
+          }
+        ],
+        "inputUsd": 0.315
       }
     },
     {
@@ -5401,75 +5634,6 @@
           {
             "spec": {},
             "usd": 0.105
-          }
-        ]
-      }
-    },
-    {
-      "apiId": "elevenlabs/eleven-music/sound-effects",
-      "vendor": "elevenlabs",
-      "fn": "sound-effects",
-      "category": "audio",
-      "name": "Eleven Music Sound Effects",
-      "description": "Eleven Music Sound Effects is available in the Business API catalog.",
-      "method": "POST",
-      "path": "/v1/media/elevenlabs/eleven-music/sound-effects",
-      "textField": "prompt",
-      "textMaxLength": 4100,
-      "media": [],
-      "params": [
-        {
-          "key": "music_length_ms",
-          "label": "Music Length Ms",
-          "type": "number",
-          "valueType": "integer",
-          "description": "Length of the track in milliseconds.",
-          "min": 3000,
-          "max": 600000,
-          "step": 1,
-          "required": true
-        },
-        {
-          "key": "force_instrumental",
-          "label": "Force Instrumental",
-          "type": "select",
-          "options": [
-            "",
-            "off",
-            "on"
-          ],
-          "valueType": "boolean",
-          "description": "Whether to force an instrumental track with no vocals."
-        },
-        {
-          "key": "seed",
-          "label": "Seed",
-          "type": "number",
-          "valueType": "integer",
-          "description": "Seed for reproducible output. Defaults to a random seed.",
-          "min": 0,
-          "max": 2147483647,
-          "step": 1
-        }
-      ],
-      "defaults": {
-        "music_length_ms": 3000,
-        "force_instrumental": "",
-        "seed": ""
-      },
-      "advanced": [],
-      "requiredAdvanced": [],
-      "requiredFields": [
-        "prompt",
-        "music_length_ms"
-      ],
-      "pricing": {
-        "unit": "minute",
-        "quantity": 1,
-        "tiers": [
-          {
-            "spec": {},
-            "usd": 0.158
           }
         ]
       }
@@ -6769,6 +6933,34 @@
       }
     },
     {
+      "apiId": "google/gemini-3.8-flash",
+      "vendor": "google",
+      "fn": null,
+      "category": "llm",
+      "name": "Gemini 3.8 Flash",
+      "description": "Gemini 3.8 Flash is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/google/gemini-3.8-flash",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 7.088
+          }
+        ],
+        "inputUsd": 1.418
+      }
+    },
+    {
       "apiId": "google/gemini-omni-1.1-flash/image-to-video",
       "vendor": "google",
       "fn": "image-to-video",
@@ -7352,6 +7544,36 @@
           {
             "spec": {},
             "usd": 0.064
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "google/lyria-3.5/text-to-audio",
+      "vendor": "google",
+      "fn": "text-to-audio",
+      "category": "audio",
+      "name": "Lyria 3.5",
+      "description": "Generate a full-length song of a couple of minutes from a text prompt, with vocals and either supplied or model-written lyrics. Length, BPM, and structure are prompt-driven via timestamp ranges and [Verse]/[Chorus] section tags; there is no duration, seed, or negative-prompt parameter. Returns 44.1 kHz MP3 carrying an embedded SynthID watermark. Google model code lyria-3.5 (Preview).",
+      "method": "POST",
+      "path": "/v1/media/google/lyria-3.5/text-to-audio",
+      "textField": "prompt",
+      "textMaxLength": 4096,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt"
+      ],
+      "pricing": {
+        "unit": "request",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.092
           }
         ]
       }
@@ -8530,6 +8752,283 @@
               "mode": "QUALITY"
             },
             "usd": 0.105
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "ideogram/ideogram-4.5/image-to-image",
+      "vendor": "ideogram",
+      "fn": "image-to-image",
+      "category": "image",
+      "name": "Ideogram 4.5 Edit Image",
+      "description": "Ideogram 4.5 editing from up to five images with an optional mask, priced per image by quality.",
+      "method": "POST",
+      "path": "/v1/media/ideogram/ideogram-4.5/image-to-image",
+      "textField": "prompt",
+      "textMaxLength": 10000,
+      "media": [
+        {
+          "field": "image_urls",
+          "kinds": [
+            "image"
+          ],
+          "array": true,
+          "required": true,
+          "maxItems": 5,
+          "minItems": 1
+        },
+        {
+          "field": "mask_image_url",
+          "kinds": [
+            "image"
+          ],
+          "array": false,
+          "required": false
+        }
+      ],
+      "params": [
+        {
+          "key": "num_images",
+          "label": "Num Images",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Images to return. Each one is billed.",
+          "min": 1,
+          "max": 8,
+          "step": 1
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "min": 0,
+          "max": 2147483647,
+          "step": 1
+        },
+        {
+          "key": "enable_copyright_detection",
+          "label": "Enable Copyright Detection",
+          "type": "select",
+          "options": [
+            "",
+            "off",
+            "on"
+          ],
+          "valueType": "boolean"
+        },
+        {
+          "key": "quality",
+          "label": "Quality",
+          "type": "select",
+          "options": [
+            "very_low",
+            "low",
+            "medium",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "\"high\" picks the best of several candidates, so it takes longer."
+        },
+        {
+          "key": "size",
+          "label": "Size",
+          "type": "string",
+          "valueType": "string",
+          "description": "\"auto\", \"source\" (keep the first image's shape), or WIDTHxHEIGHT in multiples of 32, each at least 256, at most 4,194,304 pixels and 6:1. Omitted, Ideogram picks. Not accepted with a mask."
+        }
+      ],
+      "defaults": {
+        "num_images": 1,
+        "seed": "",
+        "enable_copyright_detection": "",
+        "quality": "medium",
+        "size": ""
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt",
+        "image_urls"
+      ],
+      "pricing": {
+        "unit": "image",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "quality": "very_low"
+            },
+            "usd": 0.0072
+          },
+          {
+            "spec": {
+              "quality": "low"
+            },
+            "usd": 0.027
+          },
+          {
+            "spec": {
+              "quality": "medium"
+            },
+            "usd": 0.054
+          },
+          {
+            "spec": {
+              "quality": "high"
+            },
+            "usd": 0.198
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "ideogram/ideogram-4.5/text-to-image",
+      "vendor": "ideogram",
+      "fn": "text-to-image",
+      "category": "image",
+      "name": "Ideogram 4.5 Text to Image",
+      "description": "Ideogram 4.5 image generation, priced per image by quality.",
+      "method": "POST",
+      "path": "/v1/media/ideogram/ideogram-4.5/text-to-image",
+      "textField": "prompt",
+      "textMaxLength": 10000,
+      "media": [],
+      "params": [
+        {
+          "key": "num_images",
+          "label": "Num Images",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Images to return. Each one is billed.",
+          "min": 1,
+          "max": 8,
+          "step": 1
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "min": 0,
+          "max": 2147483647,
+          "step": 1
+        },
+        {
+          "key": "enable_copyright_detection",
+          "label": "Enable Copyright Detection",
+          "type": "select",
+          "options": [
+            "",
+            "off",
+            "on"
+          ],
+          "valueType": "boolean"
+        },
+        {
+          "key": "quality",
+          "label": "Quality",
+          "type": "select",
+          "options": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "valueType": "string"
+        },
+        {
+          "key": "size",
+          "label": "Size",
+          "type": "select",
+          "options": [
+            "auto",
+            "2048x2048",
+            "1440x2880",
+            "2880x1440",
+            "1664x2496",
+            "2496x1664",
+            "1792x2240",
+            "2240x1792",
+            "1440x2560",
+            "2560x1440",
+            "1600x2560",
+            "2560x1600",
+            "1728x2304",
+            "2304x1728",
+            "1296x3168",
+            "3168x1296",
+            "1152x2944",
+            "2944x1152",
+            "1248x3328",
+            "3328x1248",
+            "1280x3072",
+            "3072x1280",
+            "1024x3072",
+            "3072x1024",
+            "1024x1024",
+            "896x1120",
+            "1120x896",
+            "864x1152",
+            "1152x864",
+            "832x1248",
+            "1248x832",
+            "800x1280",
+            "1280x800",
+            "720x1280",
+            "1280x720",
+            "720x1440",
+            "1440x720"
+          ],
+          "valueType": "string"
+        },
+        {
+          "key": "magic_prompt",
+          "label": "Magic Prompt",
+          "type": "select",
+          "options": [
+            "auto",
+            "on",
+            "off"
+          ],
+          "valueType": "string",
+          "description": "\"auto\" and \"on\" let Ideogram rewrite the prompt before rendering; \"off\" sends it as written."
+        }
+      ],
+      "defaults": {
+        "num_images": 1,
+        "seed": "",
+        "enable_copyright_detection": "",
+        "quality": "high",
+        "size": "auto",
+        "magic_prompt": "auto"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt"
+      ],
+      "pricing": {
+        "unit": "image",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "quality": "low"
+            },
+            "usd": 0.027
+          },
+          {
+            "spec": {
+              "quality": "medium"
+            },
+            "usd": 0.054
+          },
+          {
+            "spec": {
+              "quality": "high"
+            },
+            "usd": 0.09
           }
         ]
       }
@@ -11439,6 +11938,34 @@
       }
     },
     {
+      "apiId": "openai/gpt-6-astra",
+      "vendor": "openai",
+      "fn": null,
+      "category": "llm",
+      "name": "OpenAI GPT-6 Astra",
+      "description": "OpenAI GPT-6 Astra is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/openai/gpt-6-astra",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 52.5
+          }
+        ],
+        "inputUsd": 10.5
+      }
+    },
+    {
       "apiId": "openai/gpt-image-2.5-flare/image-to-image",
       "vendor": "openai",
       "fn": "image-to-image",
@@ -11578,10 +12105,10 @@
         "tiers": [
           {
             "spec": {},
-            "usd": 30
+            "usd": 28.5
           }
         ],
-        "inputUsd": 5
+        "inputUsd": 4.75
       }
     },
     {
@@ -11704,10 +12231,10 @@
         "tiers": [
           {
             "spec": {},
-            "usd": 30
+            "usd": 28.5
           }
         ],
-        "inputUsd": 5
+        "inputUsd": 4.75
       }
     },
     {
@@ -11850,10 +12377,10 @@
         "tiers": [
           {
             "spec": {},
-            "usd": 30
+            "usd": 28.5
           }
         ],
-        "inputUsd": 5
+        "inputUsd": 4.75
       }
     },
     {
@@ -11976,10 +12503,10 @@
         "tiers": [
           {
             "spec": {},
-            "usd": 30
+            "usd": 28.5
           }
         ],
-        "inputUsd": 5
+        "inputUsd": 4.75
       }
     },
     {
@@ -13074,11 +13601,20 @@
           "valueType": "integer",
           "description": "Seed for reproducible output. Defaults to a random seed.",
           "step": 1
+        },
+        {
+          "key": "prompt_override",
+          "label": "Prompt Override",
+          "type": "string",
+          "valueType": "string",
+          "description": "Optional replacement for an editable image recipe prompt; preserves its workflow.",
+          "maxLength": 10000
         }
       ],
       "defaults": {
         "pikaffect": "90s Me",
-        "seed": ""
+        "seed": "",
+        "prompt_override": ""
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -13361,6 +13897,336 @@
             "usd": 0.03
           }
         ]
+      }
+    },
+    {
+      "apiId": "pika/video-compose/compose-video",
+      "vendor": "pika",
+      "fn": "compose-video",
+      "category": "video",
+      "name": "Pika Video Compose",
+      "description": "Render a timeline into one video: lay video, image, and audio keyframes out on tracks and get back the composed clip. Billed per output second.",
+      "method": "POST",
+      "path": "/v1/media/pika/video-compose/compose-video",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [
+        {
+          "key": "tracks",
+          "label": "Tracks",
+          "required": true,
+          "description": "Timeline tracks, rendered into one video. At least one video or image track; up to 32 keyframes in total, non-overlapping within a track, ending by 1200000 ms.",
+          "schema": {
+            "description": "Timeline tracks, rendered into one video. At least one video or image track; up to 32 keyframes in total, non-overlapping within a track, ending by 1200000 ms.",
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "audio": "#/$defs/ComposeAudioTrack",
+                  "image": "#/$defs/ComposeImageTrack",
+                  "video": "#/$defs/ComposeVideoTrack"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "description": "Track identifier, unique across tracks.",
+                      "maxLength": 64,
+                      "minLength": 1,
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "type": {
+                      "const": "video",
+                      "title": "Type",
+                      "type": "string"
+                    },
+                    "keyframes": {
+                      "items": {
+                        "$ref": "#/$defs/ComposeVideoKeyframe"
+                      },
+                      "maxItems": 32,
+                      "minItems": 1,
+                      "title": "Keyframes",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "type",
+                    "keyframes"
+                  ],
+                  "title": "ComposeVideoTrack",
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "description": "Track identifier, unique across tracks.",
+                      "maxLength": 64,
+                      "minLength": 1,
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "type": {
+                      "const": "image",
+                      "title": "Type",
+                      "type": "string"
+                    },
+                    "keyframes": {
+                      "items": {
+                        "$ref": "#/$defs/ComposeImageKeyframe"
+                      },
+                      "maxItems": 32,
+                      "minItems": 1,
+                      "title": "Keyframes",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "type",
+                    "keyframes"
+                  ],
+                  "title": "ComposeImageTrack",
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "description": "Track identifier, unique across tracks.",
+                      "maxLength": 64,
+                      "minLength": 1,
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "type": {
+                      "const": "audio",
+                      "title": "Type",
+                      "type": "string"
+                    },
+                    "keyframes": {
+                      "items": {
+                        "$ref": "#/$defs/ComposeAudioKeyframe"
+                      },
+                      "maxItems": 32,
+                      "minItems": 1,
+                      "title": "Keyframes",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "type",
+                    "keyframes"
+                  ],
+                  "title": "ComposeAudioTrack",
+                  "type": "object"
+                }
+              ]
+            },
+            "maxItems": 8,
+            "minItems": 1,
+            "title": "Tracks",
+            "type": "array"
+          }
+        }
+      ],
+      "requiredAdvanced": [
+        "tracks"
+      ],
+      "requiredFields": [
+        "tracks"
+      ],
+      "pricing": {
+        "unit": "output_second",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.0002
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "pika/video-merge/merge-videos",
+      "vendor": "pika",
+      "fn": "merge-videos",
+      "category": "video",
+      "name": "Pika Video Merge",
+      "description": "Join videos into one clip: hand over two to ten in playback order and get back a single video with stereo audio, at the first clip's size and frame rate unless you choose a size, reference clip, or frame rate. Clips of a different shape get black bars. Billed per output second.",
+      "method": "POST",
+      "path": "/v1/media/pika/video-merge/merge-videos",
+      "textField": null,
+      "media": [
+        {
+          "field": "videos",
+          "kinds": [
+            "video"
+          ],
+          "array": true,
+          "required": true,
+          "maxItems": 10,
+          "minItems": 2
+        }
+      ],
+      "params": [
+        {
+          "key": "target_fps",
+          "label": "Target Fps",
+          "type": "number",
+          "valueType": "number",
+          "description": "Output frame rate, 1–60. Defaults to the reference video's frame rate.",
+          "min": 1,
+          "max": 60,
+          "step": 0.1
+        },
+        {
+          "key": "reference_video_index",
+          "label": "Reference Video Index",
+          "type": "number",
+          "valueType": "integer",
+          "description": "The video the output matches when resolution or target_fps is omitted, as an index into videos. Defaults to 0, the first video. Other clips are fit inside its size with black bars. Can't be combined with resolution.",
+          "min": 0,
+          "step": 1
+        }
+      ],
+      "defaults": {
+        "target_fps": "",
+        "reference_video_index": ""
+      },
+      "advanced": [
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "required": false,
+          "description": "Output size: a preset or an explicit {width, height} (even, 512–2048). Presets: square_hd 1024x1024, square 512x512, portrait_4_3 768x1024, portrait_16_9 576x1024, landscape_4_3 1024x768, landscape_16_9 1024x576. Omit it to use the size of the reference video (reference_video_index). Every clip is scaled to fit without distortion, with black bars filling any gap.",
+          "schema": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "width": {
+                    "description": "Output width in pixels (even, 512-2048).",
+                    "maximum": 2048,
+                    "minimum": 512,
+                    "multipleOf": 2,
+                    "title": "Width",
+                    "type": "integer"
+                  },
+                  "height": {
+                    "description": "Output height in pixels (even, 512-2048).",
+                    "maximum": 2048,
+                    "minimum": 512,
+                    "multipleOf": 2,
+                    "title": "Height",
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "width",
+                  "height"
+                ],
+                "title": "VideoDimensions",
+                "type": "object"
+              },
+              {
+                "enum": [
+                  "square_hd",
+                  "square",
+                  "portrait_4_3",
+                  "portrait_16_9",
+                  "landscape_4_3",
+                  "landscape_16_9"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Output size: a preset or an explicit {width, height} (even, 512–2048). Presets: square_hd 1024x1024, square 512x512, portrait_4_3 768x1024, portrait_16_9 576x1024, landscape_4_3 1024x768, landscape_16_9 1024x576. Omit it to use the size of the reference video (reference_video_index). Every clip is scaled to fit without distortion, with black bars filling any gap.",
+            "title": "Resolution"
+          }
+        }
+      ],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "videos"
+      ],
+      "pricing": {
+        "unit": "second",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.0002
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "qwen/qwen3.8-flash",
+      "vendor": "qwen",
+      "fn": null,
+      "category": "llm",
+      "name": "Alibaba Qwen3.8 Flash",
+      "description": "Alibaba Qwen3.8 Flash is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/qwen/qwen3.8-flash",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.417
+          }
+        ],
+        "inputUsd": 0.124
+      }
+    },
+    {
+      "apiId": "qwen/qwen3.8-max",
+      "vendor": "qwen",
+      "fn": null,
+      "category": "llm",
+      "name": "Alibaba Qwen3.8 Max",
+      "description": "Alibaba Qwen3.8 Max is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/qwen/qwen3.8-max",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 6.3
+          }
+        ],
+        "inputUsd": 2.1
       }
     },
     {
@@ -14017,6 +14883,331 @@
       }
     },
     {
+      "apiId": "sync/lipsync-2-pro/avatar",
+      "vendor": "sync",
+      "fn": "avatar",
+      "category": "video",
+      "name": "Sync Lipsync 2 Pro",
+      "description": "Lip-syncs a video to new audio with higher facial detail.",
+      "method": "POST",
+      "path": "/v1/media/sync/lipsync-2-pro/avatar",
+      "textField": null,
+      "media": [
+        {
+          "field": "video_url",
+          "kinds": [
+            "video"
+          ],
+          "array": false,
+          "required": true
+        },
+        {
+          "field": "audio_url",
+          "kinds": [
+            "audio"
+          ],
+          "array": false,
+          "required": true
+        }
+      ],
+      "params": [
+        {
+          "key": "sync_mode",
+          "label": "Sync Mode",
+          "type": "select",
+          "options": [
+            "bounce",
+            "loop",
+            "cut_off",
+            "silence",
+            "remap"
+          ],
+          "valueType": "string",
+          "description": "How a video/audio length mismatch is resolved: bounce plays the video forward then backward until the audio ends, loop restarts it, cut_off uses the shorter input, silence pads the audio through the full video, remap time-stretches the video to the audio."
+        },
+        {
+          "key": "temperature",
+          "label": "Temperature",
+          "type": "number",
+          "valueType": "number",
+          "description": "How expressive the lip movement is, 0 to 1.",
+          "min": 0,
+          "max": 1,
+          "step": 0.1
+        },
+        {
+          "key": "active_speaker_detection",
+          "label": "Active Speaker Detection",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Lip-sync only the detected active speaker when several faces are present."
+        },
+        {
+          "key": "occlusion_detection",
+          "label": "Occlusion Detection",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Detect objects covering the mouth; slower."
+        }
+      ],
+      "defaults": {
+        "sync_mode": "bounce",
+        "temperature": 0.5,
+        "active_speaker_detection": "off",
+        "occlusion_detection": "off"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "video_url",
+        "audio_url"
+      ],
+      "pricing": {
+        "unit": "minute",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 5.229
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "sync/lipsync-2/avatar",
+      "vendor": "sync",
+      "fn": "avatar",
+      "category": "video",
+      "name": "Sync Lipsync 2",
+      "description": "Lip-syncs a video to new audio.",
+      "method": "POST",
+      "path": "/v1/media/sync/lipsync-2/avatar",
+      "textField": null,
+      "media": [
+        {
+          "field": "video_url",
+          "kinds": [
+            "video"
+          ],
+          "array": false,
+          "required": true
+        },
+        {
+          "field": "audio_url",
+          "kinds": [
+            "audio"
+          ],
+          "array": false,
+          "required": true
+        }
+      ],
+      "params": [
+        {
+          "key": "sync_mode",
+          "label": "Sync Mode",
+          "type": "select",
+          "options": [
+            "bounce",
+            "loop",
+            "cut_off",
+            "silence",
+            "remap"
+          ],
+          "valueType": "string",
+          "description": "How a video/audio length mismatch is resolved: bounce plays the video forward then backward until the audio ends, loop restarts it, cut_off uses the shorter input, silence pads the audio through the full video, remap time-stretches the video to the audio."
+        },
+        {
+          "key": "temperature",
+          "label": "Temperature",
+          "type": "number",
+          "valueType": "number",
+          "description": "How expressive the lip movement is, 0 to 1.",
+          "min": 0,
+          "max": 1,
+          "step": 0.1
+        },
+        {
+          "key": "active_speaker_detection",
+          "label": "Active Speaker Detection",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Lip-sync only the detected active speaker when several faces are present."
+        },
+        {
+          "key": "occlusion_detection",
+          "label": "Occlusion Detection",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Detect objects covering the mouth; slower."
+        }
+      ],
+      "defaults": {
+        "sync_mode": "bounce",
+        "temperature": 0.5,
+        "active_speaker_detection": "off",
+        "occlusion_detection": "off"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "video_url",
+        "audio_url"
+      ],
+      "pricing": {
+        "unit": "minute",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 3.15
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "sync/sync-3/avatar",
+      "vendor": "sync",
+      "fn": "avatar",
+      "category": "video",
+      "name": "Sync 3",
+      "description": "Sync's highest-quality lip-sync, handles close-ups, obstructions and extreme angles.",
+      "method": "POST",
+      "path": "/v1/media/sync/sync-3/avatar",
+      "textField": null,
+      "media": [
+        {
+          "field": "video_url",
+          "kinds": [
+            "video"
+          ],
+          "array": false,
+          "required": true
+        },
+        {
+          "field": "audio_url",
+          "kinds": [
+            "audio"
+          ],
+          "array": false,
+          "required": true
+        }
+      ],
+      "params": [
+        {
+          "key": "sync_mode",
+          "label": "Sync Mode",
+          "type": "select",
+          "options": [
+            "bounce",
+            "loop",
+            "cut_off",
+            "silence",
+            "remap"
+          ],
+          "valueType": "string",
+          "description": "How a video/audio length mismatch is resolved: bounce plays the video forward then backward until the audio ends, loop restarts it, cut_off uses the shorter input, silence pads the audio through the full video, remap time-stretches the video to the audio."
+        },
+        {
+          "key": "temperature",
+          "label": "Temperature",
+          "type": "number",
+          "valueType": "number",
+          "description": "How expressive the lip movement is, 0 to 1.",
+          "min": 0,
+          "max": 1,
+          "step": 0.1
+        },
+        {
+          "key": "active_speaker_detection",
+          "label": "Active Speaker Detection",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Lip-sync only the detected active speaker when several faces are present."
+        },
+        {
+          "key": "occlusion_detection",
+          "label": "Occlusion Detection",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Detect objects covering the mouth; slower."
+        }
+      ],
+      "defaults": {
+        "sync_mode": "bounce",
+        "temperature": 0.5,
+        "active_speaker_detection": "off",
+        "occlusion_detection": "off"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "video_url",
+        "audio_url"
+      ],
+      "pricing": {
+        "unit": "minute",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 8.379
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "tencent/hy4-preview",
+      "vendor": "tencent",
+      "fn": null,
+      "category": "llm",
+      "name": "Tencent Hunyuan 4 Preview",
+      "description": "Tencent Hunyuan 4 Preview is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/tencent/hy4-preview",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 2.627
+          }
+        ],
+        "inputUsd": 0.876
+      }
+    },
+    {
       "apiId": "topaz/topaz-image-upscale/image-upscale",
       "vendor": "topaz",
       "fn": "image-upscale",
@@ -14344,7 +15535,7 @@
       "fn": "video-upscale",
       "category": "video",
       "name": "Topaz Video Upscale",
-      "description": "Upscale videos with Topaz Labs enhancement models. One endpoint; the `model` request field picks the enhancement model (Proteus by default), priced per second of output video by model.",
+      "description": "Upscale videos with Topaz Labs enhancement models, optionally raising the frame rate in the same job. One endpoint; the `model` request field picks the enhancement model (Proteus by default). Starlight models are priced per output frame, at a higher rate when the output's long edge exceeds 1920px. Proteus is priced per output megapixel.",
       "method": "POST",
       "path": "/v1/media/topaz/topaz-video-upscale/video-upscale",
       "textField": null,
@@ -14364,10 +15555,12 @@
           "label": "Upscale Factor",
           "type": "select",
           "options": [
+            "x1",
             "x2",
             "x4"
           ],
-          "valueType": "string"
+          "valueType": "string",
+          "description": "Output scale. `x1` means no upscale: the job carries only the frame-interpolation filter and the output keeps the source resolution, so it requires `target_fps` and forbids the proteus tuning controls (they belong to the upscale filter that `x1` omits). `x1` is a widening of the enum — the default is still `x2`."
         },
         {
           "key": "model",
@@ -14444,6 +15637,26 @@
           ],
           "valueType": "boolean",
           "description": "Encode the output with H.264 instead of the default H.265."
+        },
+        {
+          "key": "target_fps",
+          "label": "Target Fps",
+          "type": "number",
+          "valueType": "number",
+          "description": "Raise the output frame rate to this value (15-240, decimals allowed for the NTSC rates 23.976/29.97/59.94) with Topaz's Apollo frame-interpolation model, in the same job as the upscale (proteus only). The output duration is unchanged — only the frame rate goes up — and the target must exceed the source's own frame rate. Omitted keeps the source frame rate.",
+          "min": 15,
+          "max": 240,
+          "step": 0.1
+        },
+        {
+          "key": "slowdown_factor",
+          "label": "Slowdown Factor",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Stretch the output to this many times the source duration (1-16), filling the extra time with interpolated frames — smooth slow motion rather than held frames. Requires `target_fps` (proteus only). The output is billed on what it delivers, so a 2x slowdown delivers twice the frames and costs accordingly. Omitted or 1 keeps the source duration.",
+          "min": 1,
+          "max": 16,
+          "step": 1
         }
       ],
       "defaults": {
@@ -14454,7 +15667,9 @@
         "halo": "",
         "grain": "",
         "recover_detail": "",
-        "h264_output": "off"
+        "h264_output": "off",
+        "target_fps": "",
+        "slowdown_factor": ""
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -14462,44 +15677,284 @@
         "video_url"
       ],
       "pricing": {
-        "unit": "second",
-        "quantity": 1,
+        "unit": "output_megapixel",
+        "quantity": 1000,
         "tiers": [
           {
             "spec": {
               "variant": "proteus"
             },
-            "usd": 0.076
-          },
-          {
-            "spec": {
-              "variant": "starlight-fast-2"
-            },
-            "usd": 0.189
+            "usd": 0.1938
           },
           {
             "spec": {
               "variant": "starlight-mini"
             },
-            "usd": 0.378
+            "usd": 0
           },
           {
             "spec": {
               "variant": "starlight-hq"
             },
-            "usd": 0.378
+            "usd": 0
           },
           {
             "spec": {
               "variant": "starlight-sharp"
             },
-            "usd": 0.378
+            "usd": 0
+          },
+          {
+            "spec": {
+              "variant": "starlight-fast-2"
+            },
+            "usd": 0
           },
           {
             "spec": {
               "variant": "starlight-precise-2.6"
             },
-            "usd": 0.378
+            "usd": 0
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "x-ai/grok-imagine-image-2.0/image-to-image",
+      "vendor": "x-ai",
+      "fn": "image-to-image",
+      "category": "image",
+      "name": "Grok Imagine Image 2.0 Edit Image",
+      "description": "Grok Imagine Image 2.0 image editing at configurable quality and 1K or 2K resolution: combine up to 5 source images with a text prompt. Every source image is billed per input image.",
+      "method": "POST",
+      "path": "/v1/media/x-ai/grok-imagine-image-2.0/image-to-image",
+      "textField": "prompt",
+      "media": [
+        {
+          "field": "image_urls",
+          "kinds": [
+            "image"
+          ],
+          "array": true,
+          "required": true,
+          "maxItems": 5,
+          "minItems": 1
+        }
+      ],
+      "params": [
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "1K",
+            "2K"
+          ],
+          "valueType": "string"
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "1:1",
+            "2:3",
+            "3:2",
+            "3:4",
+            "4:3",
+            "9:16",
+            "16:9",
+            "9:19.5",
+            "19.5:9",
+            "9:20",
+            "20:9",
+            "1:2",
+            "2:1",
+            "21:9",
+            "5:2",
+            "auto"
+          ],
+          "valueType": "string"
+        },
+        {
+          "key": "num_images",
+          "label": "Num Images",
+          "type": "number",
+          "valueType": "integer",
+          "min": 1,
+          "max": 10,
+          "step": 1
+        },
+        {
+          "key": "quality",
+          "label": "Quality",
+          "type": "select",
+          "options": [
+            "",
+            "low",
+            "medium",
+            "auto"
+          ],
+          "valueType": "string"
+        }
+      ],
+      "defaults": {
+        "resolution": "1K",
+        "aspect_ratio": "auto",
+        "num_images": 1,
+        "quality": ""
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt",
+        "image_urls"
+      ],
+      "pricing": {
+        "unit": "image",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "quality": "low",
+              "resolution": "1K"
+            },
+            "usd": 0.042
+          },
+          {
+            "spec": {
+              "quality": "low",
+              "resolution": "2K"
+            },
+            "usd": 0.063
+          },
+          {
+            "spec": {
+              "quality": "medium",
+              "resolution": "1K"
+            },
+            "usd": 0.063
+          },
+          {
+            "spec": {
+              "quality": "medium",
+              "resolution": "2K"
+            },
+            "usd": 0.084
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "x-ai/grok-imagine-image-2.0/text-to-image",
+      "vendor": "x-ai",
+      "fn": "text-to-image",
+      "category": "image",
+      "name": "Grok Imagine Image 2.0 Text To Image",
+      "description": "Grok Imagine Image 2.0 text-to-image at configurable quality and 1K or 2K resolution.",
+      "method": "POST",
+      "path": "/v1/media/x-ai/grok-imagine-image-2.0/text-to-image",
+      "textField": "prompt",
+      "media": [],
+      "params": [
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "1K",
+            "2K"
+          ],
+          "valueType": "string"
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "1:1",
+            "2:3",
+            "3:2",
+            "3:4",
+            "4:3",
+            "9:16",
+            "16:9",
+            "9:19.5",
+            "19.5:9",
+            "9:20",
+            "20:9",
+            "1:2",
+            "2:1",
+            "21:9",
+            "5:2",
+            "auto"
+          ],
+          "valueType": "string"
+        },
+        {
+          "key": "num_images",
+          "label": "Num Images",
+          "type": "number",
+          "valueType": "integer",
+          "min": 1,
+          "max": 10,
+          "step": 1
+        },
+        {
+          "key": "quality",
+          "label": "Quality",
+          "type": "select",
+          "options": [
+            "",
+            "low",
+            "medium",
+            "auto"
+          ],
+          "valueType": "string"
+        }
+      ],
+      "defaults": {
+        "resolution": "1K",
+        "aspect_ratio": "1:1",
+        "num_images": 1,
+        "quality": ""
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt"
+      ],
+      "pricing": {
+        "unit": "image",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "quality": "low",
+              "resolution": "1K"
+            },
+            "usd": 0.042
+          },
+          {
+            "spec": {
+              "quality": "low",
+              "resolution": "2K"
+            },
+            "usd": 0.063
+          },
+          {
+            "spec": {
+              "quality": "medium",
+              "resolution": "1K"
+            },
+            "usd": 0.063
+          },
+          {
+            "spec": {
+              "quality": "medium",
+              "resolution": "2K"
+            },
+            "usd": 0.084
           }
         ]
       }
@@ -15291,6 +16746,34 @@
           }
         ],
         "inputUsd": 1.47
+      }
+    },
+    {
+      "apiId": "z-ai/glm-5.3-flash",
+      "vendor": "z-ai",
+      "fn": null,
+      "category": "llm",
+      "name": "Z.ai GLM 5.3 Flash",
+      "description": "Z.ai GLM 5.3 Flash is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/z-ai/glm-5.3-flash",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.525
+          }
+        ],
+        "inputUsd": 0.158
       }
     }
   ]

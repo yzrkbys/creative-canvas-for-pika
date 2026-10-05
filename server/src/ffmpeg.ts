@@ -1,31 +1,58 @@
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
+import path from "node:path";
+
+const IS_WINDOWS = process.platform === "win32";
+
+/**
+ * Where package managers put the binary. A GUI app does not see the PATH a
+ * shell would (macOS launches it with a bare one; on Windows a PATH entry added
+ * by an install made after login may not have reached Explorer yet), so the
+ * usual locations are tried before falling back to PATH.
+ */
+function candidates(name: string): string[] {
+  if (!IS_WINDOWS) return [`/opt/homebrew/bin/${name}`, `/usr/local/bin/${name}`, `/usr/bin/${name}`];
+  const exe = `${name}.exe`;
+  const env = process.env;
+  return [
+    // winget install Gyan.FFmpeg (the route the README gives)
+    env.LOCALAPPDATA && path.join(env.LOCALAPPDATA, "Microsoft", "WinGet", "Links", exe),
+    // scoop / chocolatey
+    env.USERPROFILE && path.join(env.USERPROFILE, "scoop", "shims", exe),
+    env.ProgramData && path.join(env.ProgramData, "chocolatey", "bin", exe),
+    // unzipped by hand, the layout ffmpeg's own Windows builds ship in
+    env.ProgramFiles && path.join(env.ProgramFiles, "ffmpeg", "bin", exe),
+    path.join("C:\\", "ffmpeg", "bin", exe),
+  ].filter((c): c is string => !!c);
+}
 
 // Resolve a binary: explicit env override, then common install locations, then PATH.
 function findBin(name: string, envVar: string): string {
   const env = process.env[envVar];
   if (env) return env;
-  for (const c of [`/opt/homebrew/bin/${name}`, `/usr/local/bin/${name}`, `/usr/bin/${name}`])
-    if (existsSync(c)) return c;
-  return name; // fall back to PATH
+  for (const c of candidates(name)) if (existsSync(c)) return c;
+  return name; // fall back to PATH (spawn finds name.exe there on Windows)
 }
 
 const FFMPEG = findBin("ffmpeg", "PIKA_CANVAS_FFMPEG");
 const FFPROBE = findBin("ffprobe", "PIKA_CANVAS_FFPROBE");
 
+const INSTALL_HINT = IS_WINDOWS
+  ? "PowerShell で `winget install Gyan.FFmpeg` を実行してからアプリを再起動するか、" +
+    "設定ファイルの PIKA_CANVAS_FFMPEG / PIKA_CANVAS_FFPROBE に ffmpeg.exe / ffprobe.exe の場所を書いてください"
+  : "`brew install ffmpeg` でインストールするか、PIKA_CANVAS_FFMPEG / PIKA_CANVAS_FFPROBE で場所を指定してください";
+
 function run(bin: string, args: string[]): Promise<string> {
   return new Promise((resolve, reject) => {
-    const p = spawn(bin, args);
+    // windowsHide: the server runs under a GUI app, and without it every
+    // ffmpeg call flashes a console window on Windows.
+    const p = spawn(bin, args, { windowsHide: true });
     let out = "";
     let err = "";
     p.stdout.on("data", (d) => (out += d));
     p.stderr.on("data", (d) => (err += d));
     p.on("error", (e) =>
-      reject(
-        new Error(
-          `${bin} の起動に失敗しました（インストール済みか確認してください）: ${e.message}`,
-        ),
-      ),
+      reject(new Error(`${bin} の起動に失敗しました（${INSTALL_HINT}）: ${e.message}`)),
     );
     p.on("close", (code) =>
       code === 0 ? resolve(out) : reject(new Error(`${bin} failed: ${err.slice(-400)}`)),

@@ -49,7 +49,12 @@ export const mockAdapter: ProviderAdapter = {
   async run(model, args: ProviderRunArgs): Promise<ProviderRunResult> {
     const spec = getModel(model);
     const kind = spec?.kind ?? "image";
-    await new Promise((r) => setTimeout(r, 600)); // simulate latency
+    const providerJobId = `mock-${Date.now().toString(36)}`;
+    args.onSubmitted?.(providerJobId);
+    // Simulated latency. MOCK_LATENCY_MS stretches it so the in-progress UI
+    // (inspector, elapsed time) can be exercised without a real hour-long job.
+    const latency = Number(process.env.MOCK_LATENCY_MS) || 600;
+    await new Promise((r) => setTimeout(r, latency));
 
     // Text models have no picture to fake — echo the prompt so downstream text
     // nodes still receive something to work with.
@@ -57,6 +62,7 @@ export const mockAdapter: ProviderAdapter = {
       return {
         outputs: [{ kind: "text", url: "", text: `[MOCK ${model}]\n\n${args.prompt}` }],
         cost: 0,
+        providerJobId,
       };
     }
     // No placeholder audio: an SVG served as audio would fail to decode and
@@ -65,6 +71,7 @@ export const mockAdapter: ProviderAdapter = {
       return {
         outputs: [{ kind: "text", url: "", text: `[MOCK audio: ${model}]\n${args.prompt}` }],
         cost: 0,
+        providerJobId,
       };
     }
 
@@ -87,6 +94,7 @@ export const mockAdapter: ProviderAdapter = {
         const est = this.estimateCost(model, args.params, args.inputs, args.prompt);
         return est.metered ? null : est.amount;
       })(),
+      providerJobId,
     };
   },
 };

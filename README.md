@@ -47,11 +47,13 @@ one node type, because the model's own schema decides which ports it needs.
     generations only.
   - No key? `MOCK_PROVIDER=1` runs the whole app against placeholder output, free.
 - **ffmpeg / ffprobe** — for the local nodes (concat, trim, frame extract, audio mux).
-  `brew install ffmpeg` on macOS.
+  - macOS: `brew install ffmpeg`
+  - Windows: `winget install Gyan.FFmpeg` in PowerShell (then restart the app)
 - **Claude Code** — optional, but it is how the MCP half is meant to be driven.
 
-Built and tested on **macOS (Apple Silicon)**. The code is cross-platform and the packaging
-config currently targets macOS only; a Windows build is not yet wired up.
+Runs on **macOS (Apple Silicon)** and **Windows 10 / 11 (x64)**. The Windows build and a smoke
+test of it (`desktop/smoke.mjs`) run on a GitHub Actions Windows runner
+(`.github/workflows/windows.yml`).
 
 ---
 
@@ -64,13 +66,28 @@ npm install
 npm run app
 ```
 
-`npm run app` builds the web bundle and the server, then launches the desktop app.
+`npm run app` builds the web bundle and the server, then launches the desktop app. On Windows,
+run the same commands in PowerShell or the Command Prompt.
 
 **Set your API key** from the app's menu: **Canvas → 設定（APIキー）を開く**. Paste
-`PIKA_API_KEY=...` into the file that opens, save, and restart the app. The key lives in
-your user data directory, never in the repository.
+`PIKA_API_KEY=...` into the file that opens (Notepad, on Windows), save, and choose
+**Canvas → 設定を反映して再起動** (apply and restart). The key lives in your user data directory,
+never in the repository.
 
-### Packaging a `.app`
+### Packaging a Windows installer
+
+```bash
+npm run app:dist:win    # → desktop/release/CreativeCanvasForPika-Setup-<version>.exe
+```
+
+Build it on Windows, or cross-build it from macOS (the first run downloads Electron for Windows
+and NSIS). The installer installs per user, so it needs no admin rights, and uninstalling keeps
+your work in `%APPDATA%`.
+
+The build is **unsigned**, so SmartScreen will say "Windows protected your PC" on first launch.
+Choose **More info → Run anyway**. Making that go away takes a code-signing certificate.
+
+### Packaging a `.app` (macOS)
 
 ```bash
 npm run app:dist        # → desktop/release/
@@ -93,7 +110,8 @@ Signing it yourself requires an Apple Developer ID.
 Open this folder in Claude Code. The bundled `.mcp.json` registers an MCP server named
 **`creative-canvas-pika`** (deliberately not `creative-canvas`, so it can coexist with other
 canvases you may have registered). Start the desktop app first — the MCP server talks to it
-over `localhost:8797` — then just ask:
+over `127.0.0.1:8797` — then just ask. The MCP server is launched with `node` directly rather
+than through `npx`, so it needs no `cmd /c` wrapper on Windows.
 
 - "Make an image node for a sunset over Mount Fuji and generate it"
 - "Turn that image into a 5-second clip"
@@ -114,10 +132,30 @@ Nodes appear on the canvas as they are created, live.
 | Layout | `frame` | a visual grouping box |
 
 The ffmpeg-backed nodes (`video_trim`, `video_concat`, `frame_extract`, `av_mux`) and
-`web_clip` run locally and cost nothing.
+`web_clip` run locally and cost nothing. `video_concat` defaults to a local ffmpeg join, which
+keeps the picture only; switch its model to **Pika Video Merge** (2–10 clips, $0.0002/s) to keep
+each clip's audio. Either way the clips play left to right as laid out on the canvas.
 
 The **scoring round trip** closes inside the canvas:
 `video_gen → video_to_audio` (score the cut) `→ av_mux` (put the track back on the picture).
+
+### Checking a job while it runs
+
+A generating node's settings panel stays reachable — through **設定** or **内容を確認** on the
+node. Its first section shows what the running job was actually sent:
+
+- the model, the prompt (marked when it came from an upstream text node), the parameters and
+  thumbnails of the wired inputs
+- elapsed time, the estimate, and the **Pika job id** (copyable — for looking the job up on
+  Pika's side, and for finalising drafts, below)
+
+A job is **frozen at start**: editing the prompt or switching the model while it runs changes
+the next run, not this one. Every output also records what made it, so when a re-run sends the
+previous result to the archive, that result keeps the model and prompt that produced it.
+
+**Seedance 2.5 drafts**: turn `draft` on to get a 480p preview first. To finalise it, paste its
+job id into *Draft Job Id* on "Seedance 2.5 Draft To Video" for a 1080p render that inherits the
+draft's prompt and inputs (within 7 days; the final is billed as its own job).
 
 ---
 
@@ -220,8 +258,20 @@ measured at 44–55 minutes. The app polls for up to 180 minutes. Giving up earl
 orphan a job that Pika keeps running — and keeps billing.
 
 **`ffmpeg failed` / `ffmpeg の起動に失敗しました`.**
-ffmpeg is not on `PATH`. Install it, or point at it explicitly with `PIKA_CANVAS_FFMPEG` and
-`PIKA_CANVAS_FFPROBE`.
+ffmpeg was not found. Besides `PATH`, the app looks in Homebrew's locations (macOS) and in
+winget / scoop / Chocolatey / `C:\ffmpeg\bin` (Windows). Restart the app if you just installed
+it; otherwise set `PIKA_CANVAS_FFMPEG` and `PIKA_CANVAS_FFPROBE` in the settings file
+(e.g. `PIKA_CANVAS_FFMPEG=C:\ffmpeg\bin\ffmpeg.exe`).
+
+**A model shows ⚠ / "現在の Pika カタログにありません" (no longer in the catalog).**
+Pika has retired it (the 2026-10 sync dropped `deepseek-v4-flash` and the `eleven-music` sound
+effects). Pick another model in the node's settings. The run stops before billing, so nothing
+was charged.
+
+**Connecting the MCP server from somewhere else (e.g. WSL2).**
+The bundled server listens on `127.0.0.1` only — it fronts a paid API, so it stays off the LAN,
+and Windows raises no firewall prompt. If you really need outside access, put
+`PIKA_CANVAS_HOST=0.0.0.0` in the settings file and restart.
 
 **A model you can see on Pika's site is missing from the list.**
 Re-run the sync with your key (`PIKA_API_KEY=... npm run sync:catalog`); early-access models
@@ -246,6 +296,17 @@ its own data directory:
 ```bash
 PORT=8891 PIKA_CANVAS_DATA_DIR=/tmp/canvas-dev node_modules/.bin/tsx server/src/index.ts
 ```
+
+On Windows (PowerShell):
+
+```powershell
+$env:PORT=8891; $env:PIKA_CANVAS_DATA_DIR="$env:TEMP\canvas-dev"; node node_modules/tsx/dist/cli.mjs server/src/index.ts
+```
+
+Add `MOCK_PROVIDER=1` to run without billing, and `MOCK_LATENCY_MS=20000` to watch the
+in-progress UI at leisure. The server bundle the app ships can be exercised end to end in mock
+mode (a generation and an ffmpeg concat) with
+`npm -w desktop run build:all && npm -w desktop run smoke`.
 
 ---
 
