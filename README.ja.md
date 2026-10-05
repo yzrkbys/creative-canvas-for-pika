@@ -46,11 +46,13 @@ reference-to-video / video-to-video / extension / motion-control / avatar を賄
   - 画像・動画・音声・LLM の全モデルがこのキー1本で動きます。**成功した生成のみ課金**されます。
   - キーが無くても `MOCK_PROVIDER=1` でプレースホルダ生成の動作確認ができます（無料）。
 - **ffmpeg / ffprobe** … ローカル実行のノード（連結・トリム・フレーム抽出・音声合成）用。
-  macOS なら `brew install ffmpeg`。
+  - macOS: `brew install ffmpeg`
+  - Windows: PowerShell で `winget install Gyan.FFmpeg`（入れたらアプリを再起動）
 - **Claude Code** … 必須ではありませんが、MCP 側はこれで動かす前提の設計です。
 
-**macOS（Apple Silicon）**でビルド・動作確認しています。コード自体はクロスプラットフォームですが、
-パッケージング設定は現状 macOS のみで、Windows ビルドは未整備です。
+**macOS（Apple Silicon）** と **Windows 10 / 11（x64）** に対応しています。Windows 向けのビルドと
+スモークテスト（`desktop/smoke.mjs`）は GitHub Actions の Windows ランナーで回します
+（`.github/workflows/windows.yml`）。
 
 ---
 
@@ -64,12 +66,26 @@ npm run app
 ```
 
 `npm run app` で web とサーバをビルドし、デスクトップアプリを起動します。
+Windows でも同じコマンドを PowerShell（またはコマンドプロンプト）で実行します。
 
-**APIキーの設定**はメニューから: **Canvas → 設定（APIキー）を開く**。開いたファイルに
-`PIKA_API_KEY=...` を貼って保存し、アプリを再起動してください。キーはユーザーデータ
-ディレクトリに保存され、リポジトリには入りません。
+**APIキーの設定**はメニューから: **Canvas → 設定（APIキー）を開く**。開いたファイル
+（Windows ではメモ帳で開きます）に `PIKA_API_KEY=...` を貼って保存し、**Canvas → 設定を反映して再起動**
+を選んでください。キーはユーザーデータディレクトリに保存され、リポジトリには入りません。
 
-### `.app` を書き出す
+### Windows のインストーラを書き出す
+
+```bash
+npm run app:dist:win    # → desktop/release/CreativeCanvasForPika-Setup-<version>.exe
+```
+
+Windows 上で実行するのが基本ですが、macOS からもクロスビルドできます（初回は Electron の
+Windows 版と NSIS をダウンロードします）。インストーラはユーザー単位でインストールするので
+管理者権限は要りません。アンインストールしても作業データ（`%APPDATA%` 側）は残ります。
+
+ビルドは**未署名**なので、初回起動時に SmartScreen が「Windows によって PC が保護されました」と
+出します。**詳細情報 → 実行**で起動してください。表示を出さないにはコード署名証明書が必要です。
+
+### `.app` を書き出す（macOS）
 
 ```bash
 npm run app:dist        # → desktop/release/
@@ -90,8 +106,9 @@ xattr -dr com.apple.quarantine "/Applications/Creative Canvas for Pika API Club.
 
 このフォルダを Claude Code で開くと、同梱の `.mcp.json` が **`creative-canvas-pika`** という名前で
 MCP サーバを登録します（`creative-canvas` にしていないのは、別のキャンバスを登録していても
-共存できるようにするためです）。先にデスクトップアプリを起動してから（MCP は `localhost:8797`
-経由で通信します）、チャットで指示するだけです。
+共存できるようにするためです）。先にデスクトップアプリを起動してから（MCP は `127.0.0.1:8797`
+経由で通信します）、チャットで指示するだけです。MCP は `npx` を介さず `node` で直接起動するので、
+Windows でも `cmd /c` などの包み方は要りません。
 
 - 「『夕焼けの富士山』の画像ノードを作って生成して」
 - 「この画像から5秒の動画を作って」
@@ -112,10 +129,28 @@ MCP サーバを登録します（`creative-canvas` にしていないのは、�
 | レイアウト | `frame` | 視覚的なグルーピング枠 |
 
 ffmpeg で動くノード（`video_trim` `video_concat` `frame_extract` `av_mux`）と `web_clip` は
-ローカル実行なので無料です。
+ローカル実行なので無料です。`video_concat` は既定の「ローカル連結（ffmpeg）」が映像だけを繋ぐので、
+各クリップの音声を残したいときはモデルを **Pika Video Merge**（2〜10本・$0.0002/秒）に切り替えてください。
+どちらもクリップは左→右の並び順で繋がります。
 
 **スコアリングの往復**がキャンバス内で閉じます:
 `video_gen → video_to_audio`（カットに劇伴/SEを付ける）`→ av_mux`（映像に戻す）。
+
+### 生成中に内容を確認する
+
+生成中のノードでも **「設定」** や **「内容を確認」** から設定パネルを開けます。先頭の
+**「実行中の内容」** に、そのジョブに実際に送ったものが出ます。
+
+- モデル、プロンプト（上流のテキストノードから来た場合はそう表示）、パラメータ、入力のサムネイル
+- 経過時間、見積り、**Pika ジョブID**（コピー可。Pika 側での照会や下記のドラフト確定に使います）
+
+ジョブは**開始時の内容で固定**されるので、生成中にプロンプトやモデルを書き換えても実行中のジョブには
+影響せず、次回の実行から反映されます。完了した出力にも「何で作ったか」が記録されるので、再生成で
+アーカイブに回った前の結果は、その結果を作ったときのモデルとプロンプトを持ったまま残ります。
+
+**Seedance 2.5 のドラフト**: `draft` を on にすると 480p のドラフトで先に確認できます。気に入ったら、
+そのジョブIDを「Seedance 2.5 Draft To Video」の Draft Job Id に貼ると、プロンプトや入力を引き継いだ
+1080p の本番を書き出せます（7日以内・本番は別ジョブとして課金）。
 
 ---
 
@@ -214,8 +249,19 @@ master を黙って縮小する方が悪い失敗だからです（気づけま�
 **課金され続けている**ジョブを見失うためです。
 
 **`ffmpeg の起動に失敗しました` と出る。**
-ffmpeg が `PATH` にありません。インストールするか、`PIKA_CANVAS_FFMPEG` と
-`PIKA_CANVAS_FFPROBE` で場所を明示してください。
+ffmpeg が見つかっていません。アプリは `PATH` に加えて、Homebrew（macOS）と winget / scoop /
+Chocolatey / `C:\ffmpeg\bin`（Windows）の標準の場所を探します。インストール直後ならアプリを再起動し、
+それでも駄目なら設定ファイルに `PIKA_CANVAS_FFMPEG` と `PIKA_CANVAS_FFPROBE` で場所を書いてください
+（例: `PIKA_CANVAS_FFMPEG=C:\ffmpeg\bin\ffmpeg.exe`）。
+
+**モデル名の横に ⚠ が出る / 「現在の Pika カタログにありません」と出る。**
+Pika が提供を終えたモデルです（2026-10 の同期では `deepseek-v4-flash` と `eleven-music` の効果音が
+終了）。ノードの「設定」から別のモデルを選び直してください。課金前に止まるので、費用は掛かっていません。
+
+**WSL2 など別の環境から MCP で繋ぎたい。**
+内蔵サーバは安全のため `127.0.0.1` だけで待ち受けます（LAN に課金APIを晒さず、Windows で
+ファイアウォールの確認も出さないため）。外から繋ぐ必要がある場合だけ、設定ファイルに
+`PIKA_CANVAS_HOST=0.0.0.0` を書いて再起動してください。
 
 **Pika のサイトで見えるモデルが一覧に出ない。**
 キー付きで同期し直してください（`PIKA_API_KEY=... npm run sync:catalog`）。アーリーアクセスの
@@ -241,6 +287,16 @@ npm run typecheck    # server / mcp / web
 ```bash
 PORT=8891 PIKA_CANVAS_DATA_DIR=/tmp/canvas-dev node_modules/.bin/tsx server/src/index.ts
 ```
+
+Windows（PowerShell）では:
+
+```powershell
+$env:PORT=8891; $env:PIKA_CANVAS_DATA_DIR="$env:TEMP\canvas-dev"; node node_modules/tsx/dist/cli.mjs server/src/index.ts
+```
+
+`MOCK_PROVIDER=1` を足すと無課金で動き、`MOCK_LATENCY_MS=20000` で生成中の表示をゆっくり確かめられます。
+パッケージに入るサーバ一式は `npm -w desktop run build:all && npm -w desktop run smoke` で
+モックのまま一通り（生成・ffmpeg 連結）検査できます。
 
 ---
 
