@@ -108,7 +108,14 @@ const NODE_TYPE_BY_FUNCTION: Record<string, NodeType> = {
   "motion-control": "video_gen",
   "omni-video": "video_gen",
   avatar: "video_gen",
+  // Seedance 2.5 renders the 1080p final of an earlier draft run. It takes no
+  // media at all — only the draft's Pika job id (`draft_job_id`), which the
+  // inspector shows on every run so it can be copied across.
+  "draft-to-video": "video_gen",
   "video-upscale": "video_upscale",
+  // Pika's own concatenation. Same job as the local ffmpeg concat on the same
+  // node, but it keeps each clip's audio (the local one drops it).
+  "merge-videos": "video_concat",
 
   "text-to-speech": "audio_gen",
   "text-to-audio": "audio_gen",
@@ -141,11 +148,21 @@ const NODE_TYPE_BY_FUNCTION: Record<string, NodeType> = {
   transcription: "transcribe",
 };
 
+// Functions the canvas deliberately does not offer, with the reason. Listed so
+// that skipping them is a decision on record rather than a boot-time warning.
+const UNSUPPORTED_FUNCTIONS: Record<string, string> = {
+  // A multi-track timeline (tracks -> keyframes -> {url, timestamp, duration})
+  // that the canvas's wiring cannot express, and whose URLs must already be
+  // Pika-hosted — so a node for it could only ever be filled in by hand.
+  "compose-video": "timeline tracks cannot be wired from the canvas",
+};
+
 const KIND_BY_NODE_TYPE: Partial<Record<NodeType, OutputKind>> = {
   image_gen: "image",
   image_edit: "image",
   video_gen: "video",
   video_upscale: "video",
+  video_concat: "video",
   audio_gen: "audio",
   video_to_audio: "audio",
   transcribe: "text",
@@ -206,6 +223,7 @@ function applyPreferredParams(entry: CatalogEntry): Record<string, unknown> {
 }
 
 function specOf(entry: CatalogEntry): ModelSpec | null {
+  if (entry.fn && entry.fn in UNSUPPORTED_FUNCTIONS) return null;
   const nodeType = entry.category === "llm" ? "llm_text" : NODE_TYPE_BY_FUNCTION[entry.fn ?? ""];
   if (!nodeType) {
     console.warn(
@@ -294,6 +312,8 @@ export function getEntry(modelId: string): CatalogEntry | undefined {
 // builtin models (not Pika): free local utilities.
 // ---------------------------------------------------------------------------
 
+export const BUILTIN_CONCAT_MODEL = "builtin/video-concat";
+
 const BUILTIN_MODELS: ModelSpec[] = [
   {
     id: "builtin/web-clip",
@@ -323,6 +343,22 @@ const BUILTIN_MODELS: ModelSpec[] = [
     ],
     defaults: { start: "0", end: "last" },
   },
+  {
+    // The default for video_concat: free and offline, but picture only. Pika
+    // Video Merge sits next to it on the same node for when the audio matters.
+    id: BUILTIN_CONCAT_MODEL,
+    provider: "builtin",
+    path: "video-concat",
+    label: "ローカル連結（ffmpeg）",
+    kind: "video",
+    nodeTypes: ["video_concat"],
+    priceHint: "free (ffmpeg)",
+    description:
+      "この端末の ffmpeg で連結します。無料・オフラインで動きますが、音声は落ちます。" +
+      "音声を残すなら Pika Video Merge を選んでください。",
+    paramSchema: [],
+    defaults: {},
+  },
 ];
 
 export const MODELS: ModelSpec[] = [...PIKA_MODELS, ...BUILTIN_MODELS];
@@ -333,7 +369,10 @@ export const MODELS: ModelSpec[] = [...PIKA_MODELS, ...BUILTIN_MODELS];
 // falls back to the first model that fits the node type.
 const PREFERRED_DEFAULT: Partial<Record<NodeType, string>> = {
   image_gen: "pika/bytedance/seedream-5.0-pro/text-to-image",
-  image_edit: "pika/openai/gpt-image-2/image-to-image",
+  // GPT Image 2.5 supersedes 2 at a slightly lower rate ($28.5 vs $30 / 1M).
+  // Flare and Sunburst publish identical schemas and prices; Flare is simply
+  // the first of the pair, and Sunburst stays one click away.
+  image_edit: "pika/openai/gpt-image-2.5-flare/image-to-image",
   video_gen: "pika/bytedance/seedance-2.0/reference-to-video",
   video_upscale: "pika/topaz/topaz-video-upscale/video-upscale",
   audio_gen: "pika/elevenlabs/eleven-multilingual-v2/text-to-speech",
@@ -343,6 +382,7 @@ const PREFERRED_DEFAULT: Partial<Record<NodeType, string>> = {
   video_to_audio: "pika/sonilo/sonilo-v1.1-music/video-to-music",
   transcribe: "pika/openai/whisper/transcription",
   llm_text: "pika/anthropic/claude-opus-5",
+  video_concat: BUILTIN_CONCAT_MODEL,
 };
 
 export function getModel(id: string): ModelSpec | undefined {

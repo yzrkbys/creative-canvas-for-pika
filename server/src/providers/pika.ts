@@ -885,6 +885,7 @@ export const pikaAdapter: ProviderAdapter = {
     const body = buildBody(entry, args.prompt, params, resolved);
     const submitted = await pika<{ id?: string }>(entry.method, entry.path, body);
     if (!submitted?.id) throw new Error(`Pika did not return a job id: ${JSON.stringify(submitted).slice(0, 200)}`);
+    args.onSubmitted?.(submitted.id);
 
     const job = await waitForJob(submitted.id);
     const url = await resultUrl(job);
@@ -902,6 +903,7 @@ export const pikaAdapter: ProviderAdapter = {
       outputs,
       cost: est.metered ? null : est.amount,
       usage: usageOf(job),
+      providerJobId: submitted.id,
     };
   },
 };

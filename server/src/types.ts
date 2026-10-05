@@ -66,6 +66,13 @@ export interface OutputMeta {
   // a real figure can be reconciled later without re-running anything.
   usage?: Record<string, unknown>;
   seed?: number;
+  // What produced this output. The node's own prompt/params usually move on
+  // after a run (that is why it gets re-run), so without this an output cannot
+  // say which prompt made it.
+  request?: RunRequest;
+  // The provider's id for the job (Pika's media job id). Needed to look a job
+  // up on the provider's side, and as the input of Seedance 2.5 draft-to-video.
+  providerJobId?: string;
 }
 
 export interface Output {
@@ -85,6 +92,29 @@ export interface NodeData {
   outputs: Output[];
 }
 
+/**
+ * A run's inputs as they were when it started — the effective prompt (which
+ * may have come from an upstream text node), the model params actually in
+ * play, and the media wired in. A job runs on this snapshot, so editing the
+ * node while it generates only affects the next run.
+ */
+export interface RunRequest {
+  model: string;
+  prompt: string;
+  // "text_in": the prompt came from a connected text node, not the node's box.
+  promptSource: "node" | "text_in";
+  params: Record<string, unknown>;
+  inputs: { port: PortIn; kind: OutputKind; url: string; textChars?: number }[];
+}
+
+export interface RunInfo extends RunRequest {
+  jobId: string;
+  startedAt: string;
+  finishedAt?: string;
+  providerJobId?: string;
+  estimate?: CostEstimate;
+}
+
 export interface GraphNode {
   id: string;
   type: NodeType;
@@ -92,6 +122,9 @@ export interface GraphNode {
   data: NodeData;
   status: NodeStatus;
   error?: string;
+  // The most recent run, kept after it ends so the inspector can show what
+  // was sent even while (and after) the job runs.
+  lastRun?: RunInfo;
 }
 
 export interface Edge {
@@ -147,12 +180,16 @@ export interface ProviderRunArgs {
   prompt: string;
   params: Record<string, unknown>;
   inputs: ResolvedInput[];
+  // Called once the provider has accepted the job, long before it finishes —
+  // a video job can run for an hour and its id is worth seeing meanwhile.
+  onSubmitted?: (providerJobId: string) => void;
 }
 
 export interface ProviderRunResult {
   outputs: RawOutput[];
   cost: number | null; // null = metered on an unquotable unit (see OutputMeta.cost)
   usage?: Record<string, unknown>;
+  providerJobId?: string;
 }
 
 export interface ProviderAdapter {

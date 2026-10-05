@@ -2,13 +2,13 @@
   "mcpServers": {
     "creative-canvas-pika": {
       "type": "stdio",
-      "command": "npx",
+      "command": "node",
       "args": [
-        "tsx",
+        "node_modules/tsx/dist/cli.mjs",
         "mcp/src/index.ts"
       ],
       "env": {
-        "PIKA_CANVAS_SERVER_URL": "http://localhost:8797"
+        "PIKA_CANVAS_SERVER_URL": "http://127.0.0.1:8797"
       }
     }
   }

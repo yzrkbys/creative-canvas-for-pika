@@ -3,6 +3,7 @@ import { api } from "./api";
 import { labelOf } from "./labels";
 import type { GraphNode, ModelSpec, ParamField } from "./types";
 import { useDismissibleLayer } from "./useDismissibleLayer";
+import { RunDetails } from "./RunDetails";
 
 function vendorOf(model: ModelSpec): string {
   const parts = model.id.replace(/^pika\//, "").split("/");
@@ -230,6 +231,8 @@ export function NodeInspector({
           </button>
         </header>
         <div className="inspector-scroll">
+          {node.lastRun ? <RunDetails node={node} run={node.lastRun} models={models} /> : null}
+
           {models.length > 0 ? (
             <section className="inspector-section" aria-labelledby={`model-heading-${node.id}`}>
               <div className="inspector-section-head">
@@ -238,6 +241,13 @@ export function NodeInspector({
                   <p>{models.length}件から選択</p>
                 </div>
               </div>
+              {!selected && node.data.model ? (
+                <div className="model-retired" role="alert">
+                  <strong>このモデルは現在のカタログにありません</strong>
+                  <code>{node.data.model}</code>
+                  <p>提供終了か名称変更です。このままでは実行できないので、下の一覧から選び直してください。</p>
+                </div>
+              ) : null}
               {selected ? (
                 <div className="selected-model">
                   <span>{selected.label || selected.id}</span>

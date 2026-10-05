@@ -11,7 +11,10 @@
     "build:all": "npm run build:web && npm run build:server",
     "start": "npm run build:all && electron .",
     "dist": "npm run build:all && electron-builder",
-    "dist:dir": "npm run build:all && electron-builder --dir"
+    "dist:dir": "npm run build:all && electron-builder --dir",
+    "dist:win": "npm run build:all && electron-builder --win --x64",
+    "dist:win:dir": "npm run build:all && electron-builder --win --x64 --dir",
+    "smoke": "node smoke.mjs"
   },
   "devDependencies": {
     "electron": "^33.2.1",
@@ -47,6 +50,27 @@
       ],
       "category": "public.app-category.graphics-design",
       "icon": "buildResources/icon.icns"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "buildResources/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": false,
+      "language": "1041",
+      "artifactName": "CreativeCanvasForPika-Setup-${version}.${ext}"
     }
   }
 }

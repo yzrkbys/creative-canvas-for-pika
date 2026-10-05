@@ -18,7 +18,8 @@
     "sync:catalog": "node server/scripts/sync-catalog.mjs",
     "typecheck": "npm -w server run typecheck && npm -w mcp run typecheck && npm -w web run typecheck",
     "app": "npm -w desktop run start",
-    "app:dist": "npm -w desktop run dist"
+    "app:dist": "npm -w desktop run dist",
+    "app:dist:win": "npm -w desktop run dist:win"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",

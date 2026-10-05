@@ -8,6 +8,7 @@ import { useStore, archiveNode } from "./store";
 import { api } from "./api";
 import { NodeInspector } from "./NodeInspector";
 import { useDismissibleLayer } from "./useDismissibleLayer";
+import { fmtElapsed, useNow } from "./RunDetails";
 
 const STATUS_COLOR: Record<string, string> = {
   idle: "#6b7280",
@@ -81,6 +82,11 @@ export function CanvasNode({ data, selected }: NodeProps) {
   // brief local HTTP "busy" flag.
   const generating = node.status === "running" || node.status === "queued";
   const blocked = busy || generating;
+  const now = useNow(generating);
+  const elapsed =
+    generating && node.lastRun ? fmtElapsed(now - Date.parse(node.lastRun.startedAt)) : "";
+  // A saved node can name a model Pika has since retired.
+  const retired = hasModel && !!node.data.model && !spec;
 
   function saveContent() {
     focused.current = false;
@@ -321,7 +327,15 @@ export function CanvasNode({ data, selected }: NodeProps) {
           {generating && (
             <div className="cn-loading">
               <span className="cn-spinner" />
-              <span>{node.status === "queued" ? "待機中…" : "生成中…"}</span>
+              <span>
+                {node.status === "queued" ? "待機中…" : "生成中…"}
+                {elapsed ? <span className="cn-elapsed"> {elapsed}</span> : null}
+              </span>
+              {(hasPrompt || hasModel) && (
+                <button className="cn-loading-detail nodrag" onClick={() => setInspectorOpen(true)}>
+                  内容を確認
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -362,10 +376,12 @@ export function CanvasNode({ data, selected }: NodeProps) {
           )}
           {hasModel && (
             <button
-              className="cn-ob-chip"
-              aria-label={`モデルを選択。現在: ${spec?.label || node.data.model || "未選択"}`}
+              className={`cn-ob-chip${retired ? " retired" : ""}`}
+              aria-label={`モデルを選択。現在: ${spec?.label || node.data.model || "未選択"}${retired ? "（提供終了）" : ""}`}
+              title={retired ? "このモデルは現在のカタログにありません。選び直してください" : undefined}
               onClick={() => setInspectorOpen(true)}
             >
+              {retired ? "⚠ " : ""}
               {spec?.label || shortModel(node.data.model) || "モデル選択"}
             </button>
           )}

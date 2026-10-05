@@ -1,5 +1,5 @@
 const { app, BrowserWindow, Menu, shell, dialog } = require("electron");
-const { fork } = require("node:child_process");
+const { fork, spawn } = require("node:child_process");
 const path = require("node:path");
 const fs = require("node:fs");
 
@@ -8,6 +8,18 @@ const fs = require("node:fs");
 const APP_NAME = "Creative Canvas for Pika API Club";
 const PREVIOUS_APP_NAME = "Pika Canvas";
 app.setName(APP_NAME);
+
+// One instance per data directory. macOS refuses a second launch of the same
+// bundle by itself, but Windows happily starts another copy on a second click
+// of the shortcut — a second server writing the same projects/*.json as the
+// first. The lock is taken after setName because it is keyed on userData.
+const HAS_LOCK = app.requestSingleInstanceLock();
+if (!HAS_LOCK) app.quit();
+app.on("second-instance", () => {
+  if (!win) return;
+  if (win.isMinimized()) win.restore();
+  win.focus();
+});
 
 // The app was called "Pika Canvas" until 2026-09-02, and Electron derives the
 // data directory from the name — so renaming it would strand every existing
@@ -113,6 +125,22 @@ function ensureEnvFile() {
   }
   return p;
 }
+// Open the settings file for editing. Returns an error message, or "" on success.
+// Windows has no program associated with a bare ".env", so shell.openPath only
+// raises an "open with" prompt there (or fails); Notepad is always present.
+async function openSettingsFile(p) {
+  if (process.platform === "win32") {
+    return new Promise((resolve) => {
+      const child = spawn("notepad.exe", [p], { detached: true, stdio: "ignore" });
+      child.once("error", (err) => resolve(err.message));
+      child.once("spawn", () => {
+        child.unref();
+        resolve("");
+      });
+    });
+  }
+  return shell.openPath(p);
+}
 function loadEnvFile(p) {
   const env = {};
   if (!fs.existsSync(p)) return env;
@@ -205,6 +233,7 @@ async function startServer() {
       PIKA_CANVAS_WEB_DIR: resourcePath("web"),
     },
     stdio: ["ignore", "pipe", "pipe", "ipc"],
+    windowsHide: true,
   });
   serverProc.stdout?.on("data", (d) => process.stdout.write(`[server] ${d}`));
   serverProc.stderr?.on("data", (d) => process.stderr.write(`[server] ${d}`));
@@ -251,13 +280,21 @@ function buildMenu() {
           label: "設定（APIキー）を開く",
           accelerator: "CmdOrCtrl+,",
           click: async () => {
-            await shell.openPath(ensureEnvFile());
+            const failed = await openSettingsFile(ensureEnvFile());
             dialog.showMessageBox(win, {
-              message: "設定ファイルを開きました",
-              detail:
-                "PIKA_API_KEY を編集して保存後、アプリを再起動すると反映されます。",
+              message: failed ? "設定ファイルを開けませんでした" : "設定ファイルを開きました",
+              detail: failed
+                ? `${envPath()} をテキストエディタで開いて PIKA_API_KEY を書いてください。\n(${failed})`
+                : "PIKA_API_KEY を編集して保存したら、「設定を反映して再起動」を選んでください。",
               buttons: ["OK"],
             });
+          },
+        },
+        {
+          label: "設定を反映して再起動",
+          click: () => {
+            app.relaunch();
+            app.quit();
           },
         },
         {
@@ -275,6 +312,7 @@ function buildMenu() {
 }
 
 app.whenReady().then(async () => {
+  if (!HAS_LOCK) return; // quitting: the running instance has been focused instead
   // macOS takes the Dock icon from the bundle, which an unpackaged run lacks —
   // it has to be set explicitly, and only after the app is ready.
   if (!app.isPackaged && process.platform === "darwin") {

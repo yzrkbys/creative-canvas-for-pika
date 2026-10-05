@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-const SERVER = process.env.PIKA_CANVAS_SERVER_URL ?? "http://localhost:8797";
+const SERVER = process.env.PIKA_CANVAS_SERVER_URL ?? "http://127.0.0.1:8797";
 
 export default defineConfig({
   plugins: [react()],
