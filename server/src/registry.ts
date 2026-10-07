@@ -155,6 +155,10 @@ const UNSUPPORTED_FUNCTIONS: Record<string, string> = {
   // that the canvas's wiring cannot express, and whose URLs must already be
   // Pika-hosted — so a node for it could only ever be filled in by hand.
   "compose-video": "timeline tracks cannot be wired from the canvas",
+  // Pika Dynamic Captions needs `words`: every spoken word with its start/end
+  // time. The transcribe node keeps plain text only, so nothing on the canvas
+  // can produce that list — offering the node would mean typing timings by hand.
+  "caption-video": "word timings cannot be produced on the canvas yet",
 };
 
 const KIND_BY_NODE_TYPE: Partial<Record<NodeType, OutputKind>> = {
@@ -206,6 +210,14 @@ function priceHintOf(p: CatalogPricing | null): string {
 const PREFERRED_PARAMS: { match: (apiId: string) => boolean; params: Record<string, unknown> }[] = [
   // Seedance's resolution enum starts at 480p — a proxy tier, not a working one.
   { match: (id) => id.startsWith("bytedance/seedance-"), params: { resolution: "720p" } },
+  // Gemini image edits (Nano Banana family) declare aspect_ratio 1:1, so a
+  // 16:9 source came back as a square with sky and foreground invented around
+  // it (measured 2026-10-07 on Nano Banana 2.1: 1376x768 in -> 1024x1024 out).
+  // "auto" keeps the source's frame (1376x768 out). Generation keeps 1:1.
+  {
+    match: (id) => id.startsWith("google/") && id.endsWith("/image-to-image"),
+    params: { aspect_ratio: "auto" },
+  },
 ];
 
 function applyPreferredParams(entry: CatalogEntry): Record<string, unknown> {
