@@ -1,5 +1,5 @@
 {
-  "syncedAt": "2026-10-05T17:29:43.616Z",
+  "syncedAt": "2026-10-07T04:37:18.628Z",
   "base": "https://api.dev.pika.art",
   "entries": [
     {
@@ -6961,6 +6961,222 @@
       }
     },
     {
+      "apiId": "google/gemini-nano-banana-2.1/image-to-image",
+      "vendor": "google",
+      "fn": "image-to-image",
+      "category": "image",
+      "name": "Nano Banana 2.1 Edit Image",
+      "description": "Gemini image model with Pro-level editing, product recontextualization and factuality at Flash latency.",
+      "method": "POST",
+      "path": "/v1/media/google/gemini-nano-banana-2.1/image-to-image",
+      "textField": "prompt",
+      "media": [
+        {
+          "field": "image_urls",
+          "kinds": [
+            "image"
+          ],
+          "array": true,
+          "required": true,
+          "maxItems": 16,
+          "minItems": 1
+        }
+      ],
+      "params": [
+        {
+          "key": "num_images",
+          "label": "Num Images",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Number of images to generate.",
+          "min": 1,
+          "max": 1,
+          "step": 1
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "1:1",
+            "2:3",
+            "3:2",
+            "3:4",
+            "4:3",
+            "4:5",
+            "5:4",
+            "9:16",
+            "16:9",
+            "21:9",
+            "auto"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio."
+        },
+        {
+          "key": "output_format",
+          "label": "Output Format",
+          "type": "select",
+          "options": [
+            "png",
+            "jpeg",
+            "webp"
+          ],
+          "valueType": "string",
+          "description": "Image file format of the output."
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "1K",
+            "2K",
+            "4K"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        },
+        {
+          "key": "thinking_level",
+          "label": "Thinking Level",
+          "type": "select",
+          "options": [
+            "minimal",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "How much the model reasons before rendering. `high` helps complex compositions at the cost of latency and thinking tokens."
+        }
+      ],
+      "defaults": {
+        "num_images": 1,
+        "aspect_ratio": "1:1",
+        "output_format": "png",
+        "resolution": "1K",
+        "thinking_level": "minimal"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt",
+        "image_urls"
+      ],
+      "pricing": {
+        "unit": "image_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 30
+          }
+        ],
+        "inputUsd": 1.5
+      }
+    },
+    {
+      "apiId": "google/gemini-nano-banana-2.1/text-to-image",
+      "vendor": "google",
+      "fn": "text-to-image",
+      "category": "image",
+      "name": "Nano Banana 2.1 Image Generation",
+      "description": "Gemini image model with Pro-level photorealism, materials and lighting at Flash latency.",
+      "method": "POST",
+      "path": "/v1/media/google/gemini-nano-banana-2.1/text-to-image",
+      "textField": "prompt",
+      "media": [],
+      "params": [
+        {
+          "key": "num_images",
+          "label": "Num Images",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Number of images to generate.",
+          "min": 1,
+          "max": 1,
+          "step": 1
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "1:1",
+            "2:3",
+            "3:2",
+            "3:4",
+            "4:3",
+            "4:5",
+            "5:4",
+            "9:16",
+            "16:9",
+            "21:9",
+            "auto"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio."
+        },
+        {
+          "key": "output_format",
+          "label": "Output Format",
+          "type": "select",
+          "options": [
+            "png",
+            "jpeg",
+            "webp"
+          ],
+          "valueType": "string",
+          "description": "Image file format of the output."
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "1K",
+            "2K",
+            "4K"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        },
+        {
+          "key": "thinking_level",
+          "label": "Thinking Level",
+          "type": "select",
+          "options": [
+            "minimal",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "How much the model reasons before rendering. `high` helps complex compositions at the cost of latency and thinking tokens."
+        }
+      ],
+      "defaults": {
+        "num_images": 1,
+        "aspect_ratio": "1:1",
+        "output_format": "png",
+        "resolution": "1K",
+        "thinking_level": "minimal"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt"
+      ],
+      "pricing": {
+        "unit": "image_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 30
+          }
+        ],
+        "inputUsd": 1.5
+      }
+    },
+    {
       "apiId": "google/gemini-omni-1.1-flash/image-to-video",
       "vendor": "google",
       "fn": "image-to-video",
@@ -12850,6 +13066,138 @@
           {
             "spec": {},
             "usd": 0.007
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "pika/dynamic-captions/caption-video",
+      "vendor": "pika",
+      "fn": "caption-video",
+      "category": "video",
+      "name": "Pika Dynamic Captions",
+      "description": "Burn word-timed captions into a talking-head clip: hand over the video, the words with their timings, a caption style and a colour, and get the same clip back with the captions rendered over the picture. The output keeps the source's audio and length, and its size up to 2160 pixels on the long side (larger clips are scaled down). SDR sources up to 1,200 seconds; convert PQ/HLG HDR to SDR first. Billed per output second.",
+      "method": "POST",
+      "path": "/v1/media/pika/dynamic-captions/caption-video",
+      "textField": null,
+      "media": [
+        {
+          "field": "video",
+          "kinds": [
+            "video"
+          ],
+          "array": false,
+          "required": true
+        }
+      ],
+      "params": [
+        {
+          "key": "style",
+          "label": "Style",
+          "type": "select",
+          "options": [
+            "scroll",
+            "bold-overlay",
+            "emphasis",
+            "multiposition",
+            "paper-cutout",
+            "handwrite",
+            "headline",
+            "cascade",
+            "push-out"
+          ],
+          "valueType": "string",
+          "description": "Which caption template renders the words.",
+          "required": true
+        },
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "string",
+          "valueType": "string",
+          "description": "The template's accent colour.",
+          "required": true
+        }
+      ],
+      "defaults": {
+        "style": "scroll",
+        "color": ""
+      },
+      "advanced": [
+        {
+          "key": "words",
+          "label": "Words",
+          "required": true,
+          "description": "The spoken words and their timings, as a transcription step returned them. Words are ordered by start time, and a word that runs into the next one is cut where it starts. Up to 4000 words, ending by 1200 seconds.",
+          "schema": {
+            "description": "The spoken words and their timings, as a transcription step returned them. Words are ordered by start time, and a word that runs into the next one is cut where it starts. Up to 4000 words, ending by 1200 seconds.",
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "word": {
+                  "description": "The spoken word, as it should read on screen.",
+                  "maxLength": 80,
+                  "minLength": 1,
+                  "title": "Word",
+                  "type": "string"
+                },
+                "start": {
+                  "description": "When the word starts, in seconds from the top of the clip.",
+                  "minimum": 0,
+                  "title": "Start",
+                  "type": "number"
+                },
+                "end": {
+                  "description": "When the word ends, in seconds from the top of the clip.",
+                  "minimum": 0,
+                  "title": "End",
+                  "type": "number"
+                },
+                "emphasis": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "description": "Multiposition only: set this word apart in the accent colour. When no word carries this field, Multiposition picks the emphasised words itself.",
+                  "title": "Emphasis"
+                }
+              },
+              "required": [
+                "word",
+                "start",
+                "end"
+              ],
+              "title": "CaptionWord",
+              "type": "object"
+            },
+            "maxItems": 4000,
+            "minItems": 1,
+            "title": "Words",
+            "type": "array"
+          }
+        }
+      ],
+      "requiredAdvanced": [
+        "words"
+      ],
+      "requiredFields": [
+        "video",
+        "words",
+        "style",
+        "color"
+      ],
+      "pricing": {
+        "unit": "second",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.0004
           }
         ]
       }
