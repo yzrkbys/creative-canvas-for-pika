@@ -236,6 +236,21 @@ function pricingOf(entry) {
       const inp = comps.find((c) => c.role === "input" && c.unit?.type === "input_token");
       return inp ? Number(inp.starting_at?.sell_usd) : undefined;
     })(),
+    // Media the request carries can be billed too: Wan 3.0 Omni and MiniMax H3
+    // charge every second of reference video at the output rate, H3 every image
+    // past the fifth. Dropping these components made the estimate quote about
+    // half the real charge for a 15s reference + 15s output.
+    inputPricing: (() => {
+      const list = comps
+        .filter((c) => c.role === "input" && c.unit?.type && c.unit.type !== "input_token")
+        .map((c) => ({
+          unit: c.unit.type,
+          quantity: Number(c.unit.quantity ?? 1),
+          included: Number(c.unit.included ?? 0),
+          tiers: (c.price_tiers ?? []).map((t) => ({ spec: t.spec ?? {}, usd: Number(t.sell_usd) })),
+        }));
+      return list.length ? list : undefined;
+    })(),
   };
 }
 

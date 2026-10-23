@@ -174,6 +174,10 @@ export interface CostEstimate {
   // true when the unit cannot be quoted up front. `amount` is 0 in that case
   // purely as a placeholder — treat it as "unknown", never as "free".
   metered?: boolean;
+  // A billed part `amount` leaves out because it could not be measured (a
+  // reference video whose length ffprobe could not read). When set, `amount`
+  // is a lower bound and must be shown together with this text.
+  excluded?: string;
 }
 
 export interface ProviderRunArgs {
@@ -187,7 +191,7 @@ export interface ProviderRunArgs {
 
 export interface ProviderRunResult {
   outputs: RawOutput[];
-  cost: number | null; // null = metered on an unquotable unit (see OutputMeta.cost)
+  cost: number | null; // null = metered on an unquotable unit, or a billed input went unmeasured (see OutputMeta.cost)
   usage?: Record<string, unknown>;
   providerJobId?: string;
 }
@@ -195,6 +199,8 @@ export interface ProviderRunResult {
 export interface ProviderAdapter {
   id: "pika" | "mock";
   supports(model: string): boolean;
+  // Async because reference videos are billed per second of their own length,
+  // which has to be probed from the connected files.
   estimateCost(
     model: string,
     params: Record<string, unknown>,
@@ -202,7 +208,7 @@ export interface ProviderAdapter {
     // Some models are billed per character of input (TTS), so the estimate
     // cannot be computed from params alone.
     prompt?: string,
-  ): CostEstimate;
+  ): Promise<CostEstimate>;
   run(model: string, args: ProviderRunArgs): Promise<ProviderRunResult>;
 }
 

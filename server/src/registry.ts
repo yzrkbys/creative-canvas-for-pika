@@ -37,6 +37,16 @@ export interface CatalogPricing {
   quantity: number;
   tiers: { spec: Record<string, string>; usd: number }[];
   inputUsd?: number;
+  /** Charges on what the request carries (reference video seconds, input
+   *  images), billed on top of the output. `included` units are free. */
+  inputPricing?: CatalogInputPricing[];
+}
+
+export interface CatalogInputPricing {
+  unit: string; // "video_input_second", "input_image", or a token unit
+  quantity: number;
+  included: number;
+  tiers: { spec: Record<string, string>; usd: number }[];
 }
 
 export interface CatalogAdvancedField {
@@ -199,7 +209,24 @@ function priceHintOf(p: CatalogPricing | null): string {
   const money = lo === hi ? `$${lo}` : `$${lo}–${hi}`;
   if (isOpaqueUnit(p.unit)) return `${money} / 1M ${p.unit}（数量不明・事前見積り不可）`;
   const unit = UNIT_LABEL[p.unit] ?? p.unit;
-  return `${money} / ${p.quantity === 1 ? unit : `${p.quantity}${unit}`}`;
+  return `${money} / ${p.quantity === 1 ? unit : `${p.quantity}${unit}`}${inputHintOf(p)}`;
+}
+
+// Billed inputs belong in the hint: a reference video doubles a Wan 3.0 Omni
+// run at equal lengths, which matters when choosing the model.
+function inputHintOf(p: CatalogPricing): string {
+  let out = "";
+  for (const c of p.inputPricing ?? []) {
+    if (!c.tiers.length) continue;
+    const amounts = c.tiers.map((t) => t.usd).sort((a, b) => a - b);
+    const lo = amounts[0];
+    const hi = amounts[amounts.length - 1];
+    const money = lo === hi ? `$${lo}` : `$${lo}–${hi}`;
+    if (c.unit === "video_input_second") out += ` ＋ 入力動画 ${money}/秒`;
+    else if (c.unit === "input_image")
+      out += ` ＋ 入力画像 ${money}/枚${c.included ? `（${c.included}枚まで無料）` : ""}`;
+  }
+  return out;
 }
 
 // Taste layer for param defaults — the same status as PREFERRED_DEFAULT below.

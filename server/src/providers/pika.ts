@@ -488,7 +488,7 @@ function norm(v: unknown): string {
  * ({resolution:"1080p", audio:"on"}), so score by matching keys and break ties
  * upward — quoting under the real price is worse than quoting over it.
  */
-function pickTier(pricing: CatalogPricing, params: Record<string, unknown>) {
+function pickTier(pricing: Pick<CatalogPricing, "tiers">, params: Record<string, unknown>) {
   let best = pricing.tiers[0];
   let bestScore = -1;
   // A tier can name a dimension the params express as a boolean instead: FLUX 3
@@ -544,15 +544,119 @@ function durationFor(entry: CatalogEntry, params: Record<string, unknown>): { se
   return { sec: min, assumed: true };
 }
 
+/** What the connected media is, as far as the bill is concerned. */
+export interface InputMeasure {
+  images: number;
+  videos: number;
+  // Probed only for models that bill reference video by the second.
+  videoSec: number;
+  unreadVideos: number; // connected videos whose length ffprobe could not read
+}
+
+async function measureInputs(
+  entry: CatalogEntry | undefined,
+  inputs: ResolvedInput[],
+): Promise<InputMeasure> {
+  const videos = inputs.filter((i) => i.kind === "video" && i.url);
+  const m: InputMeasure = {
+    images: inputs.filter((i) => i.kind === "image" && i.url).length,
+    videos: videos.length,
+    videoSec: 0,
+    unreadVideos: 0,
+  };
+  if (!entry?.pricing?.inputPricing?.some((c) => c.unit === "video_input_second")) return m;
+  const secs = await Promise.all(
+    videos.map(async (v) => {
+      try {
+        return await probeDuration(resolveAssetPath(v.url));
+      } catch {
+        return 0; // not a local asset — counted as unread, never as 0 seconds
+      }
+    }),
+  );
+  for (const s of secs) {
+    if (s > 0) m.videoSec += s;
+    else m.unreadVideos++;
+  }
+  // Round up like withMeasuredDuration: a figure under the real length under-quotes.
+  m.videoSec = Math.ceil(m.videoSec * 100) / 100;
+  return m;
+}
+
+/**
+ * The charges on what the request carries, from the catalog's input
+ * components. Wan 3.0 Omni and H3 bill every second of reference video at the
+ * output rate — leaving that out quoted a 15s-in / 15s-out run at half price.
+ */
+function inputCharges(
+  pricing: CatalogPricing,
+  params: Record<string, unknown>,
+  m: InputMeasure,
+): { amount: number; lines: string[]; excluded?: string } {
+  let amount = 0;
+  const lines: string[] = [];
+  let excluded: string | undefined;
+  for (const c of pricing.inputPricing ?? []) {
+    if (!c.tiers.length) continue;
+    const usd = pickTier(c, params).tier.usd;
+    if (c.unit === "video_input_second") {
+      const measured = m.videos - m.unreadVideos;
+      if (measured > 0) {
+        const billed = Math.max(0, m.videoSec / c.quantity - c.included);
+        amount += usd * billed;
+        lines.push(`入力動画 $${usd}/秒 × ${m.videoSec}秒（${measured}本）`);
+      }
+      if (m.unreadVideos > 0) {
+        excluded = `入力動画${m.unreadVideos}本分（秒数を測れず未計上）`;
+        lines.push(`入力動画 ${m.unreadVideos}本は秒数を測れず未計上（$${usd}/秒 × その秒数が加算されます）`);
+      }
+    } else if (c.unit === "input_image") {
+      const billed = Math.max(0, m.images / c.quantity - c.included);
+      if (billed > 0) {
+        amount += usd * billed;
+        lines.push(
+          `入力画像 $${usd}/枚 × ${billed}枚${c.included ? `（${m.images}枚中${c.included}枚まで無料）` : ""}`,
+        );
+      }
+    }
+    // Token-billed inputs only appear on metered models, which never get a figure.
+  }
+  return { amount, lines, excluded };
+}
+
+/**
+ * The estimate for a run as wired: the output, plus whatever the connected
+ * media is billed. Async because reference videos are priced by their length.
+ */
+export async function estimateRun(
+  modelId: string,
+  params: Record<string, unknown>,
+  inputs: ResolvedInput[],
+  prompt = "",
+): Promise<CostEstimate> {
+  return estimate(modelId, params, prompt, await measureInputs(getEntry(modelId), inputs));
+}
+
 export function estimate(
   modelId: string,
   params: Record<string, unknown>,
   prompt = "",
+  measured?: InputMeasure,
 ): CostEstimate {
   const entry = getEntry(modelId);
   const pricing = entry?.pricing;
   if (!entry || !pricing || !pricing.tiers.length)
     return { amount: 0, currency: "USD", note: "価格情報なし（実行後に請求額を確認してください）" };
+
+  // Seedance prices on whether the request carries any video at all, a
+  // dimension no param expresses; without this the tie-break always quoted
+  // the no-video-input rate (about 1.7x) as "※ティア推定".
+  if (
+    measured &&
+    params.variant === undefined &&
+    pricing.tiers.some((t) => t.spec.variant === "with-video-input")
+  )
+    params = { ...params, variant: measured.videos ? "with-video-input" : "no-video-input" };
 
   const { tier, matched } = pickTier(pricing, params);
   const unitPrice = tier.usd;
@@ -572,55 +676,62 @@ export function estimate(
     };
   }
 
+  let amount: number;
+  let line: string;
   switch (pricing.unit) {
     case "second":
     case "output_second": {
       const { sec, assumed } = durationFor(entry, params);
-      return {
-        amount: Number((unitPrice * sec).toFixed(3)),
-        currency: "USD",
-        note: `$${unitPrice}/秒 × ${sec}秒${assumed ? "（尺未指定のため最短で試算・実際はこれ以上）" : ""}${tierNote ? ` · ${tierNote}` : ""}`,
-      };
+      amount = unitPrice * sec;
+      line = `$${unitPrice}/秒 × ${sec}秒${assumed ? "（尺未指定のため最短で試算・実際はこれ以上）" : ""}`;
+      break;
     }
     case "image": {
       const key = COUNT_KEYS.find((k) => Number(params[k]) > 0);
       const n = key ? Number(params[key]) : 1;
-      return {
-        amount: Number((unitPrice * n).toFixed(3)),
-        currency: "USD",
-        note: `$${unitPrice}/枚 × ${n}枚${tierNote ? ` · ${tierNote}` : ""}`,
-      };
+      amount = unitPrice * n;
+      line = `$${unitPrice}/枚 × ${n}枚`;
+      break;
     }
     case "character": {
       const chars = prompt.trim().length;
       const per = pricing.quantity || 1000;
-      return {
-        amount: Number(((unitPrice * chars) / per).toFixed(3)),
-        currency: "USD",
-        note: `$${unitPrice}/${per}字 × ${chars}字${tierNote ? ` · ${tierNote}` : ""}`,
-      };
+      amount = (unitPrice * chars) / per;
+      line = `$${unitPrice}/${per}字 × ${chars}字`;
+      break;
     }
     case "minute":
-      // Billed on the *input* clip's length, which this (synchronous) estimate
-      // cannot measure. Quote the rate and be explicit about the multiplier.
+      // Billed on the *input* clip's length, which this estimate does not
+      // measure. Quote the rate and be explicit about the multiplier.
       return {
         amount: 0,
         currency: "USD",
         note: `$${unitPrice}/分 × 入力動画の長さ（尺に比例・事前計測なし）${tierNote ? ` · ${tierNote}` : ""}`,
       };
     case "request":
-      return {
-        amount: unitPrice,
-        currency: "USD",
-        note: `$${unitPrice}/回${tierNote ? ` · ${tierNote}` : ""}`,
-      };
+      amount = unitPrice;
+      line = `$${unitPrice}/回`;
+      break;
     default:
-      return {
-        amount: unitPrice,
-        currency: "USD",
-        note: `$${unitPrice} / ${pricing.unit}${tierNote ? ` · ${tierNote}` : ""}`,
-      };
+      amount = unitPrice;
+      line = `$${unitPrice} / ${pricing.unit}`;
   }
+
+  const inputs = measured ? inputCharges(pricing, params, measured) : { amount: 0, lines: [] };
+  if (!inputs.lines.length) {
+    return {
+      amount: Number(amount.toFixed(3)),
+      currency: "USD",
+      note: `${line}${tierNote ? ` · ${tierNote}` : ""}`,
+    };
+  }
+  // One line per billed part, so the confirm shows what the total is made of.
+  return {
+    amount: Number((amount + inputs.amount).toFixed(3)),
+    currency: "USD",
+    note: [`出力 ${line}`, ...inputs.lines.map((l) => `＋ ${l}`), ...(tierNote ? [tierNote] : [])].join("\n"),
+    excluded: inputs.excluded,
+  };
 }
 
 // ------------------------------------------------------- measured duration
@@ -845,8 +956,8 @@ export const pikaAdapter: ProviderAdapter = {
     return model.startsWith("pika/");
   },
 
-  estimateCost(model, params, _inputs, prompt) {
-    return estimate(model, params, prompt);
+  estimateCost(model, params, inputs, prompt) {
+    return estimateRun(model, params, inputs, prompt);
   },
 
   async run(model, args: ProviderRunArgs) {
@@ -863,6 +974,8 @@ export const pikaAdapter: ProviderAdapter = {
     }
 
     const params = await withMeasuredDuration(entry, spec, args.params, args.inputs);
+    // Priced on the local files, before they are swapped for upload URLs.
+    const est = await estimateRun(model, args.params, args.inputs, args.prompt);
 
     // Validate against the local wiring first. Every guard depends only on
     // which ports carry something, so running it before the uploads means a
@@ -897,11 +1010,11 @@ export const pikaAdapter: ProviderAdapter = {
 
     // A metered model reports null, not 0 — the charge is real, we just cannot
     // derive it locally. Recording 0 made totals silently under-report by the
-    // whole token-billed share of a project.
-    const est = estimate(model, args.params, args.prompt);
+    // whole token-billed share of a project. An unmeasured reference video is
+    // the same case: the figure would be low by an unknown amount.
     return {
       outputs,
-      cost: est.metered ? null : est.amount,
+      cost: est.metered || est.excluded ? null : est.amount,
       usage: usageOf(job),
       providerJobId: submitted.id,
     };

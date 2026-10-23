@@ -103,9 +103,11 @@ export function CanvasNode({ data, selected }: NodeProps) {
         // A metered model has amount 0 only because the unit cannot be quoted.
         // Printing "約 $0" there asked the user to approve paid work as if it
         // were free, which is the opposite of what this dialog is for.
+        // A part that could not be measured (a reference video ffprobe could
+        // not read) stays next to the figure, so a low number is never shown alone.
         const head = e.metered
           ? "課金されますが、事前に金額を出せません"
-          : `見積り: 約 $${e.amount}`;
+          : `見積り: 約 $${e.amount}${e.excluded ? ` ＋ ${e.excluded}` : ""}`;
         if (window.confirm(`${head}\n${e.note ?? ""}\n\n実行しますか？`))
           await api.run(node.id, true);
       }

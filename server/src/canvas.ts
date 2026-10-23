@@ -64,7 +64,7 @@ export type RunResult =
   | { jobId: string }
   | {
       needConfirm: true;
-      estimate: { amount: number; currency: string; note?: string; metered?: boolean };
+      estimate: { amount: number; currency: string; note?: string; metered?: boolean; excluded?: string };
     };
 
 // Params the canvas itself owns rather than the model: node geometry, archive
@@ -488,7 +488,7 @@ export class Canvas extends EventEmitter {
 
   // ---- run (spec §2 run-guard) ----
 
-  run(id: string, opts?: { confirm?: boolean }): RunResult {
+  async run(id: string, opts?: { confirm?: boolean }): Promise<RunResult> {
     const node = this.node(id);
     if (node.type === "note" || node.type === "doc" || node.type === "frame")
       throw new Error(`${node.type} nodes don't run`);
@@ -521,7 +521,7 @@ export class Canvas extends EventEmitter {
     const mediaInputs =
       node.type === "llm_text" ? resolved : resolved.filter((r) => r.kind !== "text");
     const effPrompt = node.type === "llm_text" ? node.data.prompt : (textIn?.text ?? node.data.prompt);
-    const estimate = adapter.estimateCost(
+    const estimate = await adapter.estimateCost(
       node.data.model,
       node.data.params,
       mediaInputs,
@@ -540,6 +540,7 @@ export class Canvas extends EventEmitter {
           currency: estimate.currency,
           note: estimate.note,
           metered: estimate.metered,
+          excluded: estimate.excluded,
         },
       };
     }
