@@ -298,7 +298,12 @@ export function buildBody(
 
   // --- free text -----------------------------------------------------------
   if (entry.textField) {
-    const text = (prompt ?? "").trim();
+    // A node saved while this field was still a plain param (Ideogram 4.0's
+    // `text_prompt` before 2026-10-30) carries its text there, because typing
+    // into the prompt box did nothing. Keep such nodes running as saved; the
+    // prompt box wins whenever it has text.
+    const legacy = params[entry.textField];
+    const text = ((prompt ?? "").trim() || (typeof legacy === "string" ? legacy : "")).trim();
     if (entry.textMaxLength && text.length > entry.textMaxLength) {
       throw new Error(
         `${entry.name} のテキスト上限は ${entry.textMaxLength} 文字です（現在 ${text.length} 文字）。実行前に削ってください。`,
@@ -604,7 +609,9 @@ function inputCharges(
       if (measured > 0) {
         const billed = Math.max(0, m.videoSec / c.quantity - c.included);
         amount += usd * billed;
-        lines.push(`入力動画 $${usd}/秒 × ${m.videoSec}秒（${measured}本）`);
+        lines.push(
+          `入力動画 $${usd}/秒 × ${m.videoSec}秒（${measured}本）${c.unlisted ? `※Pika の価格表に記載なし・${c.unlisted}` : ""}`,
+        );
       }
       if (m.unreadVideos > 0) {
         excluded = `入力動画${m.unreadVideos}本分（秒数を測れず未計上）`;
@@ -682,6 +689,16 @@ export function estimate(
     case "second":
     case "output_second": {
       const { sec, assumed } = durationFor(entry, params);
+      // An edit with no length param returns a clip as long as its input
+      // (Happyhorse 1.0 Video Editing: 5.04s in -> 5.04s out, 2026-10-30), so
+      // the schema-minimum fallback under-quotes every longer input. The input
+      // is only measured for models that bill it, so others keep the fallback.
+      const lengthParam = entry.params.some((f) => f.key === "duration" || f.key === "duration_seconds");
+      if (!lengthParam && measured?.videos === 1 && !measured.unreadVideos && measured.videoSec > 0) {
+        amount = unitPrice * measured.videoSec;
+        line = `$${unitPrice}/秒 × ${measured.videoSec}秒（入力動画と同じ長さ）`;
+        break;
+      }
       amount = unitPrice * sec;
       line = `$${unitPrice}/秒 × ${sec}秒${assumed ? "（尺未指定のため最短で試算・実際はこれ以上）" : ""}`;
       break;

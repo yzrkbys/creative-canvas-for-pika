@@ -39,11 +39,29 @@ const BINDINGS = JSON.parse(readFileSync(path.join(SRC, "pika-port-bindings.json
 const TEXT_FIELDS = ["prompt", "text"];
 
 // A few endpoints carry their free text under their own name and have no
-// `prompt` at all (pika-speech: `script`, pika-soundtrack: `instruction`).
+// `prompt` at all (pika-speech: `script`, pika-soundtrack: `instruction`,
+// Ideogram 4.0 and 4.0 Transparent: `text_prompt`).
 // Left as params, those models get a node whose prompt box does nothing while
-// the actual text hides in a side panel. Promoted only when the endpoint has
-// no field from TEXT_FIELDS, so a model with both keeps `prompt` as the box.
-const FALLBACK_TEXT_FIELDS = ["script", "instruction"];
+// the actual text hides in a side panel — Ideogram was billed for images that
+// ignored the prompt box entirely (found 2026-10-30). Promoted only when the
+// endpoint has no field from TEXT_FIELDS, so a model with both keeps `prompt`
+// as the box.
+const FALLBACK_TEXT_FIELDS = ["script", "instruction", "text_prompt"];
+
+// Input video Pika bills but its catalog does not publish. The estimate can
+// only count what display_pricing lists, so an endpoint missing here quotes
+// output seconds alone. Each entry is a measured charge, never an inference,
+// and is applied only while the catalog itself lists no `video_input_second`
+// component for the endpoint — once Pika publishes one, the catalog wins.
+//
+// Value: the dated measurement. The input is billed at the output tier rate.
+const INPUT_VIDEO_BILLED_UNLISTED = {
+  // 2026-10-30, 720p: a 5.04s input edited into a 5.04s output was charged
+  // $0.98 = $0.098/s x ~10s. display_pricing lists the output component only.
+  // (Grok Imagine Video Editing, also output-only, was charged $0.084/s with
+  // the input included, so it is NOT listed here.)
+  "alibaba/happyhorse-1.0/video-to-video": "2026-10-30 実測（5秒入力＋5秒出力 720p で $0.98）",
+};
 
 // The catalog is public, but early-access models (e.g. Wan 3.0 during its
 // closed beta) only appear when the request carries an allowlisted API key.
@@ -249,6 +267,20 @@ function pricingOf(entry) {
           included: Number(c.unit.included ?? 0),
           tiers: (c.price_tiers ?? []).map((t) => ({ spec: t.spec ?? {}, usd: Number(t.sell_usd) })),
         }));
+      const measured = INPUT_VIDEO_BILLED_UNLISTED[entry.api_id];
+      if (measured) {
+        if (list.some((c) => c.unit === "video_input_second")) {
+          console.warn(`  ${entry.api_id}: catalog now lists video_input_second — drop it from INPUT_VIDEO_BILLED_UNLISTED`);
+        } else {
+          list.push({
+            unit: "video_input_second",
+            quantity: 1,
+            included: 0,
+            tiers: (out.price_tiers ?? []).map((t) => ({ spec: t.spec ?? {}, usd: Number(t.sell_usd) })),
+            unlisted: measured,
+          });
+        }
+      }
       return list.length ? list : undefined;
     })(),
   };

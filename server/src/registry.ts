@@ -47,6 +47,9 @@ export interface CatalogInputPricing {
   quantity: number;
   included: number;
   tiers: { spec: Record<string, string>; usd: number }[];
+  /** Set when Pika bills this but its catalog does not list it: the dated
+   *  measurement behind it (sync-catalog.mjs INPUT_VIDEO_BILLED_UNLISTED). */
+  unlisted?: string;
 }
 
 export interface CatalogAdvancedField {

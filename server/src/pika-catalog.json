@@ -414,6 +414,28 @@
             },
             "usd": 0.168
           }
+        ],
+        "inputPricing": [
+          {
+            "unit": "video_input_second",
+            "quantity": 1,
+            "included": 0,
+            "tiers": [
+              {
+                "spec": {
+                  "resolution": "720p"
+                },
+                "usd": 0.098
+              },
+              {
+                "spec": {
+                  "resolution": "1080p"
+                },
+                "usd": 0.168
+              }
+            ],
+            "unlisted": "2026-10-30 実測（5秒入力＋5秒出力 720p で $0.98）"
+          }
         ]
       }
     },
@@ -8896,15 +8918,9 @@
       "description": "Ideogram 4.0 transparent-background image generation at 1K to 8K, priced per rendering speed and output resolution.",
       "method": "POST",
       "path": "/v1/media/ideogram/ideogram-4.0-transparent/text-to-image",
-      "textField": null,
+      "textField": "text_prompt",
       "media": [],
       "params": [
-        {
-          "key": "text_prompt",
-          "label": "Text Prompt",
-          "type": "string",
-          "valueType": "string"
-        },
         {
           "key": "rendering_speed",
           "label": "Rendering Speed",
@@ -8967,7 +8983,6 @@
         }
       ],
       "defaults": {
-        "text_prompt": "",
         "rendering_speed": "DEFAULT",
         "enable_copyright_detection": "",
         "aspect_ratio": "AUTO",
@@ -9147,15 +9162,9 @@
       "description": "Ideogram 4.0 image generation with best-in-class typography, priced per rendering speed (Turbo, Default, Quality).",
       "method": "POST",
       "path": "/v1/media/ideogram/ideogram-4.0/text-to-image",
-      "textField": null,
+      "textField": "text_prompt",
       "media": [],
       "params": [
-        {
-          "key": "text_prompt",
-          "label": "Text Prompt",
-          "type": "string",
-          "valueType": "string"
-        },
         {
           "key": "rendering_speed",
           "label": "Rendering Speed",
@@ -9227,7 +9236,6 @@
         }
       ],
       "defaults": {
-        "text_prompt": "",
         "rendering_speed": "DEFAULT",
         "enable_copyright_detection": "",
         "resolution": ""
