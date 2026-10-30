@@ -2060,6 +2060,10 @@ summary.model-vendor {
   font-size: 10px;
   line-height: 1.5;
 }
+/* An estimate with billed inputs lists one part per line. */
+.run-estimate {
+  white-space: pre-line;
+}
 .run-copy {
   flex: none;
   padding: 3px 9px;

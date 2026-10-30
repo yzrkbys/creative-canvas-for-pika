@@ -1,5 +1,5 @@
 import { getModel } from "../registry.js";
-import { estimate } from "./pika.js";
+import { estimateRun } from "./pika.js";
 import type {
   OutputKind,
   ProviderAdapter,
@@ -43,8 +43,8 @@ export const mockAdapter: ProviderAdapter = {
   supports() {
     return true;
   },
-  estimateCost(model, params, _inputs, prompt) {
-    return estimate(model, params, prompt);
+  estimateCost(model, params, inputs, prompt) {
+    return estimateRun(model, params, inputs, prompt);
   },
   async run(model, args: ProviderRunArgs): Promise<ProviderRunResult> {
     const spec = getModel(model);
@@ -88,12 +88,10 @@ export const mockAdapter: ProviderAdapter = {
         seed: Math.floor(Math.random() * 1e6),
       });
     }
+    const est = await this.estimateCost(model, args.params, args.inputs, args.prompt);
     return {
       outputs,
-      cost: (() => {
-        const est = this.estimateCost(model, args.params, args.inputs, args.prompt);
-        return est.metered ? null : est.amount;
-      })(),
+      cost: est.metered || est.excluded ? null : est.amount,
       providerJobId,
     };
   },

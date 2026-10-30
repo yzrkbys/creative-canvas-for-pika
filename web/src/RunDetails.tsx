@@ -164,8 +164,10 @@ export function RunDetails({
           {run.estimate?.note ? (
             <>
               <dt>見積り</dt>
-              <dd className="run-muted">
-                {run.estimate.metered ? "" : `約 $${run.estimate.amount} · `}
+              <dd className="run-muted run-estimate">
+                {run.estimate.metered
+                  ? ""
+                  : `約 $${run.estimate.amount}${run.estimate.excluded ? ` ＋ ${run.estimate.excluded}` : ""} · `}
                 {run.estimate.note}
               </dd>
             </>

@@ -71,7 +71,7 @@ export interface RunInfo extends RunRequest {
   startedAt: string;
   finishedAt?: string;
   providerJobId?: string;
-  estimate?: { amount: number; currency: string; note?: string; metered?: boolean };
+  estimate?: { amount: number; currency: string; note?: string; metered?: boolean; excluded?: string };
 }
 
 export interface NodeData {
@@ -157,5 +157,5 @@ export type RunResult =
   | { jobId: string }
   | {
       needConfirm: true;
-      estimate: { amount: number; currency: string; note?: string; metered?: boolean };
+      estimate: { amount: number; currency: string; note?: string; metered?: boolean; excluded?: string };
     };
