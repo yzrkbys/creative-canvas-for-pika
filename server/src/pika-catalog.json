@@ -1,5 +1,5 @@
 {
-  "syncedAt": "2026-10-07T04:37:18.628Z",
+  "syncedAt": "2026-11-05T22:40:02.745Z",
   "base": "https://api.dev.pika.art",
   "entries": [
     {
@@ -2079,6 +2079,69 @@
       }
     },
     {
+      "apiId": "anthropic/claude-opus-5.5",
+      "vendor": "anthropic",
+      "fn": null,
+      "category": "llm",
+      "name": "Claude Opus 5.5",
+      "description": "Claude Opus 5.5: Anthropic's model for long-running agentic coding and knowledge work, with a 1M-token context, 128K max output, and text and image input. Adaptive thinking is always on; forced tool use is not supported.",
+      "method": "POST",
+      "path": "/v1/media/anthropic/claude-opus-5.5",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 21
+          }
+        ],
+        "inputUsd": 4.2,
+        "inputPricing": [
+          {
+            "unit": "cached_input_token",
+            "quantity": 1000000,
+            "included": 0,
+            "tiers": [
+              {
+                "spec": {},
+                "usd": 0.21
+              }
+            ]
+          },
+          {
+            "unit": "cache_write_5m_token",
+            "quantity": 1000000,
+            "included": 0,
+            "tiers": [
+              {
+                "spec": {},
+                "usd": 5.25
+              }
+            ]
+          },
+          {
+            "unit": "cache_write_1h_token",
+            "quantity": 1000000,
+            "included": 0,
+            "tiers": [
+              {
+                "spec": {},
+                "usd": 8.4
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "apiId": "anthropic/claude-sonnet-5",
       "vendor": "anthropic",
       "fn": null,
@@ -2142,12 +2205,75 @@
       }
     },
     {
+      "apiId": "anthropic/claude-sonnet-5.5",
+      "vendor": "anthropic",
+      "fn": null,
+      "category": "llm",
+      "name": "Anthropic Claude Sonnet 5.5",
+      "description": "Anthropic Claude Sonnet 5.5 is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/anthropic/claude-sonnet-5.5",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 10.5
+          }
+        ],
+        "inputUsd": 2.1,
+        "inputPricing": [
+          {
+            "unit": "cached_input_token",
+            "quantity": 1000000,
+            "included": 0,
+            "tiers": [
+              {
+                "spec": {},
+                "usd": 0.21
+              }
+            ]
+          },
+          {
+            "unit": "cache_write_5m_token",
+            "quantity": 1000000,
+            "included": 0,
+            "tiers": [
+              {
+                "spec": {},
+                "usd": 2.625
+              }
+            ]
+          },
+          {
+            "unit": "cache_write_1h_token",
+            "quantity": 1000000,
+            "included": 0,
+            "tiers": [
+              {
+                "spec": {},
+                "usd": 4.2
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "apiId": "black-forest-labs/flux-3-video/image-to-video",
       "vendor": "black-forest-labs",
       "fn": "image-to-video",
       "category": "video",
       "name": "FLUX 3 Image To Video",
-      "description": "FLUX 3 image-to-video from one or more keyframe images, 5-20s with native audio, billed per second of generated video at 720p or 1080p. Draft mode is a cheaper 720p-only preview that can be re-rendered at full quality.",
+      "description": "FLUX 3 Image To Video: animate one or more keyframe images into a 5 to 20 second video with native audio at 720p or 1080p, with a cheaper 720p draft mode. Billed per second.",
       "method": "POST",
       "path": "/v1/media/black-forest-labs/flux-3-video/image-to-video",
       "textField": "prompt",
@@ -2280,21 +2406,21 @@
               "resolution": "720p",
               "mode": "draft"
             },
-            "usd": 0.054
+            "usd": 0.06
           },
           {
             "spec": {
               "resolution": "720p",
               "mode": "standard"
             },
-            "usd": 0.153
+            "usd": 0.17
           },
           {
             "spec": {
               "resolution": "1080p",
               "mode": "standard"
             },
-            "usd": 0.261
+            "usd": 0.29
           }
         ]
       }
@@ -2409,21 +2535,21 @@
               "resolution": "720p",
               "mode": "draft"
             },
-            "usd": 0.054
+            "usd": 0.06
           },
           {
             "spec": {
               "resolution": "720p",
               "mode": "standard"
             },
-            "usd": 0.153
+            "usd": 0.17
           },
           {
             "spec": {
               "resolution": "1080p",
               "mode": "standard"
             },
-            "usd": 0.261
+            "usd": 0.29
           }
         ]
       }
@@ -2434,7 +2560,7 @@
       "fn": "video-to-video",
       "category": "video",
       "name": "FLUX 3 Video To Video",
-      "description": "FLUX 3 video-to-video: continue an existing clip with new content, 5-20s with native audio, billed per second of generated video at 720p or 1080p. Draft mode is a cheaper 720p-only preview that can be re-rendered at full quality.",
+      "description": "FLUX 3 Video To Video: continue an existing clip with 5 to 15 seconds of new video and native audio at 720p or 1080p, with a cheaper 720p draft mode. Billed per second.",
       "method": "POST",
       "path": "/v1/media/black-forest-labs/flux-3-video/video-to-video",
       "textField": "prompt",
@@ -2476,15 +2602,10 @@
             "12",
             "13",
             "14",
-            "15",
-            "16",
-            "17",
-            "18",
-            "19",
-            "20"
+            "15"
           ],
           "valueType": "loose",
-          "description": "Video length in whole seconds (5-20), or \"auto\" to let the model choose."
+          "description": "Video length in whole seconds (5-15), or \"auto\" to let the model choose."
         },
         {
           "key": "aspect_ratio",
@@ -2548,21 +2669,21 @@
               "resolution": "720p",
               "mode": "draft"
             },
-            "usd": 0.108
+            "usd": 0.12
           },
           {
             "spec": {
               "resolution": "720p",
               "mode": "standard"
             },
-            "usd": 0.387
+            "usd": 0.41
           },
           {
             "spec": {
               "resolution": "1080p",
               "mode": "standard"
             },
-            "usd": 0.486
+            "usd": 0.53
           }
         ]
       }
@@ -2573,7 +2694,7 @@
       "fn": "text-to-audio",
       "category": "audio",
       "name": "Seed Audio 1.0",
-      "description": "All-in-one audio generation: dialogue, music, ambience, and sound effects in one pass, with voice cloning from up to 3 reference clips (under 30s each). The model field picks the variant: multilingual (default, 20 auto-detected languages, in-prompt timestamp control) or base (English/Chinese with the preset voice library).",
+      "description": "Seed Audio 1.0: generate dialogue, music, ambience and sound effects in one pass, with voice cloning from up to 3 reference clips. Choose the multilingual model (default) or the English/Chinese base model.",
       "method": "POST",
       "path": "/v1/media/bytedance/seed-audio-1.0/text-to-audio",
       "textField": "prompt",
@@ -2975,6 +3096,16 @@
           "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
         },
         {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seed for a similar result when repeating a request; an exact match is not guaranteed.",
+          "min": 0,
+          "max": 2147483647,
+          "step": 1
+        },
+        {
           "key": "resolution",
           "label": "Resolution",
           "type": "select",
@@ -2992,6 +3123,7 @@
         "generate_audio": "on",
         "watermark": "off",
         "bitrate_mode": "",
+        "seed": "",
         "resolution": "720p"
       },
       "advanced": [],
@@ -3138,6 +3270,16 @@
           "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
         },
         {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seed for a similar result when repeating a request; an exact match is not guaranteed.",
+          "min": 0,
+          "max": 2147483647,
+          "step": 1
+        },
+        {
           "key": "resolution",
           "label": "Resolution",
           "type": "select",
@@ -3155,6 +3297,7 @@
         "generate_audio": "on",
         "watermark": "off",
         "bitrate_mode": "",
+        "seed": "",
         "resolution": "720p"
       },
       "advanced": [],
@@ -3290,6 +3433,16 @@
           "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
         },
         {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seed for a similar result when repeating a request; an exact match is not guaranteed.",
+          "min": 0,
+          "max": 2147483647,
+          "step": 1
+        },
+        {
           "key": "resolution",
           "label": "Resolution",
           "type": "select",
@@ -3307,6 +3460,7 @@
         "generate_audio": "on",
         "watermark": "off",
         "bitrate_mode": "",
+        "seed": "",
         "resolution": "720p"
       },
       "advanced": [],
@@ -3441,6 +3595,16 @@
           "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
         },
         {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seed for a similar result when repeating a request; an exact match is not guaranteed.",
+          "min": 0,
+          "max": 2147483647,
+          "step": 1
+        },
+        {
           "key": "resolution",
           "label": "Resolution",
           "type": "select",
@@ -3458,6 +3622,7 @@
         "generate_audio": "on",
         "watermark": "off",
         "bitrate_mode": "",
+        "seed": "",
         "resolution": "720p"
       },
       "advanced": [],
@@ -3604,6 +3769,16 @@
           "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
         },
         {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seed for a similar result when repeating a request; an exact match is not guaranteed.",
+          "min": 0,
+          "max": 2147483647,
+          "step": 1
+        },
+        {
           "key": "resolution",
           "label": "Resolution",
           "type": "select",
@@ -3621,6 +3796,7 @@
         "generate_audio": "on",
         "watermark": "off",
         "bitrate_mode": "",
+        "seed": "",
         "resolution": "720p"
       },
       "advanced": [],
@@ -3756,6 +3932,16 @@
           "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
         },
         {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seed for a similar result when repeating a request; an exact match is not guaranteed.",
+          "min": 0,
+          "max": 2147483647,
+          "step": 1
+        },
+        {
           "key": "resolution",
           "label": "Resolution",
           "type": "select",
@@ -3773,6 +3959,7 @@
         "generate_audio": "on",
         "watermark": "off",
         "bitrate_mode": "",
+        "seed": "",
         "resolution": "720p"
       },
       "advanced": [],
@@ -3907,6 +4094,16 @@
           "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
         },
         {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seed for a similar result when repeating a request; an exact match is not guaranteed.",
+          "min": 0,
+          "max": 2147483647,
+          "step": 1
+        },
+        {
           "key": "resolution",
           "label": "Resolution",
           "type": "select",
@@ -3927,6 +4124,7 @@
         "generate_audio": "on",
         "watermark": "off",
         "bitrate_mode": "",
+        "seed": "",
         "resolution": "480p"
       },
       "advanced": [],
@@ -4088,6 +4286,16 @@
           "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
         },
         {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seed for a similar result when repeating a request; an exact match is not guaranteed.",
+          "min": 0,
+          "max": 2147483647,
+          "step": 1
+        },
+        {
           "key": "resolution",
           "label": "Resolution",
           "type": "select",
@@ -4108,6 +4316,7 @@
         "generate_audio": "on",
         "watermark": "off",
         "bitrate_mode": "",
+        "seed": "",
         "resolution": "480p"
       },
       "advanced": [],
@@ -4276,6 +4485,16 @@
           "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
         },
         {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seed for a similar result when repeating a request; an exact match is not guaranteed.",
+          "min": 0,
+          "max": 2147483647,
+          "step": 1
+        },
+        {
           "key": "resolution",
           "label": "Resolution",
           "type": "select",
@@ -4296,6 +4515,7 @@
         "generate_audio": "on",
         "watermark": "off",
         "bitrate_mode": "",
+        "seed": "",
         "resolution": "480p"
       },
       "advanced": [],
@@ -4346,7 +4566,7 @@
       "fn": "draft-to-video",
       "category": "video",
       "name": "Seedance 2.5 Draft To Video",
-      "description": "Seedance 2.5 Draft To Video renders the 1080p final of a completed Seedance 2.5 draft job. It inherits the draft's prompt, inputs, duration, ratio and audio; output format and watermark can be set. Billed per million video output tokens at the 1080p rate, cheaper when the draft's input included video. A draft can be finalized for 7 days, and each final is charged separately.",
+      "description": "Seedance 2.5 Draft To Video: render the 1080p final of a Seedance 2.5 draft, keeping its prompt, inputs, duration, ratio and audio. Drafts can be finalized for 7 days. Billed per million video output tokens.",
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.5/draft-to-video",
       "textField": null,
@@ -4555,6 +4775,16 @@
           "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
         },
         {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seed for a similar result when repeating a request; an exact match is not guaranteed.",
+          "min": 0,
+          "max": 2147483647,
+          "step": 1
+        },
+        {
           "key": "ratio",
           "label": "Ratio",
           "type": "select",
@@ -4574,6 +4804,7 @@
         "watermark": "off",
         "output_format": "",
         "bitrate_mode": "",
+        "seed": "",
         "ratio": ""
       },
       "advanced": [],
@@ -4624,7 +4855,7 @@
       "fn": "reference-to-video",
       "category": "video",
       "name": "Seedance 2.5 Reference To Video",
-      "description": "Seedance 2.5 Reference To Video: generate, edit, or extend video guided by reference images, videos, and audio; editing and extension are requested through the prompt. Billed per million video output tokens; the rate depends on whether the input includes video. A draft renders a cheap 480p preview that can be finalized at 1080p through bytedance/seedance-2.5/draft-to-video within 7 days.",
+      "description": "Seedance 2.5 Reference To Video: generate, edit or extend video guided by reference images, videos and audio. A cheap 480p draft can be finalized at 1080p within 7 days. Billed per million video output tokens.",
       "method": "POST",
       "path": "/v1/media/bytedance/seedance-2.5/reference-to-video",
       "textField": "prompt",
@@ -4767,6 +4998,16 @@
           "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
         },
         {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seed for a similar result when repeating a request; an exact match is not guaranteed.",
+          "min": 0,
+          "max": 2147483647,
+          "step": 1
+        },
+        {
           "key": "ratio",
           "label": "Ratio",
           "type": "select",
@@ -4805,6 +5046,7 @@
         "watermark": "off",
         "output_format": "",
         "bitrate_mode": "",
+        "seed": "",
         "ratio": "",
         "omni_reference_task_type": "auto"
       },
@@ -5006,6 +5248,16 @@
           "description": "Output encode bitrate. 'high' produces a larger, higher-bitrate file; defaults to 'standard'."
         },
         {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seed for a similar result when repeating a request; an exact match is not guaranteed.",
+          "min": 0,
+          "max": 2147483647,
+          "step": 1
+        },
+        {
           "key": "ratio",
           "label": "Ratio",
           "type": "select",
@@ -5031,6 +5283,7 @@
         "watermark": "off",
         "output_format": "",
         "bitrate_mode": "",
+        "seed": "",
         "ratio": ""
       },
       "advanced": [],
@@ -5144,7 +5397,7 @@
             "spec": {
               "resolution": "1K"
             },
-            "usd": 0.03
+            "usd": 0.0255
           }
         ]
       }
@@ -5207,7 +5460,7 @@
             "spec": {
               "resolution": "1K"
             },
-            "usd": 0.03
+            "usd": 0.0255
           }
         ]
       }
@@ -5273,7 +5526,7 @@
         "tiers": [
           {
             "spec": {},
-            "usd": 0.04
+            "usd": 0.034
           }
         ]
       }
@@ -5373,7 +5626,7 @@
             "spec": {
               "mode": "lite"
             },
-            "usd": 0.035
+            "usd": 0.02975
           }
         ]
       }
@@ -5461,7 +5714,7 @@
             "spec": {
               "mode": "lite"
             },
-            "usd": 0.035
+            "usd": 0.02975
           }
         ]
       }
@@ -5472,7 +5725,7 @@
       "fn": "image-to-image",
       "category": "image",
       "name": "Seedream 5.0 Pro Image Editing",
-      "description": "Flagship Seedream 5.0 Pro image editing at 1K, 1.5K or 2K resolution with an optional aspect ratio (1.5K priced as 1K): combine up to 10 reference images with a text prompt. The first reference is free; each additional reference is billed per image.",
+      "description": "Seedream 5.0 Pro Image Editing: edit at 1K, 1.5K or 2K by combining up to 10 reference images with a text prompt. The first reference is free; each additional one is billed per image.",
       "method": "POST",
       "path": "/v1/media/bytedance/seedream-5.0-pro/image-to-image",
       "textField": "prompt",
@@ -5561,19 +5814,19 @@
             "spec": {
               "resolution": "1K"
             },
-            "usd": 0.045
+            "usd": 0.03825
           },
           {
             "spec": {
               "resolution": "1.5K"
             },
-            "usd": 0.045
+            "usd": 0.03825
           },
           {
             "spec": {
               "resolution": "2K"
             },
-            "usd": 0.09
+            "usd": 0.0765
           }
         ],
         "inputPricing": [
@@ -5584,9 +5837,64 @@
             "tiers": [
               {
                 "spec": {},
-                "usd": 0.003
+                "usd": 0.00255
               }
             ]
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "bytedance/seedream-5.0-pro/layer-decomposition",
+      "vendor": "bytedance",
+      "fn": "layer-decomposition",
+      "category": "image",
+      "name": "Seedream 5.0 Pro Layer Decomposition",
+      "description": "Seedream 5.0 Pro Layer Decomposition: split an image into a base plus up to 16 editable transparent PNG layers, each with its stacking order, bounding box and name. Billed per output image by size.",
+      "method": "POST",
+      "path": "/v1/media/bytedance/seedream-5.0-pro/layer-decomposition",
+      "textField": "prompt",
+      "media": [
+        {
+          "field": "image_url",
+          "kinds": [
+            "image"
+          ],
+          "array": false,
+          "required": true
+        }
+      ],
+      "params": [
+        {
+          "key": "size",
+          "label": "Size",
+          "type": "select",
+          "options": [
+            "",
+            "1K",
+            "1.5K",
+            "2K",
+            "auto"
+          ],
+          "valueType": "string",
+          "description": "Output resolution; auto (the default) follows the input image."
+        }
+      ],
+      "defaults": {
+        "size": ""
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "image_url"
+      ],
+      "pricing": {
+        "unit": "output_image_1k",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.019125
           }
         ]
       }
@@ -5674,19 +5982,19 @@
             "spec": {
               "resolution": "1K"
             },
-            "usd": 0.045
+            "usd": 0.03825
           },
           {
             "spec": {
               "resolution": "1.5K"
             },
-            "usd": 0.045
+            "usd": 0.03825
           },
           {
             "spec": {
               "resolution": "2K"
             },
-            "usd": 0.09
+            "usd": 0.0765
           }
         ]
       }
@@ -6231,6 +6539,272 @@
           {
             "spec": {},
             "usd": 0.053
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "elevenlabs/eleven-v4-turbo/text-to-speech",
+      "vendor": "elevenlabs",
+      "fn": "text-to-speech",
+      "category": "audio",
+      "name": "Eleven v4 Turbo Text To Speech",
+      "description": "Low-latency variant of Eleven v4 with the same expressive range, audio tags and 90+ languages. Up to 10,000 characters per request. Billed per 1,000 input characters.",
+      "method": "POST",
+      "path": "/v1/media/elevenlabs/eleven-v4-turbo/text-to-speech",
+      "textField": "text",
+      "textMaxLength": 10000,
+      "media": [],
+      "params": [
+        {
+          "key": "language_code",
+          "label": "Language Code",
+          "type": "string",
+          "valueType": "string",
+          "description": "ISO-639-1 or 639-3 language code (e.g. 'en', 'yue') to enforce a language."
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seed for reproducible output. Defaults to a random seed.",
+          "step": 1
+        }
+      ],
+      "defaults": {
+        "language_code": "",
+        "seed": ""
+      },
+      "advanced": [
+        {
+          "key": "voice",
+          "label": "Voice",
+          "required": false,
+          "description": "A stock voice, or the voice_id of a cloned voice you own.",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "darian",
+                  "talia",
+                  "elara",
+                  "baxter",
+                  "eldrin",
+                  "elowen",
+                  "kaelen",
+                  "lawrence",
+                  "alicia",
+                  "maisie",
+                  "warren",
+                  "jade",
+                  "caleb",
+                  "sawyer",
+                  "finley",
+                  "florence",
+                  "wyatt"
+                ],
+                "title": "StockVoice",
+                "type": "string"
+              },
+              {
+                "pattern": "^voice_[0-9a-f]{32}$",
+                "type": "string"
+              }
+            ],
+            "default": "darian",
+            "description": "A stock voice, or the voice_id of a cloned voice you own.",
+            "title": "Voice"
+          }
+        },
+        {
+          "key": "voice_settings",
+          "label": "Voice settings",
+          "required": false,
+          "description": "Voice tuning.",
+          "schema": {
+            "additionalProperties": false,
+            "properties": {
+              "stability": {
+                "anyOf": [
+                  {
+                    "maximum": 1,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "How consistent the delivery is, from 0 (varied) to 1 (stable).",
+                "title": "Stability"
+              },
+              "similarity_boost": {
+                "anyOf": [
+                  {
+                    "maximum": 1,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "How closely the output adheres to the voice, from 0 to 1.",
+                "title": "Similarity Boost"
+              }
+            },
+            "title": "ElevenLabsV4VoiceSettings",
+            "type": "object"
+          }
+        }
+      ],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "text"
+      ],
+      "pricing": {
+        "unit": "character",
+        "quantity": 1000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.042
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "elevenlabs/eleven-v4/text-to-speech",
+      "vendor": "elevenlabs",
+      "fn": "text-to-speech",
+      "category": "audio",
+      "name": "Eleven v4 Text To Speech",
+      "description": "ElevenLabs' most expressive speech model. Inline audio tags such as [laughs] or [whispers] direct the delivery, across 90+ languages. Up to 10,000 characters per request. Billed per 1,000 input characters.",
+      "method": "POST",
+      "path": "/v1/media/elevenlabs/eleven-v4/text-to-speech",
+      "textField": "text",
+      "textMaxLength": 10000,
+      "media": [],
+      "params": [
+        {
+          "key": "language_code",
+          "label": "Language Code",
+          "type": "string",
+          "valueType": "string",
+          "description": "ISO-639-1 or 639-3 language code (e.g. 'en', 'yue') to enforce a language."
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Seed for reproducible output. Defaults to a random seed.",
+          "step": 1
+        }
+      ],
+      "defaults": {
+        "language_code": "",
+        "seed": ""
+      },
+      "advanced": [
+        {
+          "key": "voice",
+          "label": "Voice",
+          "required": false,
+          "description": "A stock voice, or the voice_id of a cloned voice you own.",
+          "schema": {
+            "anyOf": [
+              {
+                "enum": [
+                  "darian",
+                  "talia",
+                  "elara",
+                  "baxter",
+                  "eldrin",
+                  "elowen",
+                  "kaelen",
+                  "lawrence",
+                  "alicia",
+                  "maisie",
+                  "warren",
+                  "jade",
+                  "caleb",
+                  "sawyer",
+                  "finley",
+                  "florence",
+                  "wyatt"
+                ],
+                "title": "StockVoice",
+                "type": "string"
+              },
+              {
+                "pattern": "^voice_[0-9a-f]{32}$",
+                "type": "string"
+              }
+            ],
+            "default": "darian",
+            "description": "A stock voice, or the voice_id of a cloned voice you own.",
+            "title": "Voice"
+          }
+        },
+        {
+          "key": "voice_settings",
+          "label": "Voice settings",
+          "required": false,
+          "description": "Voice tuning.",
+          "schema": {
+            "additionalProperties": false,
+            "properties": {
+              "stability": {
+                "anyOf": [
+                  {
+                    "maximum": 1,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "How consistent the delivery is, from 0 (varied) to 1 (stable).",
+                "title": "Stability"
+              },
+              "similarity_boost": {
+                "anyOf": [
+                  {
+                    "maximum": 1,
+                    "minimum": 0,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "description": "How closely the output adheres to the voice, from 0 to 1.",
+                "title": "Similarity Boost"
+              }
+            },
+            "title": "ElevenLabsV4VoiceSettings",
+            "type": "object"
+          }
+        }
+      ],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "text"
+      ],
+      "pricing": {
+        "unit": "character",
+        "quantity": 1000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.084
           }
         ]
       }
@@ -8121,7 +8695,7 @@
       "fn": "text-to-audio",
       "category": "audio",
       "name": "Lyria 3 Pro",
-      "description": "Generate a full-length song of up to 184 seconds from a text prompt, with vocals and either supplied or model-written lyrics. Length, BPM, and structure are prompt-driven; there is no duration, seed, or negative-prompt parameter. Returns 44.1 kHz MP3 carrying an embedded SynthID watermark. Google model code lyria-3-pro-preview (Preview).",
+      "description": "Lyria 3 Pro: generate a song of up to 184 seconds with vocals from a text prompt, using your lyrics or model-written ones. Structure and tempo are set in the prompt. Returns MP3 with a SynthID watermark.",
       "method": "POST",
       "path": "/v1/media/google/lyria-3-pro/text-to-audio",
       "textField": "prompt",
@@ -8151,7 +8725,7 @@
       "fn": "text-to-audio",
       "category": "audio",
       "name": "Lyria 3.5",
-      "description": "Generate a full-length song of a couple of minutes from a text prompt, with vocals and either supplied or model-written lyrics. Length, BPM, and structure are prompt-driven via timestamp ranges and [Verse]/[Chorus] section tags; there is no duration, seed, or negative-prompt parameter. Returns 44.1 kHz MP3 carrying an embedded SynthID watermark. Google model code lyria-3.5 (Preview).",
+      "description": "Lyria 3.5: generate a full-length song with vocals from a text prompt, using your lyrics or model-written ones. Structure and tempo are set in the prompt. Returns MP3 with a SynthID watermark.",
       "method": "POST",
       "path": "/v1/media/google/lyria-3.5/text-to-audio",
       "textField": "prompt",
@@ -8181,7 +8755,7 @@
       "fn": "text-to-audio",
       "category": "audio",
       "name": "Lyria 3",
-      "description": "Generate a complete 30-second song from a text prompt, with vocals and either supplied or model-written lyrics. Length, BPM, and structure are prompt-driven via timestamp ranges and [Verse]/[Chorus] section tags; there is no duration, seed, or negative-prompt parameter. Returns 44.1 kHz MP3 carrying an embedded SynthID watermark. Google model code lyria-3-clip-preview (Preview).",
+      "description": "Lyria 3: generate a 30-second song with vocals from a text prompt, using your lyrics or model-written ones. Structure and tempo are set in the prompt. Returns MP3 with a SynthID watermark.",
       "method": "POST",
       "path": "/v1/media/google/lyria-3/text-to-audio",
       "textField": "prompt",
@@ -10056,9 +10630,9 @@
             "items": {
               "discriminator": {
                 "mapping": {
-                  "element": "#/$defs/Kling3ImageElement",
-                  "preset_element": "#/$defs/Kling3PresetElement",
-                  "video_element": "#/$defs/Kling3VideoElement"
+                  "element": "#/$defs/KlingImageElement",
+                  "preset_element": "#/$defs/KlingPresetElement",
+                  "video_element": "#/$defs/KlingVideoElement"
                 },
                 "propertyName": "type"
               },
@@ -10108,7 +10682,7 @@
                     "frontal_image_url",
                     "reference_image_urls"
                   ],
-                  "title": "Kling3ImageElement",
+                  "title": "KlingImageElement",
                   "type": "object"
                 },
                 {
@@ -10141,7 +10715,7 @@
                     "id",
                     "video_url"
                   ],
-                  "title": "Kling3VideoElement",
+                  "title": "KlingVideoElement",
                   "type": "object"
                 },
                 {
@@ -10171,7 +10745,7 @@
                     "id",
                     "element_id"
                   ],
-                  "title": "Kling3PresetElement",
+                  "title": "KlingPresetElement",
                   "type": "object"
                 }
               ]
@@ -10239,7 +10813,7 @@
       "method": "POST",
       "path": "/v1/media/kling/kling-3.0/motion-control",
       "textField": "prompt",
-      "textMaxLength": 3072,
+      "textMaxLength": 2500,
       "media": [
         {
           "field": "image_url",
@@ -10428,14 +11002,14 @@
               "discriminator": {
                 "mapping": {
                   "base_video": "#/$defs/Kling3MaterialContent",
-                  "element": "#/$defs/Kling3ImageElement",
+                  "element": "#/$defs/KlingImageElement",
                   "feature_video": "#/$defs/Kling3MaterialContent",
                   "first_frame": "#/$defs/Kling3MaterialContent",
                   "last_frame": "#/$defs/Kling3MaterialContent",
-                  "preset_element": "#/$defs/Kling3PresetElement",
-                  "prompt": "#/$defs/Kling3PromptContent",
+                  "preset_element": "#/$defs/KlingPresetElement",
+                  "prompt": "#/$defs/KlingPromptContent",
                   "refer_image": "#/$defs/Kling3MaterialContent",
-                  "video_element": "#/$defs/Kling3VideoElement"
+                  "video_element": "#/$defs/KlingVideoElement"
                 },
                 "propertyName": "type"
               },
@@ -10461,7 +11035,7 @@
                     "type",
                     "text"
                   ],
-                  "title": "Kling3PromptContent",
+                  "title": "KlingPromptContent",
                   "type": "object"
                 },
                 {
@@ -10556,7 +11130,7 @@
                     "frontal_image_url",
                     "reference_image_urls"
                   ],
-                  "title": "Kling3ImageElement",
+                  "title": "KlingImageElement",
                   "type": "object"
                 },
                 {
@@ -10589,7 +11163,7 @@
                     "id",
                     "video_url"
                   ],
-                  "title": "Kling3VideoElement",
+                  "title": "KlingVideoElement",
                   "type": "object"
                 },
                 {
@@ -10619,7 +11193,7 @@
                     "id",
                     "element_id"
                   ],
-                  "title": "Kling3PresetElement",
+                  "title": "KlingPresetElement",
                   "type": "object"
                 }
               ]
@@ -10816,6 +11390,544 @@
       }
     },
     {
+      "apiId": "kling/kling-4.0/image-to-video",
+      "vendor": "kling",
+      "fn": "image-to-video",
+      "category": "video",
+      "name": "Kling 4.0 (Image to Video)",
+      "description": "Kling 4.0 image-to-video from a first frame (optional middle and end frames), 3-30s at 720p or 1080p. Always generates native audio.",
+      "method": "POST",
+      "path": "/v1/media/kling/kling-4.0/image-to-video",
+      "textField": "prompt",
+      "textMaxLength": 26000,
+      "media": [
+        {
+          "field": "image_url",
+          "kinds": [
+            "image"
+          ],
+          "array": false,
+          "required": true
+        },
+        {
+          "field": "middle_frame_urls",
+          "kinds": [
+            "image"
+          ],
+          "array": true,
+          "required": false,
+          "maxItems": 9
+        },
+        {
+          "field": "last_frame_url",
+          "kinds": [
+            "image"
+          ],
+          "array": false,
+          "required": false
+        }
+      ],
+      "params": [
+        {
+          "key": "watermark",
+          "label": "Watermark",
+          "type": "select",
+          "options": [
+            "",
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Also return a watermarked result."
+        },
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Video length in seconds.",
+          "min": 3,
+          "max": 30,
+          "step": 1
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "720p",
+            "1080p"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        }
+      ],
+      "defaults": {
+        "watermark": "",
+        "duration": 5,
+        "resolution": "720p"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "image_url"
+      ],
+      "pricing": {
+        "unit": "second",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "resolution": "720p"
+            },
+            "usd": 0.157
+          },
+          {
+            "spec": {
+              "resolution": "1080p"
+            },
+            "usd": 0.235
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "kling/kling-4.0/omni-video",
+      "vendor": "kling",
+      "fn": "omni-video",
+      "category": "video",
+      "name": "Kling 4.0 (Omni Video)",
+      "description": "Kling 4.0 Omni: combine a prompt with reference images, videos, Elements, and voices, 3-30s at 720p or 1080p. Always generates native audio. Video inputs also bill their own seconds.",
+      "method": "POST",
+      "path": "/v1/media/kling/kling-4.0/omni-video",
+      "textField": null,
+      "media": [],
+      "params": [
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Video length in seconds.",
+          "min": 3,
+          "max": 30,
+          "step": 1
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "720p",
+            "1080p"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "21:9",
+            "16:9",
+            "9:16",
+            "1:1",
+            "adaptive"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio; adaptive follows the inputs."
+        },
+        {
+          "key": "watermark",
+          "label": "Watermark",
+          "type": "select",
+          "options": [
+            "",
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Also return a watermarked result."
+        }
+      ],
+      "defaults": {
+        "duration": 5,
+        "resolution": "720p",
+        "aspect_ratio": "adaptive",
+        "watermark": ""
+      },
+      "advanced": [
+        {
+          "key": "contents",
+          "label": "Contents",
+          "required": true,
+          "description": "Reference inputs: a prompt, plus images, videos, inline or preset elements and voices.",
+          "schema": {
+            "description": "Reference inputs: a prompt, plus images, videos, inline or preset elements and voices.",
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "base_video": "#/$defs/KlingMaterialContent",
+                  "element": "#/$defs/KlingImageElement",
+                  "feature_video": "#/$defs/KlingMaterialContent",
+                  "first_frame": "#/$defs/KlingMaterialContent",
+                  "last_frame": "#/$defs/KlingMaterialContent",
+                  "middle_frame": "#/$defs/KlingMaterialContent",
+                  "preset_element": "#/$defs/KlingPresetElement",
+                  "prompt": "#/$defs/Kling4PromptContent",
+                  "refer_image": "#/$defs/KlingMaterialContent",
+                  "video_element": "#/$defs/KlingVideoElement",
+                  "voice": "#/$defs/KlingVoiceContent"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "prompt",
+                      "description": "prompt: the text prompt item; carries `text`.",
+                      "title": "Type",
+                      "type": "string"
+                    },
+                    "text": {
+                      "description": "Prompt text (type prompt).",
+                      "maxLength": 26000,
+                      "minLength": 1,
+                      "title": "Text",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "text"
+                  ],
+                  "title": "Kling4PromptContent",
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "description": "first_frame, middle_frame, last_frame, refer_image, feature_video or base_video: an image or video material; carries `url` and an optional `id` handle.",
+                      "enum": [
+                        "first_frame",
+                        "middle_frame",
+                        "last_frame",
+                        "refer_image",
+                        "feature_video",
+                        "base_video"
+                      ],
+                      "title": "Type",
+                      "type": "string"
+                    },
+                    "url": {
+                      "description": "Image or video URL (material types).",
+                      "media_kinds": [
+                        "image",
+                        "video"
+                      ],
+                      "pattern": "^https?://",
+                      "title": "Url",
+                      "type": "string"
+                    },
+                    "id": {
+                      "anyOf": [
+                        {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "Optional handle the prompt references as @id (material types).",
+                      "title": "Id"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "url"
+                  ],
+                  "title": "KlingMaterialContent",
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "element",
+                      "description": "element: a multi-image element registered from `frontal_image_url` and `reference_image_urls`; the prompt references it as @id.",
+                      "title": "Type",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "Handle the prompt references as @id.",
+                      "minLength": 1,
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "frontal_image_url": {
+                      "description": "Frontal image of the subject (type element): jpg/png, <=10MB, >=300px, aspect between 1:2.5 and 2.5:1.",
+                      "media_kinds": [
+                        "image"
+                      ],
+                      "pattern": "^https?://",
+                      "title": "Frontal Image Url",
+                      "type": "string"
+                    },
+                    "reference_image_urls": {
+                      "description": "1-3 additional views of the same subject (type element): jpg/png, <=10MB, >=300px, aspect between 1:2.5 and 2.5:1.",
+                      "items": {
+                        "media_kinds": [
+                          "image"
+                        ],
+                        "pattern": "^https?://",
+                        "type": "string"
+                      },
+                      "maxItems": 3,
+                      "minItems": 1,
+                      "title": "Reference Image Urls",
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "id",
+                    "frontal_image_url",
+                    "reference_image_urls"
+                  ],
+                  "title": "KlingImageElement",
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "video_element",
+                      "description": "video_element: a video-character element registered from `video_url`; the prompt references it as @id.",
+                      "title": "Type",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "Handle the prompt references as @id.",
+                      "minLength": 1,
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "video_url": {
+                      "description": "One mp4/mov of a realistic person (type video_element), 3-8s, 1080p, 16:9 or 9:16, <=200MB. Speech in the clip becomes the element's voice.",
+                      "media_kinds": [
+                        "video"
+                      ],
+                      "pattern": "^https?://",
+                      "title": "Video Url",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "id",
+                    "video_url"
+                  ],
+                  "title": "KlingVideoElement",
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "preset_element",
+                      "description": "preset_element: an element from Kling's preset library named by `element_id`; the prompt references it as @id.",
+                      "title": "Type",
+                      "type": "string"
+                    },
+                    "id": {
+                      "description": "Handle the prompt references as @id.",
+                      "minLength": 1,
+                      "title": "Id",
+                      "type": "string"
+                    },
+                    "element_id": {
+                      "description": "Id of an element in Kling's preset library (type preset_element).",
+                      "minLength": 1,
+                      "title": "Element Id",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "id",
+                    "element_id"
+                  ],
+                  "title": "KlingPresetElement",
+                  "type": "object"
+                },
+                {
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "const": "voice",
+                      "description": "voice: a voice named by `voice_id`; the prompt references it as @id.",
+                      "title": "Type",
+                      "type": "string"
+                    },
+                    "id": {
+                      "anyOf": [
+                        {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "default": null,
+                      "description": "Optional handle the prompt references as @id (type voice).",
+                      "title": "Id"
+                    },
+                    "voice_id": {
+                      "description": "Id of the voice to speak with (type voice).",
+                      "minLength": 1,
+                      "title": "Voice Id",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "voice_id"
+                  ],
+                  "title": "KlingVoiceContent",
+                  "type": "object"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Contents",
+            "type": "array"
+          }
+        }
+      ],
+      "requiredAdvanced": [
+        "contents"
+      ],
+      "requiredFields": [
+        "contents"
+      ],
+      "pricing": {
+        "unit": "second",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "resolution": "720p",
+              "variant": "with-video-input"
+            },
+            "usd": 0.094
+          },
+          {
+            "spec": {
+              "resolution": "1080p",
+              "variant": "with-video-input"
+            },
+            "usd": 0.141
+          },
+          {
+            "spec": {
+              "resolution": "720p"
+            },
+            "usd": 0.157
+          },
+          {
+            "spec": {
+              "resolution": "1080p"
+            },
+            "usd": 0.235
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "kling/kling-4.0/text-to-video",
+      "vendor": "kling",
+      "fn": "text-to-video",
+      "category": "video",
+      "name": "Kling 4.0 (Text to Video)",
+      "description": "Kling 4.0 text-to-video, 3-30s at 720p or 1080p. Always generates native audio.",
+      "method": "POST",
+      "path": "/v1/media/kling/kling-4.0/text-to-video",
+      "textField": "prompt",
+      "textMaxLength": 26000,
+      "media": [],
+      "params": [
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Video length in seconds.",
+          "min": 3,
+          "max": 30,
+          "step": 1
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "720p",
+            "1080p"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "21:9",
+            "16:9",
+            "9:16",
+            "1:1"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio."
+        }
+      ],
+      "defaults": {
+        "duration": 5,
+        "resolution": "720p",
+        "aspect_ratio": "16:9"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt"
+      ],
+      "pricing": {
+        "unit": "second",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "resolution": "720p"
+            },
+            "usd": 0.157
+          },
+          {
+            "spec": {
+              "resolution": "1080p"
+            },
+            "usd": 0.235
+          }
+        ]
+      }
+    },
+    {
       "apiId": "kling/kling-ai-avatar-v2/avatar",
       "vendor": "kling",
       "fn": "avatar",
@@ -10825,7 +11937,7 @@
       "method": "POST",
       "path": "/v1/media/kling/kling-ai-avatar-v2/avatar",
       "textField": "prompt",
-      "textMaxLength": 3072,
+      "textMaxLength": 2500,
       "media": [
         {
           "field": "image_url",
@@ -11335,6 +12447,7 @@
       "method": "POST",
       "path": "/v1/media/minimax/h3/image-to-video",
       "textField": "prompt",
+      "textMaxLength": 7000,
       "media": [
         {
           "field": "first_frame_image",
@@ -11431,10 +12544,11 @@
       "fn": "reference-to-video",
       "category": "video",
       "name": "H3 (Reference to Video)",
-      "description": "MiniMax H3 reference-to-video generation at 768P or 2K: blend reference images, videos and audio. Output is billed per second of generated video, reference videos per second of input at the output resolution's rate, and reference images beyond the first five per image.",
+      "description": "MiniMax H3 Reference to Video: generate 768p or 2K video blending reference images, videos and audio. Billed per output second, plus reference video seconds and images beyond the first five.",
       "method": "POST",
       "path": "/v1/media/minimax/h3/reference-to-video",
       "textField": "prompt",
+      "textMaxLength": 7000,
       "media": [
         {
           "field": "image_urls",
@@ -11593,6 +12707,7 @@
       "method": "POST",
       "path": "/v1/media/minimax/h3/text-to-video",
       "textField": "prompt",
+      "textMaxLength": 7000,
       "media": [],
       "params": [
         {
@@ -11988,7 +13103,7 @@
       "fn": "text-to-audio",
       "category": "audio",
       "name": "MiniMax Music 3.0",
-      "description": "Generate a song of up to 5 minutes from a text prompt, with supplied or auto-written lyrics (structure tags such as [Verse] and [Chorus]) and an instrumental-only mode. Outputs mp3, wav, or pcm at up to 44.1 kHz / 256 kbps. Reference-audio covers are a separate music-cover model. MiniMax model name music-3.0.",
+      "description": "MiniMax Music 3.0: generate a song of up to 5 minutes from a text prompt, with your lyrics, auto-written lyrics or instrumental only. Outputs MP3, WAV or PCM.",
       "method": "POST",
       "path": "/v1/media/minimax/minimax-music-3.0/text-to-audio",
       "textField": "prompt",
@@ -12659,6 +13774,129 @@
       }
     },
     {
+      "apiId": "openai/gpt-6-luna",
+      "vendor": "openai",
+      "fn": null,
+      "category": "llm",
+      "name": "OpenAI GPT-6 Luna",
+      "description": "OpenAI GPT-6 Luna is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/openai/gpt-6-luna",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.525
+          }
+        ],
+        "inputUsd": 0.105,
+        "inputPricing": [
+          {
+            "unit": "cached_input_token",
+            "quantity": 1000000,
+            "included": 0,
+            "tiers": [
+              {
+                "spec": {},
+                "usd": 0.011
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "openai/gpt-6-sol",
+      "vendor": "openai",
+      "fn": null,
+      "category": "llm",
+      "name": "OpenAI GPT-6 Sol",
+      "description": "OpenAI GPT-6 Sol is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/openai/gpt-6-sol",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 10.5
+          }
+        ],
+        "inputUsd": 2.1,
+        "inputPricing": [
+          {
+            "unit": "cached_input_token",
+            "quantity": 1000000,
+            "included": 0,
+            "tiers": [
+              {
+                "spec": {},
+                "usd": 0.21
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "openai/gpt-6.1-sol",
+      "vendor": "openai",
+      "fn": null,
+      "category": "llm",
+      "name": "OpenAI GPT-6.1 Sol",
+      "description": "OpenAI GPT-6.1 Sol is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/openai/gpt-6.1-sol",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 10.5
+          }
+        ],
+        "inputUsd": 2.1,
+        "inputPricing": [
+          {
+            "unit": "cached_input_token",
+            "quantity": 1000000,
+            "included": 0,
+            "tiers": [
+              {
+                "spec": {},
+                "usd": 0.105
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "apiId": "openai/gpt-image-2.5-flare/image-to-image",
       "vendor": "openai",
       "fn": "image-to-image",
@@ -12668,6 +13906,7 @@
       "method": "POST",
       "path": "/v1/media/openai/gpt-image-2.5-flare/image-to-image",
       "textField": "prompt",
+      "textMaxLength": 32000,
       "media": [
         {
           "field": "image_urls",
@@ -12827,6 +14066,7 @@
       "method": "POST",
       "path": "/v1/media/openai/gpt-image-2.5-flare/text-to-image",
       "textField": "prompt",
+      "textMaxLength": 32000,
       "media": [],
       "params": [
         {
@@ -12953,6 +14193,7 @@
       "method": "POST",
       "path": "/v1/media/openai/gpt-image-2.5-sunburst/image-to-image",
       "textField": "prompt",
+      "textMaxLength": 32000,
       "media": [
         {
           "field": "image_urls",
@@ -13112,6 +14353,7 @@
       "method": "POST",
       "path": "/v1/media/openai/gpt-image-2.5-sunburst/text-to-image",
       "textField": "prompt",
+      "textMaxLength": 32000,
       "media": [],
       "params": [
         {
@@ -13229,6 +14471,648 @@
       }
     },
     {
+      "apiId": "openai/gpt-image-2.6-flare/image-to-image",
+      "vendor": "openai",
+      "fn": "image-to-image",
+      "category": "image",
+      "name": "GPT Image 2.6 Flare Edit Image",
+      "description": "GPT Image 2.6 Flare Edit Image is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/openai/gpt-image-2.6-flare/image-to-image",
+      "textField": "prompt",
+      "textMaxLength": 32000,
+      "media": [
+        {
+          "field": "image_urls",
+          "kinds": [
+            "image"
+          ],
+          "array": true,
+          "required": true,
+          "maxItems": 16,
+          "minItems": 1
+        },
+        {
+          "field": "mask_image_url",
+          "kinds": [
+            "image"
+          ],
+          "array": false,
+          "required": false
+        },
+        {
+          "field": "markup_image_url",
+          "kinds": [
+            "image"
+          ],
+          "array": false,
+          "required": false
+        }
+      ],
+      "params": [
+        {
+          "key": "complexity",
+          "label": "Complexity",
+          "type": "select",
+          "options": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "How much the model plans before rendering. Higher helps dense text and complex layouts."
+        },
+        {
+          "key": "num_images",
+          "label": "Num Images",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Number of images to generate.",
+          "min": 1,
+          "max": 10,
+          "step": 1
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "1:1",
+            "2:3",
+            "3:2",
+            "3:4",
+            "4:3",
+            "4:5",
+            "5:4",
+            "9:16",
+            "16:9",
+            "21:9"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio. Ignored when 'size' is set."
+        },
+        {
+          "key": "output_format",
+          "label": "Output Format",
+          "type": "select",
+          "options": [
+            "png",
+            "jpeg",
+            "webp"
+          ],
+          "valueType": "string",
+          "description": "Image file format of the output."
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "1K",
+            "2K",
+            "4K"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        },
+        {
+          "key": "background",
+          "label": "Background",
+          "type": "select",
+          "options": [
+            "",
+            "auto",
+            "opaque",
+            "transparent"
+          ],
+          "valueType": "string",
+          "description": "Background of the output. 'transparent' needs a png or webp output_format."
+        },
+        {
+          "key": "size",
+          "label": "Size",
+          "type": "string",
+          "valueType": "string",
+          "description": "Explicit output size as 'WxH' (e.g. '1024x1024'), or 'auto' to let the provider choose. Overrides aspect_ratio and resolution."
+        },
+        {
+          "key": "quality",
+          "label": "Quality",
+          "type": "select",
+          "options": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ],
+          "valueType": "string",
+          "description": "Rendering quality of the output."
+        }
+      ],
+      "defaults": {
+        "complexity": "high",
+        "num_images": 1,
+        "aspect_ratio": "1:1",
+        "output_format": "png",
+        "resolution": "1K",
+        "background": "",
+        "size": "",
+        "quality": "medium"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt",
+        "image_urls"
+      ],
+      "pricing": {
+        "unit": "image_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 30
+          }
+        ],
+        "inputUsd": 5,
+        "inputPricing": [
+          {
+            "unit": "image_input_token",
+            "quantity": 1000000,
+            "included": 0,
+            "tiers": [
+              {
+                "spec": {},
+                "usd": 8
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "openai/gpt-image-2.6-flare/text-to-image",
+      "vendor": "openai",
+      "fn": "text-to-image",
+      "category": "image",
+      "name": "GPT Image 2.6 Flare Image Generation",
+      "description": "GPT Image 2.6 Flare Image Generation is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/openai/gpt-image-2.6-flare/text-to-image",
+      "textField": "prompt",
+      "textMaxLength": 32000,
+      "media": [],
+      "params": [
+        {
+          "key": "complexity",
+          "label": "Complexity",
+          "type": "select",
+          "options": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "How much the model plans before rendering. Higher helps dense text and complex layouts."
+        },
+        {
+          "key": "num_images",
+          "label": "Num Images",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Number of images to generate.",
+          "min": 1,
+          "max": 10,
+          "step": 1
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "1:1",
+            "2:3",
+            "3:2",
+            "3:4",
+            "4:3",
+            "4:5",
+            "5:4",
+            "9:16",
+            "16:9",
+            "21:9"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio. Ignored when 'size' is set."
+        },
+        {
+          "key": "output_format",
+          "label": "Output Format",
+          "type": "select",
+          "options": [
+            "png",
+            "jpeg",
+            "webp"
+          ],
+          "valueType": "string",
+          "description": "Image file format of the output."
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "1K",
+            "2K",
+            "4K"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        },
+        {
+          "key": "background",
+          "label": "Background",
+          "type": "select",
+          "options": [
+            "",
+            "auto",
+            "opaque",
+            "transparent"
+          ],
+          "valueType": "string",
+          "description": "Background of the output. 'transparent' needs a png or webp output_format."
+        },
+        {
+          "key": "size",
+          "label": "Size",
+          "type": "string",
+          "valueType": "string",
+          "description": "Explicit output size as 'WxH' (e.g. '1024x1024'), or 'auto' to let the provider choose. Overrides aspect_ratio and resolution."
+        },
+        {
+          "key": "quality",
+          "label": "Quality",
+          "type": "select",
+          "options": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ],
+          "valueType": "string",
+          "description": "Rendering quality of the output."
+        }
+      ],
+      "defaults": {
+        "complexity": "high",
+        "num_images": 1,
+        "aspect_ratio": "1:1",
+        "output_format": "png",
+        "resolution": "1K",
+        "background": "",
+        "size": "",
+        "quality": "medium"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt"
+      ],
+      "pricing": {
+        "unit": "image_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 30
+          }
+        ],
+        "inputUsd": 5
+      }
+    },
+    {
+      "apiId": "openai/gpt-image-2.6-sunburst/image-to-image",
+      "vendor": "openai",
+      "fn": "image-to-image",
+      "category": "image",
+      "name": "GPT Image 2.6 Sunburst Edit Image",
+      "description": "GPT Image 2.6 Sunburst Edit Image is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/openai/gpt-image-2.6-sunburst/image-to-image",
+      "textField": "prompt",
+      "textMaxLength": 32000,
+      "media": [
+        {
+          "field": "image_urls",
+          "kinds": [
+            "image"
+          ],
+          "array": true,
+          "required": true,
+          "maxItems": 16,
+          "minItems": 1
+        },
+        {
+          "field": "mask_image_url",
+          "kinds": [
+            "image"
+          ],
+          "array": false,
+          "required": false
+        },
+        {
+          "field": "markup_image_url",
+          "kinds": [
+            "image"
+          ],
+          "array": false,
+          "required": false
+        }
+      ],
+      "params": [
+        {
+          "key": "complexity",
+          "label": "Complexity",
+          "type": "select",
+          "options": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "How much the model plans before rendering. Higher helps dense text and complex layouts."
+        },
+        {
+          "key": "num_images",
+          "label": "Num Images",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Number of images to generate.",
+          "min": 1,
+          "max": 10,
+          "step": 1
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "1:1",
+            "2:3",
+            "3:2",
+            "3:4",
+            "4:3",
+            "4:5",
+            "5:4",
+            "9:16",
+            "16:9",
+            "21:9"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio. Ignored when 'size' is set."
+        },
+        {
+          "key": "output_format",
+          "label": "Output Format",
+          "type": "select",
+          "options": [
+            "png",
+            "jpeg",
+            "webp"
+          ],
+          "valueType": "string",
+          "description": "Image file format of the output."
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "1K",
+            "2K",
+            "4K"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        },
+        {
+          "key": "background",
+          "label": "Background",
+          "type": "select",
+          "options": [
+            "",
+            "auto",
+            "opaque",
+            "transparent"
+          ],
+          "valueType": "string",
+          "description": "Background of the output. 'transparent' needs a png or webp output_format."
+        },
+        {
+          "key": "size",
+          "label": "Size",
+          "type": "string",
+          "valueType": "string",
+          "description": "Explicit output size as 'WxH' (e.g. '1024x1024'), or 'auto' to let the provider choose. Overrides aspect_ratio and resolution."
+        },
+        {
+          "key": "quality",
+          "label": "Quality",
+          "type": "select",
+          "options": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ],
+          "valueType": "string",
+          "description": "Rendering quality of the output."
+        }
+      ],
+      "defaults": {
+        "complexity": "high",
+        "num_images": 1,
+        "aspect_ratio": "1:1",
+        "output_format": "png",
+        "resolution": "1K",
+        "background": "",
+        "size": "",
+        "quality": "medium"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt",
+        "image_urls"
+      ],
+      "pricing": {
+        "unit": "image_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 30
+          }
+        ],
+        "inputUsd": 5,
+        "inputPricing": [
+          {
+            "unit": "image_input_token",
+            "quantity": 1000000,
+            "included": 0,
+            "tiers": [
+              {
+                "spec": {},
+                "usd": 8
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "openai/gpt-image-2.6-sunburst/text-to-image",
+      "vendor": "openai",
+      "fn": "text-to-image",
+      "category": "image",
+      "name": "GPT Image 2.6 Sunburst Image Generation",
+      "description": "GPT Image 2.6 Sunburst Image Generation is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/openai/gpt-image-2.6-sunburst/text-to-image",
+      "textField": "prompt",
+      "textMaxLength": 32000,
+      "media": [],
+      "params": [
+        {
+          "key": "complexity",
+          "label": "Complexity",
+          "type": "select",
+          "options": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "valueType": "string",
+          "description": "How much the model plans before rendering. Higher helps dense text and complex layouts."
+        },
+        {
+          "key": "num_images",
+          "label": "Num Images",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Number of images to generate.",
+          "min": 1,
+          "max": 10,
+          "step": 1
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "1:1",
+            "2:3",
+            "3:2",
+            "3:4",
+            "4:3",
+            "4:5",
+            "5:4",
+            "9:16",
+            "16:9",
+            "21:9"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio. Ignored when 'size' is set."
+        },
+        {
+          "key": "output_format",
+          "label": "Output Format",
+          "type": "select",
+          "options": [
+            "png",
+            "jpeg",
+            "webp"
+          ],
+          "valueType": "string",
+          "description": "Image file format of the output."
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "1K",
+            "2K",
+            "4K"
+          ],
+          "valueType": "string",
+          "description": "Output resolution."
+        },
+        {
+          "key": "background",
+          "label": "Background",
+          "type": "select",
+          "options": [
+            "",
+            "auto",
+            "opaque",
+            "transparent"
+          ],
+          "valueType": "string",
+          "description": "Background of the output. 'transparent' needs a png or webp output_format."
+        },
+        {
+          "key": "size",
+          "label": "Size",
+          "type": "string",
+          "valueType": "string",
+          "description": "Explicit output size as 'WxH' (e.g. '1024x1024'), or 'auto' to let the provider choose. Overrides aspect_ratio and resolution."
+        },
+        {
+          "key": "quality",
+          "label": "Quality",
+          "type": "select",
+          "options": [
+            "low",
+            "medium",
+            "high",
+            "xhigh",
+            "max"
+          ],
+          "valueType": "string",
+          "description": "Rendering quality of the output."
+        }
+      ],
+      "defaults": {
+        "complexity": "high",
+        "num_images": 1,
+        "aspect_ratio": "1:1",
+        "output_format": "png",
+        "resolution": "1K",
+        "background": "",
+        "size": "",
+        "quality": "medium"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt"
+      ],
+      "pricing": {
+        "unit": "image_output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 30
+          }
+        ],
+        "inputUsd": 5
+      }
+    },
+    {
       "apiId": "openai/gpt-image-2/image-to-image",
       "vendor": "openai",
       "fn": "image-to-image",
@@ -13238,6 +15122,7 @@
       "method": "POST",
       "path": "/v1/media/openai/gpt-image-2/image-to-image",
       "textField": "prompt",
+      "textMaxLength": 32000,
       "media": [
         {
           "field": "image_urls",
@@ -13396,6 +15281,7 @@
       "method": "POST",
       "path": "/v1/media/openai/gpt-image-2/text-to-image",
       "textField": "prompt",
+      "textMaxLength": 32000,
       "media": [],
       "params": [
         {
@@ -13592,7 +15478,7 @@
       "fn": "caption-video",
       "category": "video",
       "name": "Pika Dynamic Captions",
-      "description": "Burn word-timed captions into a talking-head clip: hand over the video, the words with their timings, a caption style and a colour, and get the same clip back with the captions rendered over the picture. The output keeps the source's audio and length, and its size up to 2160 pixels on the long side (larger clips are scaled down). SDR sources up to 1,200 seconds; convert PQ/HLG HDR to SDR first. Billed per output second.",
+      "description": "Pika Dynamic Captions: burn word-timed captions into a talking-head video in your chosen style and colour, keeping the original audio and length. Accepts SDR video up to 20 minutes. Billed per output second.",
       "method": "POST",
       "path": "/v1/media/pika/dynamic-captions/caption-video",
       "textField": null,
@@ -13620,7 +15506,10 @@
             "handwrite",
             "headline",
             "cascade",
-            "push-out"
+            "push-out",
+            "bold-build",
+            "editorial-serif",
+            "line-by-line"
           ],
           "valueType": "string",
           "description": "Which caption template renders the words.",
@@ -13744,6 +15633,7 @@
           "label": "Resolution",
           "type": "select",
           "options": [
+            "480p",
             "720p",
             "1080p"
           ],
@@ -13794,6 +15684,19 @@
         "tiers": [
           {
             "spec": {
+              "resolution": "480p"
+            },
+            "usd": 0.02
+          },
+          {
+            "spec": {
+              "resolution": "480p",
+              "duration_s": 5
+            },
+            "usd": 0.02
+          },
+          {
+            "spec": {
               "resolution": "720p"
             },
             "usd": 0.04
@@ -13831,6 +15734,7 @@
       "method": "POST",
       "path": "/v1/media/pika/pika-2.5/text-to-video",
       "textField": "prompt",
+      "textMaxLength": 4000,
       "media": [],
       "params": [
         {
@@ -13838,6 +15742,7 @@
           "label": "Resolution",
           "type": "select",
           "options": [
+            "480p",
             "720p",
             "1080p"
           ],
@@ -13857,10 +15762,11 @@
           "label": "Duration S",
           "type": "select",
           "options": [
-            "5"
+            "5",
+            "10"
           ],
           "valueType": "number",
-          "description": "Video length in seconds (5s only for text-to-video)."
+          "description": "Video length in seconds."
         },
         {
           "key": "negative_prompt",
@@ -13868,13 +15774,30 @@
           "type": "string",
           "valueType": "string",
           "description": "Text describing what to avoid in the video."
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "",
+            "5:2",
+            "16:9",
+            "4:3",
+            "1:1",
+            "4:5",
+            "9:16"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio. Omit to let the model choose."
         }
       ],
       "defaults": {
         "resolution": "1080p",
         "seed": "",
         "duration_s": 5,
-        "negative_prompt": ""
+        "negative_prompt": "",
+        "aspect_ratio": ""
       },
       "advanced": [],
       "requiredAdvanced": [],
@@ -13887,10 +15810,35 @@
         "tiers": [
           {
             "spec": {
+              "resolution": "480p"
+            },
+            "usd": 0.02
+          },
+          {
+            "spec": {
+              "resolution": "480p",
+              "duration_s": 5
+            },
+            "usd": 0.02
+          },
+          {
+            "spec": {
+              "resolution": "720p"
+            },
+            "usd": 0.04
+          },
+          {
+            "spec": {
               "resolution": "720p",
               "duration_s": 5
             },
             "usd": 0.04
+          },
+          {
+            "spec": {
+              "resolution": "1080p"
+            },
+            "usd": 0.06
           },
           {
             "spec": {
@@ -14276,6 +16224,721 @@
       }
     },
     {
+      "apiId": "pika/pika-h3-flex/audio-stems",
+      "vendor": "pika",
+      "fn": "audio-stems",
+      "category": "audio",
+      "name": "Pika H3 Flex Audio Stems",
+      "description": "Pika H3 Flex Audio Stems: split up to 120 seconds of audio or video into Dialogue, Music and Effect stems, returned as a ZIP of WAV files. Billed per output stem second.",
+      "method": "POST",
+      "path": "/v1/media/pika/pika-h3-flex/audio-stems",
+      "textField": null,
+      "media": [
+        {
+          "field": "input_url",
+          "kinds": [
+            "audio",
+            "video"
+          ],
+          "array": false,
+          "required": false
+        }
+      ],
+      "params": [
+        {
+          "key": "request_id",
+          "label": "Request Id",
+          "type": "string",
+          "valueType": "string",
+          "description": "Completed Flex video request ID (media_...) owned by this organization, as an alternative to input_url.",
+          "maxLength": 128
+        },
+        {
+          "key": "channel_mode",
+          "label": "Channel Mode",
+          "type": "select",
+          "options": [
+            "stereo",
+            "mono"
+          ],
+          "valueType": "string",
+          "description": "Default mono downmixes before separation. Explicit stereo preserves input channels; mono downmixes before separation. Both bill the sum of all output stem durations."
+        }
+      ],
+      "defaults": {
+        "request_id": "",
+        "channel_mode": "mono"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_audio_second",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.001
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "pika/pika-h3-flex/draft-to-video",
+      "vendor": "pika",
+      "fn": "draft-to-video",
+      "category": "video",
+      "name": "Pika H3 Flex Draft to Video",
+      "description": "Pika H3 Flex Draft to Video: finish a 480p or 768p Flex draft, or an external video, at 1080p, 2K or 4K, keeping the same take and audio. Billed as the final price minus the draft's price.",
+      "method": "POST",
+      "path": "/v1/media/pika/pika-h3-flex/draft-to-video",
+      "textField": null,
+      "media": [
+        {
+          "field": "video",
+          "kinds": [
+            "video"
+          ],
+          "array": false,
+          "required": false
+        }
+      ],
+      "params": [
+        {
+          "key": "draft_job_id",
+          "label": "Draft Job Id",
+          "type": "string",
+          "valueType": "string",
+          "description": "Completed 480p/768p Pika H3 Flex request ID from this organization. Supply draft_job_id or video, not both.",
+          "maxLength": 128
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "1080p",
+            "2k",
+            "4k"
+          ],
+          "valueType": "string",
+          "description": "Final resolution. Only the upscale stage runs; the original draft and its audio are preserved."
+        }
+      ],
+      "defaults": {
+        "draft_job_id": "",
+        "resolution": "2k"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": null
+    },
+    {
+      "apiId": "pika/pika-h3-flex/image-to-video",
+      "vendor": "pika",
+      "fn": "image-to-video",
+      "category": "video",
+      "name": "Pika H3 Flex",
+      "description": "Pika H3 Flex Image to Video: animate a first frame, last frame or both into a 3 to 15 second video with synchronized audio, at 480p or 768p, or upscaled to 1080p, 2K or 4K. Billed per output second.",
+      "method": "POST",
+      "path": "/v1/media/pika/pika-h3-flex/image-to-video",
+      "textField": "prompt",
+      "textMaxLength": 8000,
+      "media": [
+        {
+          "field": "image",
+          "kinds": [
+            "image"
+          ],
+          "array": false,
+          "required": false
+        },
+        {
+          "field": "last_frame_image",
+          "kinds": [
+            "image"
+          ],
+          "array": false,
+          "required": false
+        }
+      ],
+      "params": [
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Requested video duration in whole seconds, from 3 to 15. Native output rounds up to the model's frame grid and may be slightly longer.",
+          "min": 3,
+          "max": 15,
+          "step": 1
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "",
+            "auto",
+            "21:9",
+            "16:9",
+            "3:2",
+            "4:3",
+            "5:4",
+            "1:1",
+            "4:5",
+            "3:4",
+            "2:3",
+            "9:16",
+            "9:21"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio. Auto selects from the original prompt and reference video, even when rewrite is false; with a keyframe it follows the first supplied keyframe. A fixed ratio always wins. When omitted, rewriting enables Auto; without rewriting, the first supplied keyframe sets the ratio, or 16:9 without a keyframe. Keyframes are resized and center-cropped to fit."
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "480p",
+            "768p",
+            "1080p",
+            "2k",
+            "4k"
+          ],
+          "valueType": "string",
+          "description": "480p/768p are native. 1080p/2k/4k generates at 768p, then upscales once with the V1 model, preserving audio and frame rate."
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "min": 0,
+          "max": 9223372036854776000,
+          "step": 1
+        },
+        {
+          "key": "rewrite",
+          "label": "Rewrite",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Improve the prompt before generation; disable to use the original prompt."
+        }
+      ],
+      "defaults": {
+        "duration": 5,
+        "aspect_ratio": "",
+        "resolution": "768p",
+        "seed": 0,
+        "rewrite": "on"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt"
+      ],
+      "pricing": {
+        "unit": "second",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "resolution": "480p"
+            },
+            "usd": 0.01
+          },
+          {
+            "spec": {
+              "resolution": "768p"
+            },
+            "usd": 0.02
+          },
+          {
+            "spec": {
+              "resolution": "1080p"
+            },
+            "usd": 0.035
+          },
+          {
+            "spec": {
+              "resolution": "2k"
+            },
+            "usd": 0.04
+          },
+          {
+            "spec": {
+              "resolution": "4k"
+            },
+            "usd": 0.08
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "pika/pika-h3-flex/prompt-rewriter",
+      "vendor": "pika",
+      "fn": "prompt-rewriter",
+      "category": "llm",
+      "name": "Pika H3 Flex Prompt Rewriter",
+      "description": "Pika H3 Flex Prompt Rewriter: rewrite a prompt using optional keyframes (fl2va) or image, video and audio references (ref2va), without generating media. Flat price per request.",
+      "method": "POST",
+      "path": "/v1/media/pika/pika-h3-flex/prompt-rewriter",
+      "textField": "prompt",
+      "textMaxLength": 8000,
+      "media": [
+        {
+          "field": "image",
+          "kinds": [
+            "image"
+          ],
+          "array": false,
+          "required": false
+        },
+        {
+          "field": "last_frame_image",
+          "kinds": [
+            "image"
+          ],
+          "array": false,
+          "required": false
+        },
+        {
+          "field": "references",
+          "kinds": [
+            "image",
+            "video",
+            "audio"
+          ],
+          "array": true,
+          "required": false,
+          "maxItems": 12
+        }
+      ],
+      "params": [
+        {
+          "key": "mode",
+          "label": "Mode",
+          "type": "select",
+          "options": [
+            "fl2va",
+            "ref2va"
+          ],
+          "valueType": "string",
+          "description": "fl2va rewrites text and optional first/last keyframes; ref2va uses ordered reference media."
+        },
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Requested video duration in whole seconds, from 3 to 15. Native output rounds up to the model's frame grid and may be slightly longer.",
+          "min": 3,
+          "max": 15,
+          "step": 1
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "",
+            "auto",
+            "21:9",
+            "16:9",
+            "3:2",
+            "4:3",
+            "5:4",
+            "1:1",
+            "4:5",
+            "3:4",
+            "2:3",
+            "9:16",
+            "9:21"
+          ],
+          "valueType": "string"
+        }
+      ],
+      "defaults": {
+        "mode": "fl2va",
+        "duration": 5,
+        "aspect_ratio": ""
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt"
+      ],
+      "pricing": {
+        "unit": "request",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.02
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "pika/pika-h3-flex/reference-to-video",
+      "vendor": "pika",
+      "fn": "reference-to-video",
+      "category": "video",
+      "name": "Pika H3 Flex Reference to Video",
+      "description": "Pika H3 Flex Reference to Video: generate a 3 to 15 second video with native audio guided by image, video and audio references, at 480p or 768p, or upscaled to 1080p, 2K or 4K. Billed per output second, plus reference video seconds.",
+      "method": "POST",
+      "path": "/v1/media/pika/pika-h3-flex/reference-to-video",
+      "textField": "prompt",
+      "textMaxLength": 8000,
+      "media": [
+        {
+          "field": "references",
+          "kinds": [
+            "image",
+            "video",
+            "audio"
+          ],
+          "array": true,
+          "required": true,
+          "maxItems": 12,
+          "minItems": 1
+        }
+      ],
+      "params": [
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Requested video duration in whole seconds, from 3 to 15. Native output rounds up to the model's frame grid and may be slightly longer.",
+          "min": 3,
+          "max": 15,
+          "step": 1
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "",
+            "auto",
+            "21:9",
+            "16:9",
+            "3:2",
+            "4:3",
+            "5:4",
+            "1:1",
+            "4:5",
+            "3:4",
+            "2:3",
+            "9:16",
+            "9:21"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio. Auto selects from the original prompt and reference video, even when rewrite is false; with a keyframe it follows the first supplied keyframe. A fixed ratio always wins. When omitted, rewriting enables Auto; without rewriting, the first supplied keyframe sets the ratio, or 16:9 without a keyframe. Keyframes are resized and center-cropped to fit."
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "480p",
+            "768p",
+            "1080p",
+            "2k",
+            "4k"
+          ],
+          "valueType": "string",
+          "description": "480p/768p are native. 1080p/2k/4k generates at 768p, then upscales once with the V1 model, preserving audio and frame rate."
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "min": 0,
+          "max": 9223372036854776000,
+          "step": 1
+        },
+        {
+          "key": "rewrite",
+          "label": "Rewrite",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Improve the prompt before generation; disable to use the original prompt."
+        }
+      ],
+      "defaults": {
+        "duration": 5,
+        "aspect_ratio": "",
+        "resolution": "768p",
+        "seed": 0,
+        "rewrite": "on"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt",
+        "references"
+      ],
+      "pricing": {
+        "unit": "output_second",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "resolution": "480p"
+            },
+            "usd": 0.03
+          },
+          {
+            "spec": {
+              "resolution": "480p",
+              "duration_s": 5
+            },
+            "usd": 0.03
+          },
+          {
+            "spec": {
+              "resolution": "480p",
+              "duration_s": 10
+            },
+            "usd": 0.03
+          },
+          {
+            "spec": {
+              "resolution": "480p",
+              "duration_s": 15
+            },
+            "usd": 0.03
+          },
+          {
+            "spec": {
+              "resolution": "768p"
+            },
+            "usd": 0.06
+          },
+          {
+            "spec": {
+              "resolution": "768p",
+              "duration_s": 5
+            },
+            "usd": 0.06
+          },
+          {
+            "spec": {
+              "resolution": "768p",
+              "duration_s": 10
+            },
+            "usd": 0.06
+          },
+          {
+            "spec": {
+              "resolution": "768p",
+              "duration_s": 15
+            },
+            "usd": 0.06
+          },
+          {
+            "spec": {
+              "resolution": "1080p"
+            },
+            "usd": 0.075
+          },
+          {
+            "spec": {
+              "resolution": "2k"
+            },
+            "usd": 0.08
+          },
+          {
+            "spec": {
+              "resolution": "4k"
+            },
+            "usd": 0.1
+          }
+        ],
+        "inputPricing": [
+          {
+            "unit": "video_input_second",
+            "quantity": 1,
+            "included": 0,
+            "tiers": [
+              {
+                "spec": {
+                  "resolution": "480p"
+                },
+                "usd": 0.03
+              },
+              {
+                "spec": {
+                  "resolution": "768p"
+                },
+                "usd": 0.06
+              },
+              {
+                "spec": {
+                  "resolution": "1080p"
+                },
+                "usd": 0.075
+              },
+              {
+                "spec": {
+                  "resolution": "2k"
+                },
+                "usd": 0.08
+              },
+              {
+                "spec": {
+                  "resolution": "4k"
+                },
+                "usd": 0.1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "pika/pika-h3-flex/text-to-video",
+      "vendor": "pika",
+      "fn": "text-to-video",
+      "category": "video",
+      "name": "Pika H3 Flex",
+      "description": "Pika H3 Flex Text to Video: generate a 3 to 15 second video with synchronized audio from a text prompt, at 480p or 768p, or upscaled to 1080p, 2K or 4K. Billed per output second.",
+      "method": "POST",
+      "path": "/v1/media/pika/pika-h3-flex/text-to-video",
+      "textField": "prompt",
+      "textMaxLength": 8000,
+      "media": [],
+      "params": [
+        {
+          "key": "duration",
+          "label": "Duration",
+          "type": "number",
+          "valueType": "integer",
+          "description": "Requested video duration in whole seconds, from 3 to 15. Native output rounds up to the model's frame grid and may be slightly longer.",
+          "min": 3,
+          "max": 15,
+          "step": 1
+        },
+        {
+          "key": "aspect_ratio",
+          "label": "Aspect Ratio",
+          "type": "select",
+          "options": [
+            "",
+            "auto",
+            "21:9",
+            "16:9",
+            "3:2",
+            "4:3",
+            "5:4",
+            "1:1",
+            "4:5",
+            "3:4",
+            "2:3",
+            "9:16",
+            "9:21"
+          ],
+          "valueType": "string",
+          "description": "Output aspect ratio. Auto selects from the original prompt and reference video, even when rewrite is false; with a keyframe it follows the first supplied keyframe. A fixed ratio always wins. When omitted, rewriting enables Auto; without rewriting, the first supplied keyframe sets the ratio, or 16:9 without a keyframe. Keyframes are resized and center-cropped to fit."
+        },
+        {
+          "key": "resolution",
+          "label": "Resolution",
+          "type": "select",
+          "options": [
+            "480p",
+            "768p",
+            "1080p",
+            "2k",
+            "4k"
+          ],
+          "valueType": "string",
+          "description": "480p/768p are native. 1080p/2k/4k generates at 768p, then upscales once with the V1 model, preserving audio and frame rate."
+        },
+        {
+          "key": "seed",
+          "label": "Seed",
+          "type": "number",
+          "valueType": "integer",
+          "min": 0,
+          "max": 9223372036854776000,
+          "step": 1
+        },
+        {
+          "key": "rewrite",
+          "label": "Rewrite",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Improve the prompt before generation; disable to use the original prompt."
+        }
+      ],
+      "defaults": {
+        "duration": 5,
+        "aspect_ratio": "",
+        "resolution": "768p",
+        "seed": 0,
+        "rewrite": "on"
+      },
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [
+        "prompt"
+      ],
+      "pricing": {
+        "unit": "second",
+        "quantity": 1,
+        "tiers": [
+          {
+            "spec": {
+              "resolution": "480p"
+            },
+            "usd": 0.01
+          },
+          {
+            "spec": {
+              "resolution": "768p"
+            },
+            "usd": 0.02
+          },
+          {
+            "spec": {
+              "resolution": "1080p"
+            },
+            "usd": 0.035
+          },
+          {
+            "spec": {
+              "resolution": "2k"
+            },
+            "usd": 0.04
+          },
+          {
+            "spec": {
+              "resolution": "4k"
+            },
+            "usd": 0.08
+          }
+        ]
+      }
+    },
+    {
       "apiId": "pika/pikadditions/video-to-video",
       "vendor": "pika",
       "fn": "video-to-video",
@@ -14573,7 +17236,7 @@
       "fn": "image-to-video",
       "category": "video",
       "name": "Pika 2.5 Keyframe",
-      "description": "Animate between 2-5 ordered keyframes with Pika 2.5.",
+      "description": "Animate 1-5 ordered keyframes with individual transition prompts, durations, and optional looping. A single image requires looping.",
       "method": "POST",
       "path": "/v1/media/pika/pikaframes/image-to-video",
       "textField": "prompt",
@@ -14586,7 +17249,7 @@
           "array": true,
           "required": true,
           "maxItems": 5,
-          "minItems": 2
+          "minItems": 1
         }
       ],
       "params": [
@@ -14614,10 +17277,21 @@
           "label": "Transition Duration S",
           "type": "number",
           "valueType": "integer",
-          "description": "Seconds per transition. Over 5 seconds needs exactly 2 keyframes.",
+          "description": "Default seconds per transition. Multiple transitions are limited to 5 seconds each.",
           "min": 1,
           "max": 10,
           "step": 1
+        },
+        {
+          "key": "loop",
+          "label": "Loop",
+          "type": "select",
+          "options": [
+            "off",
+            "on"
+          ],
+          "valueType": "boolean",
+          "description": "Add a closing transition from the last image to the first."
         },
         {
           "key": "negative_prompt",
@@ -14631,9 +17305,47 @@
         "resolution": "1080p",
         "seed": "",
         "transition_duration_s": 5,
+        "loop": "off",
         "negative_prompt": ""
       },
-      "advanced": [],
+      "advanced": [
+        {
+          "key": "transition_durations_s",
+          "label": "Transition Durations S",
+          "required": false,
+          "description": "Seconds for each transition, including the closing edge when loop=true. Overrides transition_duration_s.",
+          "schema": {
+            "items": {
+              "maximum": 10,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array",
+            "description": "Seconds for each transition, including the closing edge when loop=true. Overrides transition_duration_s.",
+            "default": null,
+            "title": "Transition Durations S"
+          }
+        },
+        {
+          "key": "transition_prompts",
+          "label": "Transition Prompts",
+          "required": false,
+          "description": "Prompt for each transition, including the closing edge when loop=true. Overrides prompt; empty strings are allowed.",
+          "schema": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array",
+            "description": "Prompt for each transition, including the closing edge when loop=true. Overrides prompt; empty strings are allowed.",
+            "default": null,
+            "title": "Transition Prompts"
+          }
+        }
+      ],
       "requiredAdvanced": [],
       "requiredFields": [
         "images"
@@ -14925,7 +17637,7 @@
       "fn": "merge-videos",
       "category": "video",
       "name": "Pika Video Merge",
-      "description": "Join videos into one clip: hand over two to ten in playback order and get back a single video with stereo audio, at the first clip's size and frame rate unless you choose a size, reference clip, or frame rate. Clips of a different shape get black bars. Billed per output second.",
+      "description": "Pika Video Merge: join 2 to 10 videos in order into one clip with stereo audio, matching the first clip's size and frame rate by default. Billed per output second.",
       "method": "POST",
       "path": "/v1/media/pika/video-merge/merge-videos",
       "textField": null,
@@ -16116,7 +18828,7 @@
       "fn": "image-upscale",
       "category": "image",
       "name": "Topaz Image Upscale",
-      "description": "Upscale and enhance images with Topaz Labs models. One endpoint; the `model` request field picks the enhancement model (Standard V2 by default), priced per image up to 24MP output. The standard family keeps the original flat price; the generative family (redefine, standard-max, wonder, wonder-3, wonder-3.5) adds synthesized detail at a higher rate.",
+      "description": "Topaz Image Upscale: upscale and enhance images up to 24MP with Topaz Labs models, chosen with the `model` field (Standard V2 by default). Generative models add detail at a higher rate. Billed per image.",
       "method": "POST",
       "path": "/v1/media/topaz/topaz-image-upscale/image-upscale",
       "textField": "prompt",
@@ -16438,7 +19150,7 @@
       "fn": "video-upscale",
       "category": "video",
       "name": "Topaz Video Upscale",
-      "description": "Upscale videos with Topaz Labs enhancement models, optionally raising the frame rate in the same job. One endpoint; the `model` request field picks the enhancement model (Proteus by default). Starlight models are priced per output frame, at a higher rate when the output's long edge exceeds 1920px. Proteus is priced per output megapixel.",
+      "description": "Topaz Video Upscale: upscale videos with Topaz Labs models and optionally raise the frame rate, choosing a model with the `model` field (Proteus by default). Proteus is billed per output megapixel, Starlight per output frame.",
       "method": "POST",
       "path": "/v1/media/topaz/topaz-video-upscale/video-upscale",
       "textField": null,
@@ -16460,10 +19172,11 @@
           "options": [
             "x1",
             "x2",
+            "x3",
             "x4"
           ],
           "valueType": "string",
-          "description": "Output scale. `x1` means no upscale: the job carries only the frame-interpolation filter and the output keeps the source resolution, so it requires `target_fps` and forbids the proteus tuning controls (they belong to the upscale filter that `x1` omits). `x1` is a widening of the enum — the default is still `x2`."
+          "description": "Output scale. `x2`, `x3` and `x4` multiply the source width and height, and a job whose output would exceed 4096x2160 pixels in total fails. `x1` means no upscale: the job carries only the frame-interpolation filter and the output keeps the source resolution, so it requires `target_fps` and forbids the proteus tuning controls (they belong to the upscale filter that `x1` omits). `x1` is a widening of the enum — the default is still `x2`."
         },
         {
           "key": "model",
@@ -16618,6 +19331,75 @@
               "variant": "starlight-precise-2.6"
             },
             "usd": 0
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "typesafe/jev-1.13",
+      "vendor": "typesafe",
+      "fn": null,
+      "category": "decision",
+      "name": "TypeSafe JEV 1.13",
+      "description": "TypeSafe JEV 1.13 is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/typesafe/jev-1.13",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0
+          }
+        ],
+        "inputUsd": 0.045
+      }
+    },
+    {
+      "apiId": "x-ai/grok-4.7",
+      "vendor": "x-ai",
+      "fn": null,
+      "category": "llm",
+      "name": "xAI Grok 4.7",
+      "description": "xAI Grok 4.7 is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/x-ai/grok-4.7",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 6.3
+          }
+        ],
+        "inputUsd": 2.1,
+        "inputPricing": [
+          {
+            "unit": "cached_input_token",
+            "quantity": 1000000,
+            "included": 0,
+            "tiers": [
+              {
+                "spec": {},
+                "usd": 0.525
+              }
+            ]
           }
         ]
       }
@@ -16885,6 +19667,7 @@
       "method": "POST",
       "path": "/v1/media/x-ai/grok-imagine-image-quality/image-to-image",
       "textField": "prompt",
+      "textMaxLength": 16000,
       "media": [
         {
           "field": "image_urls",
@@ -16993,6 +19776,7 @@
       "method": "POST",
       "path": "/v1/media/x-ai/grok-imagine-image-quality/text-to-image",
       "textField": "prompt",
+      "textMaxLength": 16000,
       "media": [],
       "params": [
         {
@@ -17076,6 +19860,7 @@
       "method": "POST",
       "path": "/v1/media/x-ai/grok-imagine-image/image-to-image",
       "textField": "prompt",
+      "textMaxLength": 16000,
       "media": [
         {
           "field": "image_urls",
@@ -17184,6 +19969,7 @@
       "method": "POST",
       "path": "/v1/media/x-ai/grok-imagine-image/text-to-image",
       "textField": "prompt",
+      "textMaxLength": 16000,
       "media": [],
       "params": [
         {
@@ -17640,7 +20426,7 @@
       "fn": "video-to-video",
       "category": "video",
       "name": "Grok Imagine Video Editing",
-      "description": "Grok Imagine video editing: rewrite an existing clip from a prompt, the output inheriting the input's length, aspect ratio and resolution (720p cap). The per-second rate covers both the generated output and the source clip, which xAI bills as media input.",
+      "description": "Grok Imagine Video Editing: rewrite an existing clip from a prompt, keeping its length, aspect ratio and resolution (up to 720p). Billed per second of output and source video.",
       "method": "POST",
       "path": "/v1/media/x-ai/grok-imagine-video/video-to-video",
       "textField": "prompt",
@@ -17669,6 +20455,129 @@
           {
             "spec": {},
             "usd": 0.084
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "xiaomi/mimo-v2.6-flash",
+      "vendor": "xiaomi",
+      "fn": null,
+      "category": "llm",
+      "name": "Xiaomi MiMo V2.6 Flash",
+      "description": "Xiaomi MiMo V2.6 Flash is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/xiaomi/mimo-v2.6-flash",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.294
+          }
+        ],
+        "inputUsd": 0.147,
+        "inputPricing": [
+          {
+            "unit": "cached_input_token",
+            "quantity": 1000000,
+            "included": 0,
+            "tiers": [
+              {
+                "spec": {},
+                "usd": 0.003
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "xiaomi/mimo-v2.6-pro",
+      "vendor": "xiaomi",
+      "fn": null,
+      "category": "llm",
+      "name": "Xiaomi MiMo V2.6 Pro",
+      "description": "Xiaomi MiMo V2.6 Pro is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/xiaomi/mimo-v2.6-pro",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 0.914
+          }
+        ],
+        "inputUsd": 0.457,
+        "inputPricing": [
+          {
+            "unit": "cached_input_token",
+            "quantity": 1000000,
+            "included": 0,
+            "tiers": [
+              {
+                "spec": {},
+                "usd": 0.004
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "xiaomi/mimo-v2.6-pro-ultraspeed",
+      "vendor": "xiaomi",
+      "fn": null,
+      "category": "llm",
+      "name": "Xiaomi MiMo V2.6 Pro UltraSpeed",
+      "description": "Xiaomi MiMo V2.6 Pro UltraSpeed is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/xiaomi/mimo-v2.6-pro-ultraspeed",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 9.135
+          }
+        ],
+        "inputUsd": 4.568,
+        "inputPricing": [
+          {
+            "unit": "cached_input_token",
+            "quantity": 1000000,
+            "included": 0,
+            "tiers": [
+              {
+                "spec": {},
+                "usd": 0.038
+              }
+            ]
           }
         ]
       }
@@ -17790,6 +20699,47 @@
               {
                 "spec": {},
                 "usd": 0.032
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "apiId": "z-ai/glm-5.3-flashx",
+      "vendor": "z-ai",
+      "fn": null,
+      "category": "llm",
+      "name": "Z.ai GLM 5.3 FlashX",
+      "description": "Z.ai GLM 5.3 FlashX is available in the Business API catalog.",
+      "method": "POST",
+      "path": "/v1/media/z-ai/glm-5.3-flashx",
+      "textField": null,
+      "media": [],
+      "params": [],
+      "defaults": {},
+      "advanced": [],
+      "requiredAdvanced": [],
+      "requiredFields": [],
+      "pricing": {
+        "unit": "output_token",
+        "quantity": 1000000,
+        "tiers": [
+          {
+            "spec": {},
+            "usd": 1.313
+          }
+        ],
+        "inputUsd": 0.389,
+        "inputPricing": [
+          {
+            "unit": "cached_input_token",
+            "quantity": 1000000,
+            "included": 0,
+            "tiers": [
+              {
+                "spec": {},
+                "usd": 0.079
               }
             ]
           }

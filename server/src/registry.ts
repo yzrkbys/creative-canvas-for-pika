@@ -123,7 +123,8 @@ const NODE_TYPE_BY_FUNCTION: Record<string, NodeType> = {
   avatar: "video_gen",
   // Seedance 2.5 renders the 1080p final of an earlier draft run. It takes no
   // media at all — only the draft's Pika job id (`draft_job_id`), which the
-  // inspector shows on every run so it can be copied across.
+  // inspector shows on every run so it can be copied across. Pika H3 Flex
+  // takes the same id, or an external video on `video_in` instead.
   "draft-to-video": "video_gen",
   "video-upscale": "video_upscale",
   // Pika's own concatenation. Same job as the local ffmpeg concat on the same
@@ -172,6 +173,22 @@ const UNSUPPORTED_FUNCTIONS: Record<string, string> = {
   // time. The transcribe node keeps plain text only, so nothing on the canvas
   // can produce that list — offering the node would mean typing timings by hand.
   "caption-video": "word timings cannot be produced on the canvas yet",
+  // Pika H3 Flex Audio Stems returns a ZIP of WAV files, and a node keeps one
+  // playable result, so nothing downstream could use it.
+  "audio-stems": "a ZIP of stems does not fit a single audio output",
+  // Seedream Layer Decomposition returns a base plus up to 16 PNG layers, but
+  // a node keeps one image, so the rest would be billed and dropped.
+  "layer-decomposition": "multi-layer output does not fit a single image output",
+  // Listed under category "llm" but served from /v1/media with a media-style
+  // body, so the chat path cannot run it. Flex's own `rewrite` param (on by
+  // default) does the same job inside a generation.
+  "prompt-rewriter": "not a chat model; Flex rewrites prompts during generation",
+};
+
+// Categories with no node at all. These endpoints have no media path to call.
+const UNSUPPORTED_CATEGORIES: Record<string, string> = {
+  // TypeSafe JEV returns typed judgments, not text or media.
+  decision: "no node type produces a typed judgment",
 };
 
 const KIND_BY_NODE_TYPE: Partial<Record<NodeType, OutputKind>> = {
@@ -266,6 +283,7 @@ function applyPreferredParams(entry: CatalogEntry): Record<string, unknown> {
 
 function specOf(entry: CatalogEntry): ModelSpec | null {
   if (entry.fn && entry.fn in UNSUPPORTED_FUNCTIONS) return null;
+  if (entry.category in UNSUPPORTED_CATEGORIES) return null;
   const nodeType = entry.category === "llm" ? "llm_text" : NODE_TYPE_BY_FUNCTION[entry.fn ?? ""];
   if (!nodeType) {
     console.warn(
@@ -411,10 +429,10 @@ export const MODELS: ModelSpec[] = [...PIKA_MODELS, ...BUILTIN_MODELS];
 // falls back to the first model that fits the node type.
 const PREFERRED_DEFAULT: Partial<Record<NodeType, string>> = {
   image_gen: "pika/bytedance/seedream-5.0-pro/text-to-image",
-  // GPT Image 2.5 supersedes 2 at a slightly lower rate ($28.5 vs $30 / 1M).
-  // Flare and Sunburst publish identical schemas and prices; Flare is simply
-  // the first of the pair, and Sunburst stays one click away.
-  image_edit: "pika/openai/gpt-image-2.5-flare/image-to-image",
+  // GPT Image 2.6 adds `complexity` and `markup_image_url` over 2.5, at $30
+  // vs $28.5 / 1M. Flare and Sunburst publish identical schemas and prices;
+  // Flare is simply the first of the pair, and Sunburst stays one click away.
+  image_edit: "pika/openai/gpt-image-2.6-flare/image-to-image",
   video_gen: "pika/bytedance/seedance-2.0/reference-to-video",
   video_upscale: "pika/topaz/topaz-video-upscale/video-upscale",
   audio_gen: "pika/elevenlabs/eleven-multilingual-v2/text-to-speech",

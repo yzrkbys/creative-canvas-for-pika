@@ -132,10 +132,12 @@ const MIME: Record<string, string> = {
 
 // Pika rejects an upload larger than this with a bare `413 file too large`,
 // before it hands back a presigned URL. Measured against the live API on
-// 2026-09-02: 104,857,600 bytes is accepted, 104,857,601 is not, for video,
-// audio and image alike. A 30s 1080p Wan 3.0 clip lands around 207 MiB — this
-// is not an edge case, it is the normal size of a long generated clip.
-const UPLOAD_MAX_BYTES = 100 * 1024 * 1024;
+// 2026-11-06: video is accepted up to 104,857,600 bytes, image and audio up to
+// 52,428,800 (on 2026-09-02 all three took 100 MiB). A 30s 1080p Wan 3.0 clip
+// lands around 207 MiB — this is not an edge case, it is the normal size of a
+// long generated clip.
+const uploadMaxBytes = (contentType: string) =>
+  (contentType.startsWith("video/") ? 100 : 50) * 1024 * 1024;
 
 const mib = (n: number) => `${(n / 1024 / 1024).toFixed(1)} MiB`;
 
@@ -161,47 +163,57 @@ async function toPikaUrl(url: string, shrinkable = false): Promise<string> {
 
   let filePath = resolveAssetPath(url);
   let tempProxy: string | null = null;
+  const ext = (path.extname(filePath).slice(1) || "png").toLowerCase();
+  const contentType = MIME[ext] ?? "application/octet-stream";
+  const maxBytes = uploadMaxBytes(contentType);
   // stat, not readFile: a 200 MiB buffer allocated only to learn a number the
   // filesystem already knows, and then thrown away on rejection.
   const size = (await fs.stat(filePath)).size;
-  if (size > UPLOAD_MAX_BYTES) {
+  if (size > maxBytes) {
     if (!shrinkable) {
+      const advice = contentType.startsWith("video/")
+        ? `このモデルは入力の画がそのまま出力に載るため、勝手に再エンコードして画質を落とすことはしません。` +
+          `動画トリムで短くするか、解像度・ビットレートを落としたものを取り込んでから繋いでください。`
+        : `サイズを落としたものを取り込んでから繋いでください。`;
       throw new Error(
-        `${path.basename(filePath)} は ${mib(size)} で、Pika のアップロード上限 ${mib(UPLOAD_MAX_BYTES)} を超えています。` +
-          `このモデルは入力の画がそのまま出力に載るため、勝手に再エンコードして画質を落とすことはしません。` +
-          `動画トリムで短くするか、解像度・ビットレートを落としたものを取り込んでから繋いでください。`,
+        `${path.basename(filePath)} は ${mib(size)} で、Pika のアップロード上限 ${mib(maxBytes)} を超えています。${advice}`,
       );
     }
     tempProxy = path.join(os.tmpdir(), `pika-proxy-${Date.now()}-${path.basename(filePath)}`);
-    await shrinkForUpload(filePath, tempProxy, UPLOAD_MAX_BYTES);
+    await shrinkForUpload(filePath, tempProxy, maxBytes);
     const proxySize = (await fs.stat(tempProxy)).size;
-    if (proxySize > UPLOAD_MAX_BYTES) {
+    if (proxySize > maxBytes) {
       await fs.rm(tempProxy, { force: true });
       throw new Error(
-        `${path.basename(filePath)}（${mib(size)}）を上限 ${mib(UPLOAD_MAX_BYTES)} 以下に再エンコードできませんでした` +
+        `${path.basename(filePath)}（${mib(size)}）を上限 ${mib(maxBytes)} 以下に再エンコードできませんでした` +
           `（${mib(proxySize)} まで。尺が長すぎます）。動画トリムで分割してから繋いでください。`,
       );
     }
     // Analysis-only, so this never reaches the output — but say it out loud
     // rather than let a silent re-encode look like the original was sent.
     console.log(
-      `[pika] ${path.basename(filePath)} ${mib(size)} > ${mib(UPLOAD_MAX_BYTES)}: ` +
+      `[pika] ${path.basename(filePath)} ${mib(size)} > ${mib(maxBytes)}: ` +
         `解析用に ${mib(proxySize)} へ再エンコードして送信します（出力は音声/テキストなので画質に影響しません）`,
     );
     filePath = tempProxy;
   }
 
   const buf = await fs.readFile(filePath);
-  const ext = (path.extname(filePath).slice(1) || "png").toLowerCase();
-  const contentType = MIME[ext] ?? "application/octet-stream";
 
-  const res = await pika<{ upload_url: string; url: string }>("POST", "/v1/media/uploads", {
+  const res = await pika<{
+    upload_url: string;
+    url: string;
+    method?: string;
+    headers?: Record<string, string>;
+  }>("POST", "/v1/media/uploads", {
     content_type: contentType,
     size_bytes: buf.length,
   });
+  // The presigned URL's signature covers the headers Pika returns with it
+  // (cache-control and content-length since 2026-11); anything less is a 403.
   const put = await fetch(res.upload_url, {
-    method: "PUT",
-    headers: { "content-type": contentType },
+    method: res.method ?? "PUT",
+    headers: res.headers ?? { "content-type": contentType },
     body: new Uint8Array(buf),
   });
   if (!put.ok) {
@@ -221,6 +233,7 @@ const PORT_LABEL: Record<PortIn, string> = {
   ref_in: "参照画像",
   last_frame_in: "最終フレーム",
   mask_in: "マスク",
+  markup_in: "マークアップ",
   video_in: "動画入力",
   ref_video_in: "参照動画",
   audio_in: "音声入力",
@@ -345,10 +358,14 @@ export function buildBody(
           items.push({ [union.roleField]: role, [union.urlField]: i.url });
         }
       }
-      // The prompt travels inside the same array for these models rather than
-      // in a top-level text field.
+      // Without a top-level text field the prompt travels inside the array.
       const text = (prompt ?? "").trim();
-      if (text) items.unshift({ [union.roleField]: "prompt", text });
+      if (text && !entry.textField) items.unshift({ [union.roleField]: "prompt", text });
+      if (m.maxItems && items.length > m.maxItems) {
+        throw new Error(
+          `${entry.name} の ${m.field} は最大 ${m.maxItems} 件です（現在 ${items.length} 件）。超過分を外してください。`,
+        );
+      }
       if (!items.length && m.required)
         throw new Error(
           `${entry.name} は最低1つの入力が必要です（${m.field}）。プロンプトかメディアを与えてください。`,
@@ -653,7 +670,9 @@ export function estimate(
   const entry = getEntry(modelId);
   const pricing = entry?.pricing;
   if (!entry || !pricing || !pricing.tiers.length)
-    return { amount: 0, currency: "USD", note: "価格情報なし（実行後に請求額を確認してください）" };
+    // metered, because a price we do not know is not a free run: recording 0
+    // would under-report the project total the same way token billing would.
+    return { amount: 0, currency: "USD", metered: true, note: "価格情報なし（実行後に請求額を確認してください）" };
 
   // Seedance prices on whether the request carries any video at all, a
   // dimension no param expresses; without this the tie-break always quoted
@@ -810,7 +829,40 @@ interface PikaJob {
   // reports is kept verbatim so a real charge can be reconciled later; the
   // shape is not guaranteed and is deliberately not parsed here.
   usage?: Record<string, unknown>;
+  // What this job really cost. `pending` when the job completes, `settled`
+  // about half a second later (measured 2026-11-06).
+  billing?: { state?: string; charge_micro_usd?: number };
   [k: string]: unknown;
+}
+
+const BILLING_POLL_MS = 2000;
+const BILLING_POLL_ATTEMPTS = 5;
+
+function chargedUsd(job: PikaJob): number | null {
+  const b = job.billing;
+  if (b?.state !== "settled" || typeof b.charge_micro_usd !== "number") return null;
+  return b.charge_micro_usd / 1e6;
+}
+
+/**
+ * The settled charge, or null when Pika has not reported one in time. Free
+ * allowances settle at 0 and the estimate quotes list price, so only this
+ * figure is what the run really cost. A slow settlement or a failed lookup
+ * must never lose an output that is already paid for, so both return null.
+ */
+async function settledCharge(job: PikaJob): Promise<number | null> {
+  let current = job;
+  for (let attempt = 0; attempt < BILLING_POLL_ATTEMPTS; attempt++) {
+    const usd = chargedUsd(current);
+    if (usd !== null) return usd;
+    await new Promise((r) => setTimeout(r, BILLING_POLL_MS));
+    try {
+      current = await pika<PikaJob>("GET", `/v1/media/jobs/${encodeURIComponent(job.id)}`);
+    } catch {
+      return null;
+    }
+  }
+  return chargedUsd(current);
 }
 
 /** Pull whatever usage counters a completed job carries, wherever they sit. */
@@ -1025,13 +1077,15 @@ export const pikaAdapter: ProviderAdapter = {
         ? [{ kind: "text", url: "", text: await fetchText(url) }]
         : [{ kind: spec.kind, url, fetchHeaders: fetchHeadersFor(url) }];
 
-    // A metered model reports null, not 0 — the charge is real, we just cannot
-    // derive it locally. Recording 0 made totals silently under-report by the
-    // whole token-billed share of a project. An unmeasured reference video is
-    // the same case: the figure would be low by an unknown amount.
+    // Without a settled charge, fall back to the estimate. There a metered model
+    // reports null, not 0 — the charge is real, we just cannot derive it
+    // locally. Recording 0 made totals silently under-report by the whole
+    // token-billed share of a project. An unmeasured reference video is the
+    // same case: the figure would be low by an unknown amount.
+    const charged = await settledCharge(job);
     return {
       outputs,
-      cost: est.metered || est.excluded ? null : est.amount,
+      cost: charged ?? (est.metered || est.excluded ? null : est.amount),
       usage: usageOf(job),
       providerJobId: submitted.id,
     };

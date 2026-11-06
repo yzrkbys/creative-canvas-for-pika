@@ -36,6 +36,7 @@ export const PORT_LABELS: Record<string, string> = {
   ref_in: "参照画像",
   last_frame_in: "末尾フレーム",
   mask_in: "マスク",
+  markup_in: "マークアップ",
   audio_in: "入力オーディオ",
   video_in: "入力動画",
   ref_video_in: "参照動画",

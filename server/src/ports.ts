@@ -25,6 +25,7 @@ export const PORTS: Record<NodeType, PortDef> = {
       { port: "image_in", kind: "image", required: true },
       { port: "ref_in", kind: "image", required: false },
       { port: "mask_in", kind: "image", required: false }, // inpainting mask (gpt-image-2, pikaswaps)
+      { port: "markup_in", kind: "image", required: false }, // marks over the source (gpt-image-2.6); not with mask_in
       { port: "text_in", kind: "text", required: false }, // prompt from upstream text
     ],
     output: { port: "image_out", kind: "image" },

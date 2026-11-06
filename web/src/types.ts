@@ -27,6 +27,7 @@ export type PortIn =
   | "ref_in"
   | "last_frame_in"
   | "mask_in"
+  | "markup_in"
   | "video_in"
   | "ref_video_in"
   | "audio_in"

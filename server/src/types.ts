@@ -42,6 +42,7 @@ export type PortIn =
   | "ref_in"
   | "last_frame_in"
   | "mask_in"
+  | "markup_in"
   | "video_in"
   | "ref_video_in"
   | "audio_in"
@@ -57,8 +58,9 @@ export interface OutputMeta {
   durationSec?: number;
   provider: string;
   model: string;
-  // number = the amount actually charged for this output.
-  // null   = the model is metered on a unit we cannot convert (per-million
+  // number = the charge Pika settled for this output, 0 for a free allowance.
+  //          If Pika reported none in time, or for chat models, the estimate.
+  // null   = no settled charge, and the estimate could not price it (per-million
   //          output tokens), so the charge is real but unknown here. It is NOT
   //          zero, and anything summing costs must report it separately.
   cost?: number | null;
