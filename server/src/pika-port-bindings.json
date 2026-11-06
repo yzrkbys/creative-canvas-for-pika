@@ -15,7 +15,7 @@
     "For a single-valued field the first connected port with a matching kind",
     "wins. For an array field every listed port contributes, in order.",
     "",
-    "A field is normally a list of ports. A TAGGED-UNION array (Kling 3.0's `contents`) instead maps each port to the role string the item must carry, because there the port IS the semantics: the same URL means first frame or reference or base clip depending on where it is wired."
+    "A field is normally a list of ports. A TAGGED-UNION array (Pika H3 Flex's `references`) instead maps each port to the role string the item must carry, because there the port IS the semantics: the same URL means first frame or reference or base clip depending on where it is wired."
   ],
   "fields": {
     "image_url": [
@@ -32,6 +32,9 @@
     ],
     "last_frame_url": [
       "last_frame_in"
+    ],
+    "middle_frame_urls": [
+      "ref_in"
     ],
     "last_frame_image": [
       "last_frame_in"
@@ -50,6 +53,9 @@
     "mask_image_url": [
       "mask_in"
     ],
+    "markup_image_url": [
+      "markup_in"
+    ],
     "modify_region_mask": [
       "mask_in"
     ],
@@ -60,6 +66,10 @@
       "video_in"
     ],
     "source_url": [
+      "video_in",
+      "audio_in"
+    ],
+    "input_url": [
       "video_in",
       "audio_in"
     ],
@@ -101,6 +111,15 @@
     "videos": [
       "clip_in"
     ],
+    "references": {
+      "roleField": "type",
+      "urlField": "url",
+      "ports": {
+        "ref_in": "image",
+        "ref_video_in": "video",
+        "ref_audio_in": "audio"
+      }
+    },
     "contents": {
       "roleField": "type",
       "urlField": "url",

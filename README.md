@@ -202,6 +202,10 @@ Billing units differ per model, and some genuinely cannot be quoted in advance:
 Token-billed models say "cannot be estimated" and ask for confirmation rather than inventing
 a number. **`$0` means "not quotable", not "free".**
 
+After a run, the recorded cost is the charge Pika settled, so a free allowance records 0 and a
+token-billed model records its real figure. If Pika reports no charge within about 10 seconds,
+the estimate is recorded instead.
+
 ---
 
 ## Guards that run before you are billed
@@ -241,8 +245,9 @@ The usual cause is port `8797` already being in use; the app falls back to a fre
 writes it to `server-port` in the data directory.
 
 **A generation fails with `file too large`.**
-Pika rejects uploads over **100 MiB** (104,857,600 bytes exactly), and the rejection happens
-before any bytes are sent. Generated clips reach that easily — a 30-second 1080p clip can be
+Pika rejects video uploads over **100 MiB** (104,857,600 bytes exactly) and image or audio
+uploads over **50 MiB**, and the rejection happens before any bytes are sent. Generated clips
+reach that easily — a 30-second 1080p clip can be
 over 200 MiB.
 
 Where the model only *analyses* the clip and returns something else — scoring, transcription —

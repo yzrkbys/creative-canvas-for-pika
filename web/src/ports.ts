@@ -18,6 +18,7 @@ export const PORTS: Record<NodeType, PortDef> = {
       { port: "image_in", kind: "image", required: true },
       { port: "ref_in", kind: "image", required: false },
       { port: "mask_in", kind: "image", required: false },
+      { port: "markup_in", kind: "image", required: false },
       { port: "text_in", kind: "text", required: false },
     ],
     output: { port: "image_out", kind: "image" },

@@ -48,6 +48,12 @@ const TEXT_FIELDS = ["prompt", "text"];
 // as the box.
 const FALLBACK_TEXT_FIELDS = ["script", "instruction", "text_prompt"];
 
+// Pika H3 Flex's `output_mode: audio-stems` adds a separation fee and returns
+// WAV files next to the video, but a node keeps one result, so the stems would
+// be paid for and dropped. Left out here, the endpoint's default (video only)
+// applies. `channel_mode` only affects those stems.
+const STEM_ONLY_PARAMS = ["output_mode", "channel_mode"];
+
 // Input video Pika bills but its catalog does not publish. The estimate can
 // only count what display_pricing lists, so an endpoint missing here quotes
 // output seconds alone. Each entry is a measured charge, never an inference,
@@ -117,20 +123,32 @@ function unwrap(prop) {
 
 /**
  * Media fields are self-describing: the schema tags them with `media_kinds`.
- * Three shapes occur:
+ * Four shapes occur:
  *   1. a plain string field           -> image_url
  *   2. an array of tagged strings     -> image_urls: [url, url]
  *   3. an array of tagged OBJECTS     -> keyframes: [{image_url, at_s}, ...]
+ *   4. an array of typed media items  -> references: [{type: "video", url}, ...]
  * Shape 3 (FLUX 3's keyframes) hides `media_kinds` one level down, inside the
  * item object. Without this branch the field is not seen as media at all, so
  * the connected images are never sent — and a required field like `keyframes`
  * would bill for a run that carried no pictures.
+ *
+ * Shape 4 (Pika H3 Flex's references) is a oneOf where each branch is one media
+ * kind. Only a union whose EVERY branch is a media URL counts: Kling omni-video's
+ * `contents` also carries prompts, elements and voices, which wiring cannot
+ * express, so it stays on the raw-JSON escape hatch.
  */
 function mediaKindsOf(prop, defs = {}) {
   if (Array.isArray(prop.media_kinds)) return { kinds: prop.media_kinds, array: false };
   if (prop.type !== "array") return null;
   const item = unwrap(resolveRefs(prop.items ?? {}, defs));
   if (Array.isArray(item.media_kinds)) return { kinds: item.media_kinds, array: true };
+  if (Array.isArray(item.oneOf) && item.oneOf.length) {
+    const urls = item.oneOf.map((b) => unwrap(b.properties?.url ?? {}));
+    if (urls.every((u) => Array.isArray(u.media_kinds))) {
+      return { kinds: [...new Set(urls.flatMap((u) => u.media_kinds))], array: true };
+    }
+  }
   if (item.type === "object" && item.properties) {
     for (const [name, sub] of Object.entries(item.properties)) {
       const s = unwrap(sub);
@@ -318,6 +336,7 @@ function normalize(entry) {
   let textMaxLength;
 
   for (const [key, raw] of Object.entries(props)) {
+    if ("output_mode" in props && STEM_ONLY_PARAMS.includes(key)) continue;
     const prop = unwrap(raw);
     const mk = mediaKindsOf(prop, defs);
 

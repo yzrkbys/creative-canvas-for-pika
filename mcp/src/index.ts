@@ -236,7 +236,7 @@ server.tool(
   "canvas_connect",
   "Connect source.sourceHandle -> target.targetHandle. Validates kind compatibility. " +
     "Ports: image_in(first frame / source image), last_frame_in(end frame), ref_in(reference images, multi), " +
-    "mask_in(inpaint or region mask), video_in(source clip: v2v, extension, upscale, scoring, av_mux), " +
+    "mask_in(inpaint or region mask), markup_in(transparent PNG of marks over the source, GPT Image 2.6, not with mask_in), video_in(source clip: v2v, extension, upscale, scoring, av_mux), " +
     "ref_video_in(reference videos, multi), audio_in(driving or source audio: avatar, lipsync, " +
     "speech-to-speech, transcribe, av_mux), ref_audio_in(reference audio, multi), clip_in(concat, multi), " +
     "text_in(upstream text, multi). " +
@@ -251,6 +251,7 @@ server.tool(
       "ref_in",
       "last_frame_in",
       "mask_in",
+      "markup_in",
       "video_in",
       "ref_video_in",
       "audio_in",
