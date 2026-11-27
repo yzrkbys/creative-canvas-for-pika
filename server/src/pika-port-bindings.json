@@ -108,6 +108,12 @@
     "start_video_url": [
       "video_in"
     ],
+    "first_clip_url": [
+      "video_in"
+    ],
+    "driving_audio_url": [
+      "audio_in"
+    ],
     "videos": [
       "clip_in"
     ],

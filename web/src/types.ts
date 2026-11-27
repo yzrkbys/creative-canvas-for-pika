@@ -53,6 +53,14 @@ export interface Output {
     seed?: number;
     request?: RunRequest; // what produced this output
     providerJobId?: string; // Pika's job id
+    // Set on the images of a layer decomposition (zIndex 0 = the base).
+    layer?: {
+      zIndex: number;
+      name?: string;
+      description?: string;
+      bbox?: [number, number, number, number];
+      text?: string;
+    };
   };
   createdAt: string;
 }

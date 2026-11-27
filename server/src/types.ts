@@ -75,6 +75,26 @@ export interface OutputMeta {
   // The provider's id for the job (Pika's media job id). Needed to look a job
   // up on the provider's side, and as the input of Seedance 2.5 draft-to-video.
   providerJobId?: string;
+  // Set on the outputs of a layer decomposition: where this image sits in the
+  // stack it was split from.
+  layer?: OutputLayer;
+}
+
+/**
+ * One image of a layer decomposition. zIndex 0 is the full-canvas base, which
+ * has no bounding box; the rest stack on it in ascending zIndex.
+ */
+export interface OutputLayer {
+  zIndex: number;
+  name?: string;
+  description?: string;
+  // [left, top, right, bottom] in the base image's pixels.
+  bbox?: [number, number, number, number];
+  // The layer's text when text recognition was requested, lines joined by "\n".
+  text?: string;
+  // Pika's full reading of a formatted text layer (line boxes, fonts, colors),
+  // kept as reported so an agent can rebuild the type.
+  textRecognition?: unknown;
 }
 
 export interface Output {
@@ -167,6 +187,7 @@ export interface RawOutput {
   height?: number;
   durationSec?: number;
   seed?: number;
+  layer?: OutputLayer;
 }
 
 export interface CostEstimate {
@@ -192,6 +213,9 @@ export interface ProviderRunArgs {
 }
 
 export interface ProviderRunResult {
+  // Everything the job returned. The first entry is the node's own result; any
+  // further media (extra images of a `num_images` run, the layers of a
+  // decomposition) is placed on the canvas as nodes of its own.
   outputs: RawOutput[];
   cost: number | null; // null = metered on an unquotable unit, or a billed input went unmeasured (see OutputMeta.cost)
   usage?: Record<string, unknown>;
@@ -261,4 +285,7 @@ export interface Job {
   error?: string;
   estimate?: CostEstimate;
   createdAt: string;
+  // Nodes this job added to the canvas for outputs past the first (see
+  // ProviderRunResult.outputs), in output order.
+  extraNodeIds?: string[];
 }

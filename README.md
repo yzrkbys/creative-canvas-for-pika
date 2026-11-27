@@ -153,6 +153,15 @@ A job is **frozen at start**: editing the prompt or switching the model while it
 the next run, not this one. Every output also records what made it, so when a re-run sends the
 previous result to the archive, that result keeps the model and prompt that produced it.
 
+**Jobs that return several results**: an image run with `num_images` above 1, and Seedream
+**Layer Decomposition** (selectable on the image edit node), return more than one image from a
+single job. The first one (the base, for a decomposition) stays on the node that ran; every
+further image is **placed to its right as an image node of its own**, each with an output port,
+so a single layer can be wired into the next node. Layer nodes show their stacking order
+(`レイヤー 1` sits lowest) and name, and the output records where the layer sits on the base
+(bbox). A decomposition is **billed per image returned**, so the confirm before the run shows the
+price per image and the maximum at the image cap.
+
 **Seedance 2.5 drafts**: turn `draft` on to get a 480p preview first. To finalise it, paste its
 job id into *Draft Job Id* on "Seedance 2.5 Draft To Video" for a 1080p render that inherits the
 draft's prompt and inputs (within 7 days; the final is billed as its own job).

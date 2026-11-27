@@ -26,8 +26,10 @@ import type {
   NodeStatus,
   NodeType,
   Output,
+  OutputLayer,
   PortIn,
   PortOut,
+  RawOutput,
   ResolvedInput,
   RunInfo,
   RunRequest,
@@ -89,6 +91,18 @@ const UI_OWNED_PARAMS = new Set([
 const CONFIRM_KINDS = new Set(["video", "audio"]);
 
 const MAX_IMPORT_CHARS = 50000;
+
+// Grid for the nodes a multi-output run adds (see spawnOutputNode). The steps
+// leave room for a default 280x300 image node.
+const SPAWN_COLUMNS = 4;
+const SPAWN_STEP_X = 300;
+const SPAWN_STEP_Y = 330;
+
+/** A layer for the compact graph: the per-line text styles stay in the full graph. */
+function withoutRawText(layer: OutputLayer): Omit<OutputLayer, "textRecognition"> {
+  const { textRecognition: _raw, ...rest } = layer;
+  return rest;
+}
 
 function decodeDataUrl(dataUrl: string): Buffer {
   const m = /^data:([^;,]+)?(;base64)?,(.*)$/s.exec(dataUrl);
@@ -204,6 +218,11 @@ export class Canvas extends EventEmitter {
         status: n.status,
         hasOutput: n.data.outputs.length > 0,
         outputKinds: n.data.outputs.map((o) => o.kind),
+        // Where the image this node shows sits in a layer decomposition, so an
+        // agent can tell the layers apart and restack them (zIndex 0 = base).
+        ...(n.data.outputs.at(-1)?.meta.layer
+          ? { layer: withoutRawText(n.data.outputs.at(-1)!.meta.layer!) }
+          : {}),
         error: n.error,
       })),
       edges: this.graph.edges.map((e) => ({
@@ -976,6 +995,85 @@ export class Canvas extends EventEmitter {
     this.emitEvent({ type: "node:added", node: snapshot });
   }
 
+  /**
+   * A node shows one result, so media a job returns past the first gets a node
+   * of its own beside the one that made it: the other images of a `num_images`
+   * run, or the layers of a decomposition (whose base stays on the node). They
+   * are plain media nodes with an output port, so each can be wired on, moved
+   * or deleted like an upload. Laid out in rows to the right, in output order.
+   */
+  private spawnOutputNode(
+    output: Output,
+    slot: number,
+    origin: { x: number; y: number },
+  ): GraphNode {
+    const type: NodeType =
+      output.kind === "video" ? "video_upload" : output.kind === "audio" ? "audio_upload" : "image_upload";
+    const spawned: GraphNode = {
+      id: nanoid(),
+      type,
+      position: {
+        x: origin.x + (slot % SPAWN_COLUMNS) * SPAWN_STEP_X,
+        y: origin.y + Math.floor(slot / SPAWN_COLUMNS) * SPAWN_STEP_Y,
+      },
+      data: { prompt: "", model: "", params: {}, outputs: [output] },
+      status: "succeeded",
+    };
+    this.graph.nodes.push(spawned);
+    this.touch();
+    this.emitEvent({ type: "node:added", node: spawned });
+    return spawned;
+  }
+
+  /**
+   * Top-left of the block where `count` spawned nodes go: right of `node`, and
+   * moved down a row at a time until none of them would land on a node that is
+   * already there. A re-run otherwise stacks its layers exactly on the last
+   * run's, which reads as nothing having happened.
+   */
+  private spawnOrigin(node: GraphNode, count: number): { x: number; y: number } {
+    const x = node.position.x + (Number(node.data.params.w) || 300) + 60;
+    let y = node.position.y;
+    const occupied = this.graph.nodes.filter(
+      (n) => n.id !== node.id && n.type !== "frame" && !n.data.params.archived,
+    );
+    const clashes = (top: number) =>
+      Array.from({ length: count }, (_, slot) => ({
+        x: x + (slot % SPAWN_COLUMNS) * SPAWN_STEP_X,
+        y: top + Math.floor(slot / SPAWN_COLUMNS) * SPAWN_STEP_Y,
+      })).some((p) =>
+        occupied.some(
+          (n) =>
+            Math.abs(n.position.x - p.x) < SPAWN_STEP_X - 20 &&
+            Math.abs(n.position.y - p.y) < SPAWN_STEP_Y - 20,
+        ),
+      );
+    for (let moved = 0; moved < 60 && clashes(y); moved++) y += SPAWN_STEP_Y;
+    return { x, y };
+  }
+
+  /**
+   * Download one result into the project, trying again on a failure. The job
+   * is already paid for by the time this runs, so a dropped connection is worth
+   * two more attempts before the run is reported as failed.
+   */
+  private async downloadResult(raw: RawOutput, providerJobId?: string): Promise<string> {
+    let last: unknown;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        return (await downloadToAssets(raw.url, raw.kind, this.projectId, raw.fetchHeaders)).localUrl;
+      } catch (err) {
+        last = err;
+        await new Promise((r) => setTimeout(r, 800 * (attempt + 1)));
+      }
+    }
+    const msg = last instanceof Error ? last.message : String(last);
+    throw new Error(
+      `結果のダウンロードに失敗しました: ${msg}` +
+        (providerJobId ? `（生成は完了し課金済みです。Pika のジョブID: ${providerJobId}）` : ""),
+    );
+  }
+
   private async execute(
     job: Job,
     node: GraphNode,
@@ -1015,21 +1113,41 @@ export class Canvas extends EventEmitter {
         return;
       }
 
-      // Preserve the prior result before this run's output replaces it on screen.
-      if (result.outputs.length > 0) this.archiveSupersededOutput(node);
-
+      // Fetch everything before touching the canvas. A layer decomposition
+      // returns up to a hundred files, and one failed download part-way must
+      // not leave the node holding half of a run that was billed in full.
+      const localUrls: string[] = [];
       for (const raw of result.outputs) {
         // Text results (LLM answers, transcripts) arrive inline — there is
         // nothing to download, and they live in the output's `text` field the
         // same way web_clip's do.
-        const localUrl =
+        localUrls.push(
           raw.kind === "text" && raw.text !== undefined
             ? ""
-            : (await downloadToAssets(raw.url, raw.kind, this.projectId, raw.fetchHeaders)).localUrl;
+            : await this.downloadResult(raw, result.providerJobId),
+        );
+      }
+
+      // Preserve the prior result before this run's output replaces it on screen.
+      if (result.outputs.length > 0) this.archiveSupersededOutput(node);
+
+      // One job is one charge. Spread over what came back, a project total
+      // counts it once however many outputs the job returned (and each image
+      // of a per-image model shows its own price).
+      const count = result.outputs.length;
+      const cost =
+        typeof result.cost === "number" && count > 1
+          ? Number((result.cost / count).toFixed(6))
+          : result.cost;
+
+      const extraNodeIds: string[] = [];
+      const extras = result.outputs.filter((o, i) => i > 0 && o.kind !== "text").length;
+      const origin = extras ? this.spawnOrigin(node, extras) : node.position;
+      for (const [index, raw] of result.outputs.entries()) {
         const output: Output = {
           id: nanoid(),
           kind: raw.kind,
-          url: localUrl,
+          url: localUrls[index],
           text: raw.text,
           meta: {
             width: raw.width,
@@ -1037,18 +1155,24 @@ export class Canvas extends EventEmitter {
             durationSec: raw.durationSec,
             provider: adapter.id,
             model,
-            cost: result.cost,
+            cost,
             usage: result.usage,
             seed: raw.seed,
             request,
             providerJobId: result.providerJobId,
+            ...(raw.layer ? { layer: raw.layer } : {}),
           },
           createdAt: new Date().toISOString(),
         };
+        if (index > 0 && output.kind !== "text") {
+          extraNodeIds.push(this.spawnOutputNode(output, extraNodeIds.length, origin).id);
+          continue;
+        }
         node.data.outputs.push(output);
         this.touch();
         this.emitEvent({ type: "node:output", id: node.id, output });
       }
+      if (extraNodeIds.length) job.extraNodeIds = extraNodeIds;
 
       job.status = "succeeded";
       job.progress = 1;

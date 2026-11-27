@@ -26,6 +26,11 @@ function extFromContentType(ct: string | null, kind: OutputKind): string {
   if (ct.includes("jpeg")) return "jpg";
   if (ct.includes("png")) return "png";
   if (ct.includes("webp")) return "webp";
+  // GPT Image 2.6 `output_format: gif` returns an animation. Saved as .png it
+  // still showed, but went back to Pika labelled image/png on the next upload.
+  if (ct.includes("gif")) return "gif";
+  // Seedance `output_format: mov`.
+  if (ct.includes("quicktime")) return "mov";
   if (ct.includes("mp4")) return "mp4";
   if (ct.includes("webm")) return "webm";
   return EXT[kind];

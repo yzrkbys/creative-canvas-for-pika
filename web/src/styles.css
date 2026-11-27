@@ -867,6 +867,11 @@ textarea.cnode-doc {
   padding: 2px 7px;
   border-radius: 999px;
   pointer-events: none;
+  /* a layer's name can be long; keep the chip clear of the status dot */
+  max-width: calc(100% - 36px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .cn-status-dot {
   position: absolute;

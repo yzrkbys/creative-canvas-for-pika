@@ -1,4 +1,4 @@
-import { getModel } from "../registry.js";
+import { getEntry, getModel } from "../registry.js";
 import { estimateRun } from "./pika.js";
 import type {
   OutputKind,
@@ -18,9 +18,10 @@ function placeholderSvg(
   kind: OutputKind,
   prompt: string,
   i: number,
+  caption?: string,
 ): string {
   const bg = kind === "video" ? "#1d2b3a" : "#2a1d3a";
-  const label = kind === "video" ? "MOCK VIDEO" : "MOCK IMAGE";
+  const label = caption ?? (kind === "video" ? "MOCK VIDEO" : "MOCK IMAGE");
   const text = esc(prompt.slice(0, 60)) || "(no prompt)";
   const anim =
     kind === "video"
@@ -75,7 +76,34 @@ export const mockAdapter: ProviderAdapter = {
       };
     }
 
-    const n = kind === "image" ? Number(args.params.n ?? 1) : 1;
+    const est = await this.estimateCost(model, args.params, args.inputs, args.prompt);
+
+    // A layer decomposition answers with a base and its layers. Return a small
+    // fixed stack so the canvas side (base on the node, one node per layer)
+    // can be exercised without a paid run.
+    if (getEntry(model)?.fn === "layer-decomposition") {
+      const names = ["base", "subject", "title text"];
+      return {
+        outputs: names.map((name, z) => ({
+          kind,
+          url: placeholderSvg(kind, args.prompt, z, z === 0 ? "MOCK BASE" : `MOCK LAYER ${z}`),
+          width: 512,
+          height: 512,
+          layer: {
+            zIndex: z,
+            name,
+            ...(z > 0 ? { bbox: [64 * z, 64 * z, 448, 448] as [number, number, number, number] } : {}),
+          },
+        })),
+        cost: null,
+        providerJobId,
+      };
+    }
+
+    // Image models ask for several outputs under different names (`n`,
+    // `num_images`); honour either so a multi-image run looks like a real one.
+    const asked = kind === "image" ? Number(args.params.n ?? args.params.num_images ?? 1) : 1;
+    const n = Number.isFinite(asked) && asked >= 1 ? Math.min(Math.round(asked), 10) : 1;
     const outputs: RawOutput[] = [];
     for (let i = 0; i < n; i++) {
       outputs.push({
@@ -88,7 +116,6 @@ export const mockAdapter: ProviderAdapter = {
         seed: Math.floor(Math.random() * 1e6),
       });
     }
-    const est = await this.estimateCost(model, args.params, args.inputs, args.prompt);
     return {
       outputs,
       cost: est.metered || est.excluded ? null : est.amount,

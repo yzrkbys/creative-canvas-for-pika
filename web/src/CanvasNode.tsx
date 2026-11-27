@@ -204,6 +204,19 @@ export function CanvasNode({ data, selected }: NodeProps) {
     );
   }
 
+  // A job that returns several results keeps the first on its node and puts
+  // the rest on media nodes of their own. Those are not uploads, and the layers
+  // of a decomposition need telling apart, so the chip says what each one is.
+  const layer = out?.meta.layer;
+  const spawned = (isUpload || isVideoUpload) && !!out?.meta.request;
+  const chipLabel = layer
+    ? `${spawned ? "" : `${labelOf(node.type)} · `}${
+        layer.zIndex === 0 ? "ベース" : `レイヤー ${layer.zIndex}${layer.name ? ` · ${layer.name}` : ""}`
+      }`
+    : spawned
+      ? "生成結果"
+      : labelOf(node.type);
+
   const keepAR = !isText && !!node.data.params.aspect;
   const placeholder = isConcat
     ? "clip_in に動画を複数接続 → Run で連結"
@@ -342,7 +355,7 @@ export function CanvasNode({ data, selected }: NodeProps) {
           )}
         </div>
 
-        <div className="cn-chip-type">{labelOf(node.type)}</div>
+        <div className="cn-chip-type">{chipLabel}</div>
         <span className="cn-status-dot" style={{ background: STATUS_COLOR[node.status] }} title={node.error || node.status} />
 
         {/* always-on controls; detailed settings live in the side inspector */}
