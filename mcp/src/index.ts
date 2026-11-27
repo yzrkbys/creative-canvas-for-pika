@@ -120,7 +120,10 @@ server.tool(
   "canvas_add_node",
   "Add a node. Every generative node runs a Pika model — call canvas_list_models to see which " +
     "models a given type accepts, then canvas_set_model. " +
-    "image_gen/image_edit = text-to-image / image-to-image + upscale. " +
+    "image_gen/image_edit = text-to-image / image-to-image + upscale + layer decomposition. " +
+    "A run that returns several results (num_images > 1, or a layer decomposition's base + layers) keeps the " +
+    "first on the node and adds one image_upload node per further result to its right; canvas_get_job lists " +
+    "them as extraNodeIds, and canvas_get_graph shows each layer's zIndex / name / bbox. " +
     "video_gen = every video function (t2v, i2v, first-last-frame, reference-to-video, video-to-video, " +
     "extension, motion-control, avatar/lipsync); which ports a model needs comes from the model itself, " +
     "and a mis-wired run is refused before it bills. " +
@@ -323,7 +326,8 @@ server.tool(
 
 server.tool(
   "canvas_get_job",
-  "Get job status/progress/error by jobId.",
+  "Get job status/progress/error by jobId. extraNodeIds, when present, are the nodes the job added for " +
+    "results past the first (extra images, decomposed layers).",
   { jobId: z.string() },
   async ({ jobId }) => {
     try {

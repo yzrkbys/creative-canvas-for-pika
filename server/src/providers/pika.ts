@@ -1,7 +1,13 @@
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { getEntry, getModel, isOpaqueUnit } from "../registry.js";
+import {
+  getEntry,
+  getModel,
+  isOpaqueUnit,
+  isPerOutputImageUnit,
+  perOutputImageRange,
+} from "../registry.js";
 import type { CatalogEntry, CatalogMediaField, CatalogPricing } from "../registry.js";
 import { resolveAssetPath } from "../paths.js";
 import { probeDuration, shrinkForUpload } from "../ffmpeg.js";
@@ -9,6 +15,7 @@ import bindingsFile from "../pika-port-bindings.json" with { type: "json" };
 import type {
   CostEstimate,
   OutputKind,
+  OutputLayer,
   ParamField,
   PortIn,
   ProviderAdapter,
@@ -505,12 +512,49 @@ function norm(v: unknown): string {
   return s;
 }
 
+const K_SIZE = /^(\d+(?:\.\d+)?)k$/;
+
+/**
+ * Line the size the node asks for up with the `resolution` the tiers name.
+ *
+ * Two gaps, both met on Seedream 5.5 (tiers 1.5K and 2K, param `size` with
+ * 1K / 1.5K / 2K). The tiers say `resolution` where the endpoint says `size`,
+ * and a size with no tier of its own is billed at the next one up: Pika's
+ * quote endpoint prices a 1K run at the 1.5K rate ($0.02, read 2026-11-27).
+ * Without this every Seedream 5.5 run was quoted at the 2K rate as "ティア推定".
+ * Only K-sizes round up; anything else unmatched keeps the cautious fallback.
+ */
+function withTierResolution(
+  pricing: Pick<CatalogPricing, "tiers">,
+  params: Record<string, unknown>,
+): Record<string, unknown> {
+  const tierValues = [
+    ...new Set(pricing.tiers.map((t) => t.spec.resolution).filter((v) => v !== undefined).map(norm)),
+  ];
+  if (!tierValues.length) return params;
+  const wanted = norm(params.resolution) || norm(params.size);
+  if (!wanted) return params;
+  let value = wanted;
+  if (!tierValues.includes(wanted)) {
+    const m = K_SIZE.exec(wanted);
+    if (!m) return params;
+    const next = tierValues
+      .map((v) => ({ v, k: Number(K_SIZE.exec(v)?.[1]) }))
+      .filter((x) => x.k >= Number(m[1]))
+      .sort((a, b) => a.k - b.k)[0];
+    if (!next) return params;
+    value = next.v;
+  }
+  return norm(params.resolution) === value ? params : { ...params, resolution: value };
+}
+
 /**
  * Pick the price tier matching the node's params. Tier specs are partial
  * ({resolution:"1080p", audio:"on"}), so score by matching keys and break ties
  * upward — quoting under the real price is worse than quoting over it.
  */
 function pickTier(pricing: Pick<CatalogPricing, "tiers">, params: Record<string, unknown>) {
+  params = withTierResolution(pricing, params);
   let best = pricing.tiers[0];
   let bestScore = -1;
   // A tier can name a dimension the params express as a boolean instead: FLUX 3
@@ -702,6 +746,30 @@ export function estimate(
     };
   }
 
+  if (isPerOutputImageUnit(pricing.unit)) {
+    // Layer decomposition bills every image it returns, and how many that is
+    // (the base plus the layers it finds) is only known afterwards. Pika
+    // reserves the run at the cap times the highest rate, so that is the
+    // figure worth showing: its quote for Seedream 5.5 at max_images 30 is
+    // 30 x $0.027 = $0.81 whatever `size` says (read 2026-11-27).
+    const { lo, hi } = perOutputImageRange(pricing);
+    const each = lo === hi ? `$${hi}` : `$${lo}〜${hi}`;
+    // Seedream 5.5 takes the cap as `max_images`. The 5.0 models have no such
+    // param and state theirs in the catalog text ("a base plus up to 16 ...
+    // layers"), which Pika's quote confirms (17 x the 2K rate). Read it from
+    // there; if the wording changes the note just loses its maximum.
+    const stated = /up to (\d+) [^.]*?layers/i.exec(entry.description);
+    const cap = Number(params.max_images) || (stated ? Number(stated[1]) + 1 : 0);
+    return {
+      amount: 0,
+      currency: "USD",
+      metered: true,
+      note:
+        `返ってきた画像1枚ごとに課金: ${each}/枚 × 枚数（ベース＋レイヤー。枚数は実行後に決まります）` +
+        (cap > 0 ? `\n上限 ${cap}枚のとき最大 $${Number((hi * cap).toFixed(3))}` : ""),
+    };
+  }
+
   let amount: number;
   let line: string;
   switch (pricing.unit) {
@@ -713,7 +781,11 @@ export function estimate(
       // the schema-minimum fallback under-quotes every longer input. The input
       // is only measured for models that bill it, so others keep the fallback.
       const lengthParam = entry.params.some((f) => f.key === "duration" || f.key === "duration_seconds");
-      if (!lengthParam && measured?.videos === 1 && !measured.unreadVideos && measured.videoSec > 0) {
+      // Same for an edit whose length param is left unset: Wan 2.7 Video
+      // Editing then edits the whole input, so the output is as long as the
+      // input, not the schema minimum (2s) the fallback would quote.
+      const followsInput = !lengthParam || (assumed && entry.fn === "video-to-video");
+      if (followsInput && measured?.videos === 1 && !measured.unreadVideos && measured.videoSec > 0) {
         amount = unitPrice * measured.videoSec;
         line = `$${unitPrice}/秒 × ${measured.videoSec}秒（入力動画と同じ長さ）`;
         break;
@@ -938,6 +1010,59 @@ async function resultUrl(job: PikaJob): Promise<string> {
   return res.url;
 }
 
+interface ResultAsset {
+  url: string;
+  width?: number;
+  height?: number;
+  layer?: OutputLayer;
+}
+
+function layerOf(raw: unknown): OutputLayer | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const l = raw as Record<string, any>;
+  if (typeof l.z_index !== "number") return undefined;
+  const box = l.bounding_box?.absolute;
+  const text = l.text_recognition?.text;
+  const layer: OutputLayer = { zIndex: l.z_index };
+  if (typeof l.name === "string" && l.name) layer.name = l.name;
+  if (typeof l.description === "string" && l.description) layer.description = l.description;
+  if (Array.isArray(box) && box.length === 4 && box.every((n) => typeof n === "number"))
+    layer.bbox = box as [number, number, number, number];
+  if (typeof text === "string" && text) layer.text = text;
+  if (l.text_recognition) layer.textRecognition = l.text_recognition;
+  return layer;
+}
+
+/**
+ * Every asset a job delivered, when it delivered a list. Image jobs answer with
+ * `output.images[]` (and multi-video jobs with `output.videos[]`): a
+ * `num_images: 4` run carries four entries, a layer decomposition its base and
+ * every layer, each with its placement under `layer`. resultUrl() resolves one
+ * URL, so on its own it kept a single image of a run billed for all of them.
+ * Layers come back sorted base first, then bottom to top.
+ */
+function resultAssets(job: PikaJob): ResultAsset[] {
+  const out = job.output;
+  if (!out) return [];
+  const list = [out.images, out.videos].find((v) => Array.isArray(v) && v.length) as
+    | Record<string, any>[]
+    | undefined;
+  if (!list) return [];
+  const assets: ResultAsset[] = [];
+  for (const a of list) {
+    if (!a || typeof a.url !== "string" || !a.url) continue;
+    const asset: ResultAsset = { url: a.url };
+    if (typeof a.width === "number") asset.width = a.width;
+    if (typeof a.height === "number") asset.height = a.height;
+    const layer = layerOf(a.layer);
+    if (layer) asset.layer = layer;
+    assets.push(asset);
+  }
+  if (assets.length > 1 && assets.every((a) => a.layer))
+    assets.sort((a, b) => a.layer!.zIndex - b.layer!.zIndex);
+  return assets;
+}
+
 /**
  * Results are served from two hosts with opposite requirements: cdn.pika.art
  * rejects requests carrying the API key, while the API host requires it. Both
@@ -1070,12 +1195,29 @@ export const pikaAdapter: ProviderAdapter = {
     args.onSubmitted?.(submitted.id);
 
     const job = await waitForJob(submitted.id);
-    const url = await resultUrl(job);
 
-    const outputs: RawOutput[] =
-      spec.kind === "text"
-        ? [{ kind: "text", url: "", text: await fetchText(url) }]
-        : [{ kind: spec.kind, url, fetchHeaders: fetchHeadersFor(url) }];
+    // A job that delivered several assets, or a layer, is read from the list
+    // it returned. A single plain result keeps the one-URL path it has always
+    // taken, so nothing changes for the runs that already worked.
+    const kind = spec.kind;
+    const assets = kind === "text" ? [] : resultAssets(job);
+    let outputs: RawOutput[];
+    if (assets.length > 1 || assets[0]?.layer) {
+      outputs = assets.map((a) => ({
+        kind,
+        url: a.url,
+        fetchHeaders: fetchHeadersFor(a.url),
+        width: a.width,
+        height: a.height,
+        layer: a.layer,
+      }));
+    } else {
+      const url = await resultUrl(job);
+      outputs =
+        kind === "text"
+          ? [{ kind: "text", url: "", text: await fetchText(url) }]
+          : [{ kind, url, fetchHeaders: fetchHeadersFor(url) }];
+    }
 
     // Without a settled charge, fall back to the estimate. There a metered model
     // reports null, not 0 — the charge is real, we just cannot derive it

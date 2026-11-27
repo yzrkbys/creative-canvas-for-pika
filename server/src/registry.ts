@@ -37,6 +37,13 @@ export interface CatalogPricing {
   quantity: number;
   tiers: { spec: Record<string, string>; usd: number }[];
   inputUsd?: number;
+  /** Further output components billed under another unit (layer decomposition:
+   *  `output_image_1k` and `output_image_2k`; token models: text tokens). */
+  extraOutputs?: {
+    unit: string;
+    quantity: number;
+    tiers: { spec: Record<string, string>; usd: number }[];
+  }[];
   /** Charges on what the request carries (reference video seconds, input
    *  images), billed on top of the output. `included` units are free. */
   inputPricing?: CatalogInputPricing[];
@@ -112,6 +119,11 @@ const NODE_TYPE_BY_FUNCTION: Record<string, NodeType> = {
   "text-to-image": "image_gen",
   "image-to-image": "image_edit",
   "image-upscale": "image_edit",
+  // Seedream Layer Decomposition returns a base plus its layers as separate
+  // transparent PNGs. The base stays on the node and every layer lands on the
+  // canvas as an image node of its own (canvas.ts, spawnOutputNode), so nothing
+  // that was billed is dropped and each layer can be wired on.
+  "layer-decomposition": "image_edit",
 
   "text-to-video": "video_gen",
   "image-to-video": "video_gen",
@@ -176,9 +188,6 @@ const UNSUPPORTED_FUNCTIONS: Record<string, string> = {
   // Pika H3 Flex Audio Stems returns a ZIP of WAV files, and a node keeps one
   // playable result, so nothing downstream could use it.
   "audio-stems": "a ZIP of stems does not fit a single audio output",
-  // Seedream Layer Decomposition returns a base plus up to 16 PNG layers, but
-  // a node keeps one image, so the rest would be billed and dropped.
-  "layer-decomposition": "multi-layer output does not fit a single image output",
   // Listed under category "llm" but served from /v1/media with a media-style
   // body, so the chat path cannot run it. Flex's own `rewrite` param (on by
   // default) does the same job inside a generation.
@@ -221,6 +230,25 @@ export function isOpaqueUnit(unit: string): boolean {
   return unit.endsWith("_token");
 }
 
+/**
+ * Units billed per image the job returns, where the count is the model's call
+ * (layer decomposition: the base plus however many layers it finds).
+ */
+export function isPerOutputImageUnit(unit: string): boolean {
+  return unit.startsWith("output_image_");
+}
+
+/** Lowest and highest price per returned image across the size classes. */
+export function perOutputImageRange(p: CatalogPricing): { lo: number; hi: number } {
+  const amounts = [
+    ...p.tiers.map((t) => t.usd),
+    ...(p.extraOutputs ?? [])
+      .filter((o) => isPerOutputImageUnit(o.unit))
+      .flatMap((o) => o.tiers.map((t) => t.usd)),
+  ];
+  return { lo: Math.min(...amounts), hi: Math.max(...amounts) };
+}
+
 function priceHintOf(p: CatalogPricing | null): string {
   if (!p || !p.tiers.length) return "価格情報なし";
   const amounts = p.tiers.map((t) => t.usd).sort((a, b) => a - b);
@@ -228,6 +256,10 @@ function priceHintOf(p: CatalogPricing | null): string {
   const hi = amounts[amounts.length - 1];
   const money = lo === hi ? `$${lo}` : `$${lo}–${hi}`;
   if (isOpaqueUnit(p.unit)) return `${money} / 1M ${p.unit}（数量不明・事前見積り不可）`;
+  if (isPerOutputImageUnit(p.unit)) {
+    const r = perOutputImageRange(p);
+    return `${r.lo === r.hi ? `$${r.lo}` : `$${r.lo}–${r.hi}`} / 枚 × 返ってきた枚数（ベース＋レイヤー）`;
+  }
   const unit = UNIT_LABEL[p.unit] ?? p.unit;
   return `${money} / ${p.quantity === 1 ? unit : `${p.quantity}${unit}`}${inputHintOf(p)}`;
 }

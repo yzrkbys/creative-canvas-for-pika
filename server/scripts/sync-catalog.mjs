@@ -272,6 +272,22 @@ function pricingOf(entry) {
       const inp = comps.find((c) => c.role === "input" && c.unit?.type === "input_token");
       return inp ? Number(inp.starting_at?.sell_usd) : undefined;
     })(),
+    // Some endpoints bill the output under more than one unit. Layer
+    // decomposition charges each returned image as `output_image_1k` or
+    // `output_image_2k`, and Pika reserves the run at the 2K rate (its quote for
+    // Seedream 5.5 at the default 30 images is 30 x $0.027, read 2026-11-27).
+    // With only the first component kept, the estimate quoted the 1K rate for
+    // a single image.
+    extraOutputs: (() => {
+      const rest = comps
+        .filter((c) => c.role === "output" && c !== out && c.unit?.type)
+        .map((c) => ({
+          unit: c.unit.type,
+          quantity: Number(c.unit.quantity ?? 1),
+          tiers: (c.price_tiers ?? []).map((t) => ({ spec: t.spec ?? {}, usd: Number(t.sell_usd) })),
+        }));
+      return rest.length ? rest : undefined;
+    })(),
     // Media the request carries can be billed too: Wan 3.0 Omni and MiniMax H3
     // charge every second of reference video at the output rate, H3 every image
     // past the fifth. Dropping these components made the estimate quote about
